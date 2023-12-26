@@ -13,6 +13,6 @@ class Mesh:
 
 
 def read_mesh(path_to_coordinates: Path, path_to_elements: Path) -> Mesh:
-    coordinates = np.array([[1., 1.], [2., 1.], [2., 2.], [1., 2.]])
-    elements = np.array([[0, 1, 2], [0, 2, 3]], dtype=int)
+    coordinates = np.loadtxt(path_to_coordinates)
+    elements = np.loadtxt(path_to_elements, dtype=int)
     return Mesh(coordinates=coordinates, elements=elements)
