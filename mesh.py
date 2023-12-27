@@ -49,8 +49,8 @@ def provide_geometric_data(domain: Mesh, *boundaries: tuple[np.ndarray]):
                               np.zeros(n_boundaries)))
     for k, boundary in enumerate(boundaries):
         if boundary.size:
-            I = np.concatenate(I, boundary[:, 1])
-            J = np.concatenate(J, boundary[:, 0])
+            I = np.concatenate((I, boundary[:, 1]))
+            J = np.concatenate((J, boundary[:, 0]))
         pointer[k+2] = pointer[k+1] + boundary.shape[0]
 
     # Fixing an edge number for all edges, where i<j
@@ -63,7 +63,7 @@ def provide_geometric_data(domain: Mesh, *boundaries: tuple[np.ndarray]):
     idx_JI = np.where(J < I)[0]
     number_to_edges = coo_matrix((np.arange(n_unique_edges) + 1, (I[idx_IJ],J[idx_IJ])))
     _, _, numbering_IJ = find(number_to_edges)
-    _, _, idx_JI2IJ = find(coo_matrix((idx_JI, (J(idx_JI), I(idx_JI)))))
+    _, _, idx_JI2IJ = find(coo_matrix((idx_JI, (J[idx_JI], I[idx_JI]))))
     edge_number[idx_JI2IJ] = numbering_IJ - 1
     
     element2edges = edge_number[0:3*n_elements].reshape(n_elements,3)
@@ -71,7 +71,7 @@ def provide_geometric_data(domain: Mesh, *boundaries: tuple[np.ndarray]):
     # Provide boundary2edges
     boundarie_to_edges = []
     for j in np.arange(n_boundaries):
-        boundarie_to_edges.append(edge_number[np.arange(pointer[j+1]+1,pointer[j+2])])
+        boundarie_to_edges.append(edge_number[np.arange(pointer[j+1]+1,pointer[j+2], dtype=int)])
     return element2edges, edge2nodes, boundarie_to_edges
 
 
