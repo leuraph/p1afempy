@@ -21,8 +21,8 @@ class Mesh:
         the indices (starting at 0) of the corresponding 
         vertices.
     """
-    coordinates: np.ndarray(dtype=float)
-    elements: np.ndarray(dtype=int)
+    coordinates: np.ndarray
+    elements: np.ndarray
 
     def __init__(self, coordinates: np.ndarray, elements: np.ndarray) -> None:
         self.coordinates = coordinates
