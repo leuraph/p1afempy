@@ -20,6 +20,18 @@ class MeshTest(unittest.TestCase):
         self.assertTrue(np.all(expected_coordinates == domain.coordinates))
         self.assertTrue(np.all(expected_elements == domain.elements))
 
+    def test_provide_geometric_data(self):
+        path_to_coordinates = Path('tests/data/coordinates.dat')
+        path_to_elements = Path('tests/data/elements.dat')
+
+        boundary_0 = np.array([[0, 1], [1, 2]], dtype=int)
+        boundary_1 = np.array([[2, 3], [3, 0]], dtype=int)
+        
+        domain = mesh.read_mesh(path_to_coordinates=path_to_coordinates,
+                                path_to_elements=path_to_elements)
+        element2edges, edge2nodes, boundarie_to_edg = mesh.provide_geometric_data(
+            domain, boundary_0, boundary_1)
+        #TODO check for expected behaviour
 
 if __name__ == '__main__':
     unittest.main()
