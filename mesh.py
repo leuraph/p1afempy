@@ -71,7 +71,7 @@ def provide_geometric_data(domain: Mesh, *boundaries: tuple[np.ndarray]):
     # Provide boundary2edges
     boundarie_to_edges = []
     for j in np.arange(n_boundaries):
-        boundarie_to_edges.append(edge_number[np.arange(pointer[j+1]+1,pointer[j+2], dtype=int)])
+        boundarie_to_edges.append(edge_number[np.arange(pointer[j+1]+1,pointer[j+2]+1, dtype=int)])
     return element2edges, edge2nodes, boundarie_to_edges
 
 
