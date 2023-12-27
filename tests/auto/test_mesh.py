@@ -5,30 +5,31 @@ import numpy as np
 
 
 class MeshTest(unittest.TestCase):
-    def test_read_mesh(self):
+
+    @staticmethod
+    def get_test_mesh() -> mesh.Mesh:
         path_to_coordinates = Path('tests/data/coordinates.dat')
         path_to_elements = Path('tests/data/elements.dat')
+        return mesh.read_mesh(path_to_coordinates=path_to_coordinates,
+                              path_to_elements=path_to_elements)
 
+
+    def test_read_mesh(self):
         z0, z1, z2, z3 = [0., 0.], [1., 0.], [1., 1.], [0., 1.]
         e0, e1 = [0, 1, 2], [0, 2, 3]
         expected_coordinates = np.array([z0, z1, z2, z3])
         expected_elements = np.array([e0, e1])
 
-        domain = mesh.read_mesh(path_to_coordinates=path_to_coordinates,
-                                path_to_elements=path_to_elements)
+        domain = MeshTest.get_test_mesh()
         
         self.assertTrue(np.all(expected_coordinates == domain.coordinates))
         self.assertTrue(np.all(expected_elements == domain.elements))
 
     def test_provide_geometric_data(self):
-        path_to_coordinates = Path('tests/data/coordinates.dat')
-        path_to_elements = Path('tests/data/elements.dat')
-
         boundary_0 = np.array([[0, 1], [1, 2]], dtype=int)
         boundary_1 = np.array([[2, 3], [3, 0]], dtype=int)
         
-        domain = mesh.read_mesh(path_to_coordinates=path_to_coordinates,
-                                path_to_elements=path_to_elements)
+        domain = MeshTest.get_test_mesh()
         element2edges, edge2nodes, boundaries_to_edges = mesh.provide_geometric_data(
             domain, boundary_0, boundary_1)
 
