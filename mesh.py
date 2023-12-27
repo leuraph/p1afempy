@@ -35,7 +35,7 @@ def read_mesh(path_to_coordinates: Path, path_to_elements: Path) -> Mesh:
     return Mesh(coordinates=coordinates, elements=elements)
 
 
-def provide_geometric_data(domain: Mesh, *boundaries):
+def provide_geometric_data(domain: Mesh, *boundaries: tuple[np.ndarray]):
     n_elements = domain.elements.shape[0]
     n_boundaries = len(boundaries)
 
