@@ -46,7 +46,7 @@ def provide_geometric_data(domain: Mesh, *boundaries: tuple[np.ndarray]):
         element2edges[k] holds the edges' indices of the k-th element (counter-clockwise)
     edge2nodes: np.ndarray
         edge2nodes[k] holds the nodes' indices (i, j) of the k-th edge s.t. i < j
-    boundarie_to_edges: list[np.ndarray]
+    boundaries_to_edges: list[np.ndarray]
         #TODO describe...
     """
     n_elements = domain.elements.shape[0]
