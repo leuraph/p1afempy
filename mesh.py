@@ -72,3 +72,9 @@ def provide_geometric_data(domain: Mesh, *boundaries: tuple[np.ndarray]):
     for j in np.arange(n_boundaries):
         boundarie_to_edges.append(edge_number[np.arange(pointer[j+1]+1,pointer[j+2])])
     return element2edges, edge2nodes, boundarie_to_edges
+
+
+def refineNVB(coordinates: np.ndarray, 
+              elements: np.ndarray,
+              marked_elements: np.ndarray):
+    pass    
