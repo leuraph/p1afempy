@@ -37,6 +37,18 @@ def read_mesh(path_to_coordinates: Path, path_to_elements: Path) -> Mesh:
 
 
 def provide_geometric_data(domain: Mesh, *boundaries: tuple[np.ndarray]):
+    """
+    #TODO add complete docstring
+
+    Returns
+    -------
+    element2edges: np.ndarray
+        element2edges[k] holds the edges' indices of the k-th element (counter-clockwise)
+    edge2nodes: np.ndarray
+        edge2nodes[k] holds the nodes' indices (i, j) of the k-th edge s.t. i < j
+    boundarie_to_edges: list[np.ndarray]
+        #TODO describe...
+    """
     n_elements = domain.elements.shape[0]
     n_boundaries = len(boundaries)
 
@@ -69,10 +81,10 @@ def provide_geometric_data(domain: Mesh, *boundaries: tuple[np.ndarray]):
     element2edges = edge_number[0:3*n_elements].reshape(n_elements,3)
     edge2nodes = np.column_stack((I[idx_IJ], J[idx_IJ]))
     # Provide boundary2edges
-    boundarie_to_edges = []
+    boundaries_to_edges = []
     for j in np.arange(n_boundaries):
-        boundarie_to_edges.append(edge_number[np.arange(pointer[j+1]+1,pointer[j+2]+1, dtype=int)])
-    return element2edges, edge2nodes, boundarie_to_edges
+        boundaries_to_edges.append(edge_number[np.arange(pointer[j+1]+1,pointer[j+2]+1, dtype=int)])
+    return element2edges, edge2nodes, boundaries_to_edges
 
 
 def refineNVB(coordinates: np.ndarray, 
