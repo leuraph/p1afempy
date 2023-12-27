@@ -28,6 +28,7 @@ class Mesh:
         self.coordinates = coordinates
         self.elements = elements
 
+#TODO add a class for boundary conditions
 
 def read_mesh(path_to_coordinates: Path, path_to_elements: Path) -> Mesh:
     coordinates = np.loadtxt(path_to_coordinates)
