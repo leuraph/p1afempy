@@ -124,17 +124,18 @@ def refineNVB(coordinates: np.ndarray,
         edge2newNode[element2edges[swap, 0]] = 1
 
     # generate new nodes
-    # TODO continue here
-    n_new_nodes = np.count_nonzero(edge2newNode)
+    n_new_nodes = np.count_nonzero(edge2newNode)  # number of new nodes
+    # assigning indices to new nodes
     edge2newNode[edge2newNode != 0] = np.arange(
-        coordinates.shape[0] + 1,
-        coordinates.shape[0] + n_new_nodes + 1)
+        coordinates.shape[0] - 1,
+        coordinates.shape[0] - 1 + n_new_nodes)
     idx = np.nonzero(edge2newNode)[0]
     new_node_coordinates = (
         coordinates[edge2nodes[idx, 0], :] +
         coordinates[edge2nodes[idx, 1], :]) / 2.
     coordinates = np.vstack([coordinates, new_node_coordinates])
 
+    # TODO continue here
     # refine boundary conditions
     for k, boundary in enumerate(boundaries):
         if boundary.size:
