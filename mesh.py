@@ -43,16 +43,19 @@ def provide_geometric_data(domain: Mesh, *boundaries: tuple[np.ndarray]):
     Returns
     -------
     element2edges: np.ndarray
-        element2edges[k] holds the edges' indices of the k-th element (counter-clockwise)
+        element2edges[k] holds the edges' indices of
+        the k-th element (counter-clockwise)
     edge2nodes: np.ndarray
-        edge2nodes[k] holds the nodes' indices (i, j) of the k-th edge s.t. i < j
+        edge2nodes[k] holds the nodes' indices (i, j)
+        of the k-th edge s.t. i < j
     boundaries_to_edges: list[np.ndarray]
         #TODO describe...
     """
     n_elements = domain.elements.shape[0]
     n_boundaries = len(boundaries)
 
-    # Extracting all directed edges E_l:=(I[l], J[l]) (interior edges appear twice)
+    # Extracting all directed edges E_l:=(I[l], J[l])
+    # (interior edges appear twice)
     I = domain.elements.flatten()
     J = domain.elements[:, [1, 2, 0]].flatten()
 
@@ -73,17 +76,19 @@ def provide_geometric_data(domain: Mesh, *boundaries: tuple[np.ndarray]):
 
     # Ensuring the same numbering for all edges, where j<i
     idx_JI = np.where(J < I)[0]
-    number_to_edges = coo_matrix((np.arange(n_unique_edges) + 1, (I[idx_IJ],J[idx_IJ])))
+    number_to_edges = coo_matrix(
+        (np.arange(n_unique_edges) + 1, (I[idx_IJ], J[idx_IJ])))
     _, _, numbering_IJ = find(number_to_edges)
     _, _, idx_JI2IJ = find(coo_matrix((idx_JI, (J[idx_JI], I[idx_JI]))))
     edge_number[idx_JI2IJ] = numbering_IJ - 1
     
-    element2edges = edge_number[0:3*n_elements].reshape(n_elements,3)
+    element2edges = edge_number[0:3*n_elements].reshape(n_elements, 3)
     edge2nodes = np.column_stack((I[idx_IJ], J[idx_IJ]))
     # Provide boundary2edges
     boundaries_to_edges = []
     for j in np.arange(n_boundaries):
-        boundaries_to_edges.append(edge_number[np.arange(pointer[j+1]+1,pointer[j+2]+1, dtype=int)])
+        boundaries_to_edges.append(
+            edge_number[np.arange(pointer[j+1]+1, pointer[j+2]+1, dtype=int)])
     return element2edges, edge2nodes, boundaries_to_edges
 
 
