@@ -105,21 +105,26 @@ def refineNVB(coordinates: np.ndarray,
 
     # mark all edges of marked elements for refinement
     # TODO can this be replaced with `np.zeros(edges2nodes.shape[0])`?
-    edge2newNode = np.zeros(np.max(element2edges)+1)
+    edge2newNode = np.zeros(np.max(element2edges)+1, dtype=int)
     edge2newNode[element2edges[marked_elements].flatten()] = 1
 
-    # closure of edge marking, i.e. 
-    # if E in T is marked, make sure that ref_E in T is marked
+    # closure of edge marking, i.e.
+    # if any edge in T is marked, make sure that the reference
+    # edge in T is marked, as well
     swap = 1
     while swap:
-        marked_edges = edge2newNode[element2edges]
-        # TODO replace find with np.nonzero
-        swap, _, _ = find(
-            not marked_edges[:, 0]
-            and (marked_edges[:, 1] or marked_edges[:, 2]))
+        element2marked_edges = edge2newNode[element2edges]
+        swap = np.nonzero(
+            np.logical_and(
+                # elements, whose reference edge is not marked
+                np.logical_not(element2marked_edges[:, 0]),
+                # elements, having any non-reference edge marked
+                np.logical_or(element2marked_edges[:, 1],
+                              element2marked_edges[:, 2])))[0]
         edge2newNode[element2edges[swap, 0]] = 1
 
     # generate new nodes
+    # TODO continue here
     edge2newNode[edge2newNode != 0] = np.arange(
         coordinates.shape[0] + 1,
         coordinates.shape[0] + np.count_nonzero(edge2newNode) + 1)
