@@ -92,7 +92,127 @@ def provide_geometric_data(domain: Mesh, *boundaries: tuple[np.ndarray]):
     return element2edges, edge2nodes, boundaries_to_edges
 
 
-def refineNVB(coordinates: np.ndarray, 
+def refineNVB(coordinates: np.ndarray,
               elements: np.ndarray,
-              marked_elements: np.ndarray):
-    pass    
+              marked_elements: np.ndarray,
+              *boundaries):
+    n_elements = elements.shape[0]
+
+    # obtain geometric information on edges
+    element2edges, edge2nodes, boundaries_to_edges = provide_geometric_data(
+        Mesh(coordinates=coordinates, elements=elements), boundaries
+    )
+
+    # mark all edges of marked elements for refinement
+    # TODO can this be replaced with `np.zeros(edges2nodes.shape[0])`?
+    edge2newNode = np.zeros(np.max(element2edges)+1)
+    edge2newNode[element2edges[marked_elements].flatten()] = 1
+
+    # closure of edge marking, i.e. 
+    # if E in T is marked, make sure that ref_E in T is marked
+    swap = 1
+    while swap:
+        marked_edges = edge2newNode[element2edges]
+        # TODO replace find with np.nonzero
+        swap, _, _ = find(
+            not marked_edges[:, 0]
+            and (marked_edges[:, 1] or marked_edges[:, 2]))
+        edge2newNode[element2edges[swap, 0]] = 1
+
+    # generate new nodes
+    edge2newNode[edge2newNode != 0] = np.arange(
+        coordinates.shape[0] + 1,
+        coordinates.shape[0] + np.count_nonzero(edge2newNode) + 1)
+    idx = np.nonzero(edge2newNode)[0]
+    new_node_coordinates = (
+        coordinates[edge2nodes[idx, 0], :] +
+        coordinates[edge2nodes[idx, 1], :]) / 2.
+    coordinates = np.vstack([coordinates, new_node_coordinates])
+
+    # refine boundary conditions
+    for k, boundary in enumerate(boundaries):
+        if boundary.size:
+            new_nodes_on_boundary = edge2newNode[boundaries_to_edges[k]]
+            marked_edges = np.nonzero(new_nodes_on_boundary)
+            if marked_edges.size:
+                boundary = np.vstack(
+                    [boundary[not new_nodes_on_boundary, :],
+                     np.hstack(boundary[marked_edges, 0],
+                               new_nodes_on_boundary[marked_edges]),
+                     np.hstack(new_nodes_on_boundary[marked_edges],
+                               boundary[marked_edges, 1])])
+
+    # provide new nodes for refinement of elements
+    new_nodes = edge2newNode[element2edges]
+
+    # Determine type of refinement for each element
+    marked_edges = [new_nodes != 0]
+
+    ref_marked = marked_edges[:, 0]
+    first_marked = marked_edges[:, 1]
+    second_marked = marked_edges[:, 2]
+
+    none = not ref_marked
+    bisec1 = ref_marked and not first_marked and not second_marked
+    bisec12 = ref_marked and first_marked and not second_marked
+    bisec13 = ref_marked and not first_marked and second_marked
+    bisec123 = ref_marked and first_marked and second_marked
+
+    # generate element numbering for refined mesh
+    idx = np.ones(n_elements)
+    idx[bisec1] = 2  # bisec(1): newest vertex bisection of 1st edge
+    idx[bisec12] = 3  # bisec(2): newest vertex bisection of 1st and 2nd edge
+    idx[bisec13] = 3  # bisec(2): newest vertex bisection of 1st and 3rd edge
+    idx[bisec123] = 4  # bisec(3): newest vertex bisection of all edges
+    idx = np.arange[0, 1 + np.cumsum(idx)]
+
+    # generate new elements
+    newElements = np.zeros(idx[-1] - 1, 3)
+    newElements[idx(none), :] = elements[none, :]
+    newElements[np.hstack([idx[bisec1], 1+idx[bisec1]]), :] \
+        = np.vstack(
+            [np.hstack([
+                elements[bisec1, 3],
+                elements[bisec1, 1],
+                new_nodes[bisec1, 1]]),
+             np.hstack([
+                 elements[bisec1, 2],
+                 elements[bisec1, 3],
+                 new_nodes[bisec1, 1]])])
+    newElements[np.hstack([idx[bisec12], 1+idx[bisec12], 2+idx[bisec12]]), :] \
+        = np.vstack(
+            [np.hstack([elements[bisec12, 3],
+                        elements[bisec12, 1],
+                        new_nodes[bisec12, 1]]),
+             np.hstack([new_nodes[bisec12, 1],
+                        elements[bisec12, 2],
+                        new_nodes[bisec12, 2]]),
+             np.hstack([elements[bisec12, 3],
+                        new_nodes[bisec12, 1],
+                        new_nodes[bisec12, 2]])])
+    newElements[np.hstack([idx[bisec13], 1+idx[bisec13], 2+idx[bisec13]]), :] \
+        = np.vstack(
+            [np.hstack([new_nodes[bisec13, 1],
+                        elements[bisec13, 3],
+                        new_nodes[bisec13, 3]]),
+             np.hstack([elements[bisec13, 1],
+                        new_nodes[bisec13, 1],
+                        new_nodes[bisec13, 3]]),
+             np.hstack([elements[bisec13, 2],
+                        elements[bisec13, 3],
+                        new_nodes[bisec13, 1]])])
+    newElements[np.hstack([idx(bisec123), 1+idx(bisec123),
+                           2+idx(bisec123), 3+idx(bisec123)]), :] \
+        = np.vstack([
+            np.hstack([new_nodes[bisec123, 1],
+                       elements[bisec123, 3],
+                       new_nodes[bisec123, 3]]),
+            np.hstack([elements[bisec123, 1],
+                       new_nodes[bisec123, 1],
+                       new_nodes[bisec123, 3]]),
+            np.hstack([new_nodes[bisec123, 1],
+                       elements[bisec123, 2],
+                       new_nodes[bisec123, 2]]),
+            np.hstack([elements[bisec123, 3],
+                       new_nodes[bisec123, 1],
+                       new_nodes[bisec123, 2]])])
