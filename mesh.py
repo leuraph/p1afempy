@@ -135,7 +135,6 @@ def refineNVB(coordinates: np.ndarray,
         coordinates[edge2nodes[idx, 1], :]) / 2.
     coordinates = np.vstack([coordinates, new_node_coordinates])
 
-    # TODO continue here
     # refine boundary conditions
     for k, boundary in enumerate(boundaries):
         if boundary.size:
@@ -143,12 +142,13 @@ def refineNVB(coordinates: np.ndarray,
             marked_edges = np.nonzero(new_nodes_on_boundary)
             if marked_edges.size:
                 boundary = np.vstack(
-                    [boundary[not new_nodes_on_boundary, :],
+                    [boundary[np.logical_not(new_nodes_on_boundary), :],
                      np.hstack(boundary[marked_edges, 0],
                                new_nodes_on_boundary[marked_edges]),
                      np.hstack(new_nodes_on_boundary[marked_edges],
                                boundary[marked_edges, 1])])
 
+    # TODO continue here
     # provide new nodes for refinement of elements
     new_nodes = edge2newNode[element2edges]
 
