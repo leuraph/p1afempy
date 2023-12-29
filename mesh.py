@@ -148,23 +148,23 @@ def refineNVB(coordinates: np.ndarray,
                      np.hstack(new_nodes_on_boundary[marked_edges],
                                boundary[marked_edges, 1])])
 
-    # TODO continue here
     # provide new nodes for refinement of elements
     new_nodes = edge2newNode[element2edges]
 
     # Determine type of refinement for each element
-    marked_edges = [new_nodes != 0]
+    marked_edges = new_nodes != 0
 
     ref_marked = marked_edges[:, 0]
     first_marked = marked_edges[:, 1]
     second_marked = marked_edges[:, 2]
 
-    none = not ref_marked
-    bisec1 = ref_marked and not first_marked and not second_marked
-    bisec12 = ref_marked and first_marked and not second_marked
-    bisec13 = ref_marked and not first_marked and second_marked
-    bisec123 = ref_marked and first_marked and second_marked
+    none = np.logical_not(ref_marked)
+    bisec1 = ref_marked & np.logical_not(first_marked) & np.logical_not(second_marked)
+    bisec12 = ref_marked & first_marked & np.logical_not(second_marked)
+    bisec13 = ref_marked & np.logical_not(first_marked) & second_marked
+    bisec123 = ref_marked & first_marked & second_marked
 
+    # TODO continue here
     # generate element numbering for refined mesh
     idx = np.ones(n_elements)
     idx[bisec1] = 2  # bisec(1): newest vertex bisection of 1st edge
