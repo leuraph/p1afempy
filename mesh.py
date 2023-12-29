@@ -164,15 +164,15 @@ def refineNVB(coordinates: np.ndarray,
     bisec13 = ref_marked & np.logical_not(first_marked) & second_marked
     bisec123 = ref_marked & first_marked & second_marked
 
-    # TODO continue here
     # generate element numbering for refined mesh
     idx = np.ones(n_elements)
     idx[bisec1] = 2  # bisec(1): newest vertex bisection of 1st edge
     idx[bisec12] = 3  # bisec(2): newest vertex bisection of 1st and 2nd edge
     idx[bisec13] = 3  # bisec(2): newest vertex bisection of 1st and 3rd edge
     idx[bisec123] = 4  # bisec(3): newest vertex bisection of all edges
-    idx = np.arange[0, 1 + np.cumsum(idx)]
+    idx = np.vstack([np.array([0]), np.cumsum(idx)])  # TODO maybe bug source
 
+    # TODO continue here
     # generate new elements
     newElements = np.zeros(idx[-1] - 1, 3)
     newElements[idx(none), :] = elements[none, :]
