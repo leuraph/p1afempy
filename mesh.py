@@ -125,9 +125,10 @@ def refineNVB(coordinates: np.ndarray,
 
     # generate new nodes
     # TODO continue here
+    n_new_nodes = np.count_nonzero(edge2newNode)
     edge2newNode[edge2newNode != 0] = np.arange(
         coordinates.shape[0] + 1,
-        coordinates.shape[0] + np.count_nonzero(edge2newNode) + 1)
+        coordinates.shape[0] + n_new_nodes + 1)
     idx = np.nonzero(edge2newNode)[0]
     new_node_coordinates = (
         coordinates[edge2nodes[idx, 0], :] +
