@@ -46,6 +46,17 @@ class MeshTest(unittest.TestCase):
         self.assertTrue(np.all(boundaries_to_edges[0] == [0, 1]))
         self.assertTrue(np.all(boundaries_to_edges[1] == [3, 4]))
 
+    # def test_refineNVB(self) -> None:
+    #     domain = MeshTest.get_test_mesh()
+    #     boundary_0 = np.array([[0, 1], [1, 2]], dtype=int)
+    #     boundary_1 = np.array([[2, 3], [3, 0]], dtype=int)
+
+    #     marked_elements = np.array([0, 1])
+
+    #     coordinates, newElements, boundaries = mesh.refineNVB(
+    #         domain.coordinates, domain.elements,
+    #         marked_elements, boundary_0, boundary_1)
+
 
 if __name__ == '__main__':
     unittest.main()
