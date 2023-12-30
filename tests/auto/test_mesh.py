@@ -32,18 +32,18 @@ class MeshTest(unittest.TestCase):
         element2edges, edge2nodes, boundaries_to_edges = \
             mesh.provide_geometric_data(domain, boundary_0, boundary_1)
 
-        self.assertTrue(np.all(element2edges[0] == [0, 1, 2]))
-        self.assertTrue(np.all(element2edges[1] == [2, 3, 4]))
+        self.assertTrue(np.all(element2edges[0] == [0, 2, 1]))
+        self.assertTrue(np.all(element2edges[1] == [1, 3, 4]))
         self.assertEqual(len(element2edges), 2)
 
         self.assertTrue(np.all(edge2nodes[0] == [0, 1]))
-        self.assertTrue(np.all(edge2nodes[1] == [1, 2]))
-        self.assertTrue(np.all(edge2nodes[2] == [0, 2]))
+        self.assertTrue(np.all(edge2nodes[1] == [0, 2]))
+        self.assertTrue(np.all(edge2nodes[2] == [1, 2]))
         self.assertTrue(np.all(edge2nodes[3] == [2, 3]))
         self.assertTrue(np.all(edge2nodes[4] == [0, 3]))
         self.assertEqual(len(edge2nodes), 5)
 
-        self.assertTrue(np.all(boundaries_to_edges[0] == [0, 1]))
+        self.assertTrue(np.all(boundaries_to_edges[0] == [0, 2]))
         self.assertTrue(np.all(boundaries_to_edges[1] == [3, 4]))
 
     # def test_refineNVB(self) -> None:
