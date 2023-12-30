@@ -28,7 +28,21 @@ class Mesh:
         self.coordinates = coordinates
         self.elements = elements
 
-#TODO add a class for boundary conditions
+
+class BoundaryCondition:
+    name: str
+    boundary: np.ndarray
+
+    def __init__(self, name: str, boundary: np.ndarray) -> None:
+        self.name = name
+        self.boundary = boundary
+
+
+def read_boundary_condition(path_to_boundary: Path) -> BoundaryCondition:
+    data = np.loadtxt(path_to_boundary)
+    name = path_to_boundary.stem
+    return BoundaryCondition(name=name, boundary=data)
+
 
 def read_mesh(path_to_coordinates: Path, path_to_elements: Path) -> Mesh:
     coordinates = np.loadtxt(path_to_coordinates)
