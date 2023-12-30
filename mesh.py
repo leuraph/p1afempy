@@ -174,7 +174,6 @@ def refineNVB(coordinates: np.ndarray,
     idx[bisec123] = 4  # bisec(3): newest vertex bisection of all edges
     idx = np.hstack([0, np.cumsum(idx)])  # TODO maybe bug source
 
-    # TODO continue here
     # generate new elements
     newElements = np.zeros((idx[-1], 3))
     newElements[idx[np.hstack((none, False))], :] = elements[none, :]
