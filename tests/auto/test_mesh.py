@@ -105,7 +105,7 @@ class MeshTest(unittest.TestCase):
         domain = mesh.read_mesh(path_to_coordinates=path_to_coordinates,
                                 path_to_elements=path_to_elements)
         marked_elements = np.array([0, 1, 3, 5])
-        coordinates, newElements, new_boundaries = \
+        refined_mesh, new_boundaries = \
             mesh.refineNVB(mesh=domain,
                            marked_elements=marked_elements,
                            boundary_conditions=[
@@ -127,16 +127,16 @@ class MeshTest(unittest.TestCase):
         refined_bc_2 = mesh.read_boundary_condition(
             Path('tests/data/l_shape_boundary_2_refined.dat'))
 
-        self.assertTrue(
-            np.all(coordinates == expected_refined_mesh.coordinates))
-        self.assertTrue(
-            np.all(newElements == expected_refined_mesh.elements - 1))
-        self.assertTrue(
-            np.all(new_boundaries[0].boundary == refined_bc_0.boundary - 1))
-        self.assertTrue(
-            np.all(new_boundaries[1].boundary == refined_bc_1.boundary - 1))
-        self.assertTrue(
-            np.all(new_boundaries[2].boundary == refined_bc_2.boundary - 1))
+        self.assertTrue(np.all(
+            refined_mesh.coordinates == expected_refined_mesh.coordinates))
+        self.assertTrue(np.all(
+            refined_mesh.elements == expected_refined_mesh.elements - 1))
+        self.assertTrue(np.all(
+            new_boundaries[0].boundary == refined_bc_0.boundary - 1))
+        self.assertTrue(np.all(
+            new_boundaries[1].boundary == refined_bc_1.boundary - 1))
+        self.assertTrue(np.all(
+            new_boundaries[2].boundary == refined_bc_2.boundary - 1))
 
 
 

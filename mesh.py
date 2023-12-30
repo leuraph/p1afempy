@@ -259,4 +259,5 @@ def refineNVB(mesh: Mesh, marked_elements: np.ndarray,
                              new_nodes[bisec123, 0],
                              new_nodes[bisec123, 1]])])
 
-    return coordinates, newElements, new_boundaries
+    refined_mesh = Mesh(coordinates=coordinates, elements=newElements)
+    return refined_mesh, new_boundaries
