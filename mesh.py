@@ -1,6 +1,7 @@
 import numpy as np
 from pathlib import Path
 from scipy.sparse import coo_matrix, find
+from matplotlib import pyplot as plt
 
 
 class Mesh:
@@ -27,6 +28,16 @@ class Mesh:
     def __init__(self, coordinates: np.ndarray, elements: np.ndarray) -> None:
         self.coordinates = coordinates
         self.elements = elements
+
+
+def plot_mesh(mesh: Mesh) -> None:
+    for element in mesh.elements:
+        r0, r1, r2 = mesh.coordinates[element, :]
+        plt.plot(
+            [r0[0], r1[0], r2[0], r0[0]],
+            [r0[1], r1[1], r2[1], r0[1]],
+            'black', linewidth=0.5)
+    plt.show()
 
 
 class BoundaryCondition:
@@ -192,7 +203,7 @@ def refineNVB(coordinates: np.ndarray,
     idx = np.hstack([0, np.cumsum(idx)])  # TODO maybe bug source
 
     # generate new elements
-    newElements = np.zeros((idx[-1], 3))
+    newElements = np.zeros((idx[-1], 3), dtype=int)
     newElements[idx[np.hstack((none, False))], :] = elements[none, :]
     newElements[np.hstack([idx[np.hstack((bisec1, False))],
                            1+idx[np.hstack((bisec1, False))]]), :] \
