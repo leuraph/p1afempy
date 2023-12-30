@@ -223,3 +223,5 @@ def refineNVB(coordinates: np.ndarray,
             np.hstack([elements[bisec123, 3],
                        new_nodes[bisec123, 1],
                        new_nodes[bisec123, 2]])])
+
+    return coordinates, newElements, boundaries
