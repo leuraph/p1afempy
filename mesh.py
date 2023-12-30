@@ -100,7 +100,7 @@ def refineNVB(coordinates: np.ndarray,
 
     # obtain geometric information on edges
     element2edges, edge2nodes, boundaries_to_edges = provide_geometric_data(
-        Mesh(coordinates=coordinates, elements=elements), boundaries
+        Mesh(coordinates=coordinates, elements=elements), *boundaries
     )
 
     # mark all edges of marked elements for refinement
