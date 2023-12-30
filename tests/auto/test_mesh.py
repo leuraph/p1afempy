@@ -106,8 +106,7 @@ class MeshTest(unittest.TestCase):
                                 path_to_elements=path_to_elements)
         marked_elements = np.array([0, 1, 3, 5])
         coordinates, newElements, new_boundaries = \
-            mesh.refineNVB(coordinates=domain.coordinates,
-                           elements=domain.elements,
+            mesh.refineNVB(mesh=domain,
                            marked_elements=marked_elements,
                            boundary_conditions=[
                                mesh.read_boundary_condition(path_to_bc_0),

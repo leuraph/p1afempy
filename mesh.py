@@ -118,16 +118,15 @@ def provide_geometric_data(domain: Mesh, boundaries: list[BoundaryCondition]):
     return element2edges, edge2nodes, boundaries_to_edges
 
 
-def refineNVB(coordinates: np.ndarray,
-              elements: np.ndarray,
-              marked_elements: np.ndarray,
+def refineNVB(mesh: Mesh, marked_elements: np.ndarray,
               boundary_conditions: list[BoundaryCondition]):
+    elements = mesh.elements
+    coordinates = mesh.coordinates
     n_elements = elements.shape[0]
 
     # obtain geometric information on edges
     element2edges, edge2nodes, boundaries_to_edges = provide_geometric_data(
-        domain=Mesh(coordinates=coordinates, elements=elements),
-        boundaries=boundary_conditions)
+        domain=mesh, boundaries=boundary_conditions)
 
     # mark all edges of marked elements for refinement
     # TODO can this be replaced with `np.zeros(edges2nodes.shape[0])`?
