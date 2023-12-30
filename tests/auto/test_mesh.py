@@ -28,10 +28,17 @@ class MeshTest(unittest.TestCase):
         # square-shaped testing domain
         boundary_0 = np.array([[0, 1], [1, 2]], dtype=int)
         boundary_1 = np.array([[2, 3], [3, 0]], dtype=int)
+        boundary_condition_0 = mesh.BoundaryCondition(
+            name='boundary_condition_0',
+            boundary=boundary_0)
+        boundary_condition_1 = mesh.BoundaryCondition(
+            name='boundary_condition_1',
+            boundary=boundary_1)
+        boundary_conditions = [boundary_condition_0, boundary_condition_1]
 
         domain = MeshTest.get_test_mesh()
         element2edges, edge2nodes, boundaries_to_edges = \
-            mesh.provide_geometric_data(domain, boundary_0, boundary_1)
+            mesh.provide_geometric_data(domain, boundary_conditions)
 
         self.assertTrue(np.all(element2edges[0] == [0, 2, 1]))
         self.assertTrue(np.all(element2edges[1] == [1, 3, 4]))
@@ -51,14 +58,25 @@ class MeshTest(unittest.TestCase):
         boundary_0 = np.array([[0, 1], [1, 2], [2, 3]], dtype=int)
         boundary_1 = np.array([[3, 4], [4, 5], [5, 6]], dtype=int)
         boundary_2 = np.array([[6, 7], [7, 0]], dtype=int)
+        boundary_condition_0 = mesh.BoundaryCondition(
+            name='boundary_condition_0',
+            boundary=boundary_0)
+        boundary_condition_1 = mesh.BoundaryCondition(
+            name='boundary_condition_1',
+            boundary=boundary_1)
+        boundary_condition_2 = mesh.BoundaryCondition(
+            name='boundary_condition_2',
+            boundary=boundary_2)
+        boundary_conditions = [boundary_condition_0,
+                               boundary_condition_1,
+                               boundary_condition_2]
         path_to_coordinates = Path('tests/data/l_shape_coordinates.dat')
         path_to_elements = Path('tests/data/l_shape_elements.dat')
         l_shape_domain = mesh.read_mesh(
             path_to_coordinates=path_to_coordinates,
             path_to_elements=path_to_elements)
         element2edges, edge2nodes, boundaries_to_edges = \
-            mesh.provide_geometric_data(l_shape_domain,
-                                        boundary_0, boundary_1, boundary_2)
+            mesh.provide_geometric_data(l_shape_domain, boundary_conditions)
 
         self.assertTrue(np.all(element2edges[0] == [0, 5, 1]))
         self.assertTrue(np.all(element2edges[1] == [1, 6, 12]))
