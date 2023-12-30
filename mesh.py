@@ -56,8 +56,8 @@ def provide_geometric_data(domain: Mesh, *boundaries: tuple[np.ndarray]):
 
     # Extracting all directed edges E_l:=(I[l], J[l])
     # (interior edges appear twice)
-    I = domain.elements.flatten()
-    J = domain.elements[:, [1, 2, 0]].flatten()
+    I = domain.elements.flatten(order='F')
+    J = domain.elements[:, [1, 2, 0]].flatten(order='F')
 
     # Symmetrize I and J (so far boundary edges appear only once)
     pointer = np.concatenate(([0, 3*n_elements-1],
@@ -78,11 +78,11 @@ def provide_geometric_data(domain: Mesh, *boundaries: tuple[np.ndarray]):
     idx_JI = np.where(J < I)[0]
     number_to_edges = coo_matrix(
         (np.arange(n_unique_edges) + 1, (I[idx_IJ], J[idx_IJ])))
-    _, _, numbering_IJ = find(number_to_edges)
-    _, _, idx_JI2IJ = find(coo_matrix((idx_JI, (J[idx_JI], I[idx_JI]))))
-    edge_number[idx_JI2IJ] = numbering_IJ - 1
+    _, _, numbering_IJ = find(number_to_edges)  # NOTE In Matlab, the returned order is different
+    _, _, idx_JI2IJ = find(coo_matrix((idx_JI, (J[idx_JI], I[idx_JI]))))  # NOTE In Matlab, the returned order is different
+    edge_number[idx_JI2IJ] = numbering_IJ - 1 # NOTE Here, it coincides with Matlab again, though.
 
-    element2edges = edge_number[0:3*n_elements].reshape(n_elements, 3)
+    element2edges = edge_number[0:3*n_elements].reshape(n_elements, 3, order='F')
     edge2nodes = np.column_stack((I[idx_IJ], J[idx_IJ]))
     # Provide boundary2edges
     boundaries_to_edges = []
