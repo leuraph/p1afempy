@@ -50,7 +50,7 @@ def read_mesh(path_to_coordinates: Path, path_to_elements: Path) -> Mesh:
     return Mesh(coordinates=coordinates, elements=elements)
 
 
-def provide_geometric_data(domain: Mesh, *boundaries: tuple[np.ndarray]):
+def provide_geometric_data(domain: Mesh, boundaries: list[BoundaryCondition]):
     """
     #TODO add complete docstring
 
@@ -76,7 +76,8 @@ def provide_geometric_data(domain: Mesh, *boundaries: tuple[np.ndarray]):
     # Symmetrize I and J (so far boundary edges appear only once)
     pointer = np.concatenate(([0, 3*n_elements-1],
                               np.zeros(n_boundaries, dtype=int)), dtype=int)
-    for k, boundary in enumerate(boundaries):
+    for k, boundary_condition in enumerate(boundaries):
+        boundary = boundary_condition.boundary
         if boundary.size:
             I = np.concatenate((I, boundary[:, 1]), dtype=int)
             J = np.concatenate((J, boundary[:, 0]), dtype=int)
@@ -109,13 +110,13 @@ def provide_geometric_data(domain: Mesh, *boundaries: tuple[np.ndarray]):
 def refineNVB(coordinates: np.ndarray,
               elements: np.ndarray,
               marked_elements: np.ndarray,
-              *boundaries):
+              boundary_conditions: list[BoundaryCondition]):
     n_elements = elements.shape[0]
 
     # obtain geometric information on edges
     element2edges, edge2nodes, boundaries_to_edges = provide_geometric_data(
-        Mesh(coordinates=coordinates, elements=elements), *boundaries
-    )
+        domain=Mesh(coordinates=coordinates, elements=elements),
+        boundaries=boundary_conditions)
 
     # mark all edges of marked elements for refinement
     # TODO can this be replaced with `np.zeros(edges2nodes.shape[0])`?
@@ -151,7 +152,8 @@ def refineNVB(coordinates: np.ndarray,
 
     # refine boundary conditions
     new_boundaries = []
-    for k, boundary in enumerate(boundaries):
+    for k, boundary_condition in enumerate(boundary_conditions):
+        boundary = boundary_condition.boundary
         if boundary.size:
             new_nodes_on_boundary = edge2newNode[boundaries_to_edges[k]]
             marked_edges = np.nonzero(new_nodes_on_boundary)[0]
@@ -162,7 +164,8 @@ def refineNVB(coordinates: np.ndarray,
                                       new_nodes_on_boundary[marked_edges]]),
                      np.column_stack([new_nodes_on_boundary[marked_edges],
                                       boundary[marked_edges, 1]])])
-        new_boundaries.append(boundary)
+        new_boundaries.append(
+            BoundaryCondition(name=boundary_condition.name, boundary=boundary))
 
     # provide new nodes for refinement of elements
     new_nodes = edge2newNode[element2edges]
@@ -246,4 +249,4 @@ def refineNVB(coordinates: np.ndarray,
                              new_nodes[bisec123, 0],
                              new_nodes[bisec123, 1]])])
 
-    return coordinates, newElements, boundaries
+    return coordinates, newElements, new_boundaries
