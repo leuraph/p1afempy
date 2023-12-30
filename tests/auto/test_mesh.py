@@ -51,18 +51,12 @@ class MeshTest(unittest.TestCase):
         self.assertTrue(np.all(boundaries_to_edges[1] == [3, 4]))
 
         # L-shaped testing domain
-        boundary_0 = np.array([[0, 1], [1, 2], [2, 3]], dtype=int)
-        boundary_1 = np.array([[3, 4], [4, 5], [5, 6]], dtype=int)
-        boundary_2 = np.array([[6, 7], [7, 0]], dtype=int)
-        boundary_condition_0 = mesh.BoundaryCondition(
-            name='boundary_condition_0',
-            boundary=boundary_0)
-        boundary_condition_1 = mesh.BoundaryCondition(
-            name='boundary_condition_1',
-            boundary=boundary_1)
-        boundary_condition_2 = mesh.BoundaryCondition(
-            name='boundary_condition_2',
-            boundary=boundary_2)
+        boundary_condition_0 = mesh.read_boundary_condition(
+            Path('tests/data/l_shape_bc_0.dat'))
+        boundary_condition_1 = mesh.read_boundary_condition(
+            Path('tests/data/l_shape_bc_1.dat'))
+        boundary_condition_2 = mesh.read_boundary_condition(
+            Path('tests/data/l_shape_bc_2.dat'))
         boundary_conditions = [boundary_condition_0,
                                boundary_condition_1,
                                boundary_condition_2]
