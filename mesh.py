@@ -39,14 +39,14 @@ class BoundaryCondition:
 
 
 def read_boundary_condition(path_to_boundary: Path) -> BoundaryCondition:
-    data = np.loadtxt(path_to_boundary, dtype=int)
+    data = np.loadtxt(path_to_boundary, dtype=int, converters=float)
     name = path_to_boundary.stem
     return BoundaryCondition(name=name, boundary=data)
 
 
 def read_mesh(path_to_coordinates: Path, path_to_elements: Path) -> Mesh:
     coordinates = np.loadtxt(path_to_coordinates)
-    elements = np.loadtxt(path_to_elements, dtype=int)
+    elements = np.loadtxt(path_to_elements, dtype=int, converters=float)
     return Mesh(coordinates=coordinates, elements=elements)
 
 
