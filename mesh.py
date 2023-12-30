@@ -126,8 +126,8 @@ def refineNVB(coordinates: np.ndarray,
     # closure of edge marking, i.e.
     # if any edge in T is marked, make sure that the reference
     # edge in T is marked, as well
-    swap = 1
-    while swap:
+    swap = np.array([1])
+    while swap.size > 0:
         element2marked_edges = edge2newNode[element2edges]
         swap = np.nonzero(
             np.logical_and(
