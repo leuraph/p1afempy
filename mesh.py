@@ -139,7 +139,7 @@ def refineNVB(coordinates: np.ndarray,
     for k, boundary in enumerate(boundaries):
         if boundary.size:
             new_nodes_on_boundary = edge2newNode[boundaries_to_edges[k]]
-            marked_edges = np.nonzero(new_nodes_on_boundary)
+            marked_edges = np.nonzero(new_nodes_on_boundary)[0]
             if marked_edges.size:
                 boundary = np.vstack(
                     [boundary[np.logical_not(new_nodes_on_boundary), :],
