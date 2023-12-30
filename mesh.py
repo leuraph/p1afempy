@@ -60,18 +60,18 @@ def provide_geometric_data(domain: Mesh, *boundaries: tuple[np.ndarray]):
     J = domain.elements[:, [1, 2, 0]].flatten()
 
     # Symmetrize I and J (so far boundary edges appear only once)
-    pointer = np.concatenate(([0, 3.*n_elements-1], 
-                              np.zeros(n_boundaries)))
+    pointer = np.concatenate(([0, 3*n_elements-1],
+                              np.zeros(n_boundaries, dtype=int)), dtype=int)
     for k, boundary in enumerate(boundaries):
         if boundary.size:
-            I = np.concatenate((I, boundary[:, 1]))
-            J = np.concatenate((J, boundary[:, 0]))
+            I = np.concatenate((I, boundary[:, 1]), dtype=int)
+            J = np.concatenate((J, boundary[:, 0]), dtype=int)
         pointer[k+2] = pointer[k+1] + boundary.shape[0]
 
     # Fixing an edge number for all edges, where i<j
     idx_IJ = np.where(I < J)[0]
     n_unique_edges = idx_IJ.size
-    edge_number = np.zeros(I.size)
+    edge_number = np.zeros(I.size, dtype=int)
     edge_number[idx_IJ] = np.arange(n_unique_edges)
 
     # Ensuring the same numbering for all edges, where j<i
@@ -81,7 +81,7 @@ def provide_geometric_data(domain: Mesh, *boundaries: tuple[np.ndarray]):
     _, _, numbering_IJ = find(number_to_edges)
     _, _, idx_JI2IJ = find(coo_matrix((idx_JI, (J[idx_JI], I[idx_JI]))))
     edge_number[idx_JI2IJ] = numbering_IJ - 1
-    
+
     element2edges = edge_number[0:3*n_elements].reshape(n_elements, 3)
     edge2nodes = np.column_stack((I[idx_IJ], J[idx_IJ]))
     # Provide boundary2edges
