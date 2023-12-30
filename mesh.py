@@ -39,7 +39,7 @@ class BoundaryCondition:
 
 
 def read_boundary_condition(path_to_boundary: Path) -> BoundaryCondition:
-    data = np.loadtxt(path_to_boundary)
+    data = np.loadtxt(path_to_boundary, dtype=int)
     name = path_to_boundary.stem
     return BoundaryCondition(name=name, boundary=data)
 
