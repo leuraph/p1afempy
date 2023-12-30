@@ -143,10 +143,10 @@ def refineNVB(coordinates: np.ndarray,
             if marked_edges.size:
                 boundary = np.vstack(
                     [boundary[np.logical_not(new_nodes_on_boundary), :],
-                     np.hstack(boundary[marked_edges, 0],
-                               new_nodes_on_boundary[marked_edges]),
-                     np.hstack(new_nodes_on_boundary[marked_edges],
-                               boundary[marked_edges, 1])])
+                     np.hstack([boundary[marked_edges, 0],
+                               new_nodes_on_boundary[marked_edges]]),
+                     np.hstack([new_nodes_on_boundary[marked_edges],
+                               boundary[marked_edges, 1]])])
 
     # provide new nodes for refinement of elements
     new_nodes = edge2newNode[element2edges]
