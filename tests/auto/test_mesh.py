@@ -97,6 +97,54 @@ class MeshTest(unittest.TestCase):
         self.assertEqual(len(boundaries_to_edges), 3)
 
     def test_refineNVB(self) -> None:
+        # Square Domain
+        boundary_condition_0 = mesh.read_boundary_condition(
+            Path('tests/data/square_boundary_0.dat'))
+        boundary_condition_1 = mesh.read_boundary_condition(
+            Path('tests/data/square_boundary_1.dat'))
+        boundary_conditions = [boundary_condition_0, boundary_condition_1]
+        domain = MeshTest.get_test_mesh()
+
+        refined_mesh, new_boundaries = mesh.refineNVB(
+            mesh=domain,
+            marked_elements=np.array([0, 1]),
+            boundary_conditions=boundary_conditions)
+
+        expected_refined_coordinates = np.array([[0., 0.],
+                                                 [1., 0.],
+                                                 [1., 1.],
+                                                 [0., 1.],
+                                                 [0.5, 0.],
+                                                 [0.5, 0.5],
+                                                 [1., 0.5],
+                                                 [0.5, 1.],
+                                                 [0., 0.5]])
+        expected_refined_elements = np.array([[4, 2, 5],
+                                              [0, 4, 5],
+                                              [4, 1, 6],
+                                              [2, 4, 6],
+                                              [5, 3, 8],
+                                              [0, 5, 8],
+                                              [5, 2, 7],
+                                              [3, 5, 7]], dtype=int)
+        expected_refined_bc_0 = np.array([[0, 4],
+                                          [1, 6],
+                                          [4, 1],
+                                          [6, 2]], dtype=int)
+        expected_refined_bc_1 = np.array([[2, 7],
+                                          [3, 8],
+                                          [7, 3],
+                                          [8, 0]], dtype=int)
+        self.assertTrue(
+            np.all(expected_refined_coordinates == refined_mesh.coordinates))
+        self.assertTrue(
+            np.all(expected_refined_elements == refined_mesh.elements))
+        self.assertTrue(
+            np.all(expected_refined_bc_0 == new_boundaries[0].boundary))
+        self.assertTrue(
+            np.all(expected_refined_bc_1 == new_boundaries[1].boundary))
+
+        # L-shaped Domain
         path_to_coordinates = Path('tests/data/l_shape_coordinates.dat')
         path_to_elements = Path('tests/data/l_shape_elements.dat')
         path_to_bc_0 = Path('tests/data/l_shape_bc_0.dat')
