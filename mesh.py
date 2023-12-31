@@ -105,8 +105,8 @@ def provide_geometric_data(domain: Mesh, boundaries: list[BoundaryCondition]):
     number_to_edges = coo_matrix(
         (np.arange(n_unique_edges) + 1, (I[idx_IJ], J[idx_IJ])))
     _, _, numbering_IJ = find(number_to_edges)  # NOTE In Matlab, the returned order is different
-    _, _, idx_JI2IJ = find(coo_matrix((idx_JI, (J[idx_JI], I[idx_JI]))))  # NOTE In Matlab, the returned order is different
-    edge_number[idx_JI2IJ] = numbering_IJ - 1 # NOTE Here, it coincides with Matlab again, though.
+    _, _, idx_JI2IJ = find(coo_matrix((idx_JI + 1, (J[idx_JI], I[idx_JI]))))  # NOTE In Matlab, the returned order is different
+    edge_number[idx_JI2IJ - 1] = numbering_IJ - 1 # NOTE Here, it coincides with Matlab again, though.
 
     element2edges = edge_number[0:3*n_elements].reshape(n_elements, 3, order='F')
     edge2nodes = np.column_stack((I[idx_IJ], J[idx_IJ]))
