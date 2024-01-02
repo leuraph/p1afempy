@@ -2,3 +2,5 @@ numpy
 scipy
 pathlib
 matplotlib
+notebook
+sympy
