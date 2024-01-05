@@ -10,14 +10,14 @@ from pathlib import Path
 def u(r: np.ndarray) -> float:
     """analytical solution"""
     x, y = r[0], r[1]
-    omega = 7./8. * np.pi
+    omega = 7./4. * np.pi
     return np.sin(omega*2.*x)*np.sin(omega*y)
 
 
 def f(r: np.ndarray) -> float:
     """volume force corresponding to analytical solution"""
     x, y = r[0], r[1]
-    omega = 7./8. * np.pi
+    omega = 7./4. * np.pi
     return 5. * omega**2 * np.sin(omega*2.*x) * np.sin(omega*y)
 
 
@@ -28,13 +28,13 @@ def uD(r: np.ndarray) -> float:
 
 def g_right(r: np.ndarray) -> float:
     x, y = r[0], r[1]
-    omega = 7./8. * np.pi
+    omega = 7./4. * np.pi
     return -2.*omega*np.sin(omega*y)*np.cos(omega*2.*x)
 
 
 def g_upper(r: np.ndarray) -> float:
     x, y = r[0], r[1]
-    omega = 7./8. * np.pi
+    omega = 7./4. * np.pi
     return omega*np.sin(omega*2.*x) * np.cos(omega*y)
 
 
