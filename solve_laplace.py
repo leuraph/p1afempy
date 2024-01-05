@@ -12,7 +12,7 @@ def solve_laplace(mesh: mesh.Mesh,
                   uD: callable) -> tuple[np.ndarray, float]:
     n_elements = mesh.elements.shape[0]
     n_coordinates = mesh.coordinates.shape[0]
-    x = np.zeros(n_elements)
+    x = np.zeros(n_coordinates)
 
     # first vertex of elements and corresponding edge vectors
     c1 = mesh.coordinates[mesh.elements[:, 0], :]
@@ -22,11 +22,8 @@ def solve_laplace(mesh: mesh.Mesh,
     # vector of element areas 4*|T|
     area4 = 2 * (d21[:, 0]*d31[:, 1] - d21[:, 1] * d31[:, 0])
 
-    # assembly of stiffness matrix
-    I = np.reshape(mesh.elements[:, [0, 1, 2, 0, 1, 2, 0, 1, 2]].T,
-                   (9*n_elements, 1), order='F')
-    J = np.reshape(mesh.elements[:, [0, 0, 0, 1, 1, 1, 2, 2, 2]].T,
-                   (9*n_elements, 1), order='F')
+    I = (mesh.elements[:, [0, 1, 2, 0, 1, 2, 0, 1, 2]].T).flatten(order='F')
+    J = (mesh.elements[:, [0, 0, 0, 1, 1, 1, 2, 2, 2]].T).flatten(order='F')
     a = (np.sum(d21*d31, axis=1)/area4)
     b = (np.sum(d31*d31, axis=1)/area4)
     c = (np.sum(d21*d21, axis=1)/area4)
@@ -36,7 +33,7 @@ def solve_laplace(mesh: mesh.Mesh,
     # prescribe values at dirichlet nodes
     unique_dirichlet = np.unique(dirichlet.boundary)
     x[unique_dirichlet] = np.apply_along_axis(
-        uD, 1, mesh.coordinates[dirichlet.boundary, :])
+        uD, 1, mesh.coordinates[unique_dirichlet, :])
 
     # assembly of right-hand side
     fsT = np.apply_along_axis(f, 1, c1+(d21+d31) / 3)
