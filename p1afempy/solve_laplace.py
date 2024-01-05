@@ -1,4 +1,4 @@
-import mesh
+import p1afempy.mesh as mesh 
 import numpy as np
 from scipy.sparse import coo_matrix
 from scipy.sparse.linalg import spsolve
