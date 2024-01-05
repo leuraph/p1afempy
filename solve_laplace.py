@@ -10,7 +10,7 @@ def solve_laplace(mesh: mesh.Mesh,
                   f: callable,
                   g: callable,
                   uD: callable) -> tuple[np.ndarray, float]:
-    n_elements = mesh.elements.shape[0]
+    # n_elements = mesh.elements.shape[0] unused in python context
     n_coordinates = mesh.coordinates.shape[0]
     x = np.zeros(n_coordinates)
 
