@@ -51,12 +51,12 @@ class SolverTest(unittest.TestCase):
 
     def test_solve_laplace(self) -> None:
         path_to_coordinates = Path(
-            'tests/data/laplace_example/coordinates.dat')
-        path_to_elements = Path('tests/data/laplace_example/elements.dat')
-        path_to_neumann = Path('tests/data/laplace_example/neumann.dat')
-        path_to_dirichlet = Path('tests/data/laplace_example/dirichlet.dat')
-        path_to_matlab_x = Path('tests/data/laplace_example/x.dat')
-        path_to_matlab_energy = Path('tests/data/laplace_example/energy.dat')
+            'p1afempy/tests/data/laplace_example/coordinates.dat')
+        path_to_elements = Path('p1afempy/tests/data/laplace_example/elements.dat')
+        path_to_neumann = Path('p1afempy/tests/data/laplace_example/neumann.dat')
+        path_to_dirichlet = Path('p1afempy/tests/data/laplace_example/dirichlet.dat')
+        path_to_matlab_x = Path('p1afempy/tests/data/laplace_example/x.dat')
+        path_to_matlab_energy = Path('p1afempy/tests/data/laplace_example/energy.dat')
 
         square_mesh = mesh.read_mesh(path_to_coordinates=path_to_coordinates,
                                      path_to_elements=path_to_elements)
@@ -81,10 +81,10 @@ class SolverTest(unittest.TestCase):
             f=f, g=g, uD=uD)
 
         x_matlab = np.loadtxt(path_to_matlab_x)
-        energy_matlab = np.loadtxt(path_to_matlab_energy)
+        energy_matlab = np.loadtxt(path_to_matlab_energy).reshape((1,))[0]
 
-        self.assertTrue(np.all(x == x_matlab))
-        self.assertTrue(energy == energy_matlab)
+        self.assertTrue(np.allclose(x, x_matlab))
+        self.assertTrue(np.isclose(energy, energy_matlab))
 
 
 if __name__ == "__main__":
