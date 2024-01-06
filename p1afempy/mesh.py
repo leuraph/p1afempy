@@ -156,8 +156,7 @@ def refineNVB(mesh: Mesh, marked_elements: np.ndarray,
         domain=mesh, boundaries=boundary_conditions)
 
     # mark all edges of marked elements for refinement
-    # TODO can this be replaced with `np.zeros(edges2nodes.shape[0])`?
-    edge2newNode = np.zeros(np.max(element2edges)+1, dtype=int)
+    edge2newNode = np.zeros(edge2nodes.shape[0], dtype=int)
     edge2newNode[element2edges[marked_elements].flatten()] = 1
 
     # closure of edge marking, i.e.
