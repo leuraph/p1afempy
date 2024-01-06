@@ -19,7 +19,7 @@ class Mesh:
         the elements of the mesh, i.e. the triangles,
         where the k-th element is accessed via elements[k, :]
         and returns np.array([i, j, k]), i.e.
-        the indices (starting at 0) of the corresponding 
+        the indices (starting at 0) of the corresponding
         vertices.
     """
     coordinates: np.ndarray
@@ -31,6 +31,17 @@ class Mesh:
 
 
 class BoundaryCondition:
+    """
+    A boundary condition.
+
+    instance variables
+    ------------------
+    name: str
+        The name of the boundary condition
+    boundary: np.ndarray
+        boundary[k] holds the indices (i, j) of the vertices making up the
+        k-th edge of the boundary.
+    """
     name: str
     boundary: np.ndarray
 
