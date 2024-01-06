@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
-import mesh
-import solve_laplace
+import p1afempy.mesh as mesh
+from p1afempy.solve_laplace import solve_laplace
 from pathlib import Path
 
 # TODO change the functions to be applied to all coordinates
@@ -74,17 +74,17 @@ class SolverTest(unittest.TestCase):
                 marked_elements=marked_elements,
                 boundary_conditions=boundary_conditions)
 
-        x, energy = solve_laplace.solve_laplace(
+        x, energy = solve_laplace(
             mesh=square_mesh,
             dirichlet=boundary_conditions[0],
             neumann=boundary_conditions[1],
             f=f, g=g, uD=uD)
 
         x_matlab = np.loadtxt(path_to_matlab_x)
-        energy_matlab = np.loadtxt(path_to_matlab_energy)
+        energy_matlab = np.loadtxt(path_to_matlab_energy).reshape((1,))[0]
 
-        self.assertTrue(np.all(x == x_matlab))
-        self.assertTrue(energy == energy_matlab)
+        self.assertTrue(np.allclose(x, x_matlab))
+        self.assertTrue(np.isclose(energy, energy_matlab))
 
 
 if __name__ == "__main__":

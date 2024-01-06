@@ -16,14 +16,14 @@
             "name": "unittest: test_mesh",
             "type": "python",
             "request": "launch",
-            "module": "tests.auto.test_mesh",
+            "module": "p1afempy.tests.auto.test_mesh",
             "justMyCode": true
         },
         {
             "name": "unittest: test_solver",
             "type": "python",
             "request": "launch",
-            "module": "tests.auto.test_solver",
+            "module": "p1afempy.tests.auto.test_solver",
             "justMyCode": true
         }
     ]

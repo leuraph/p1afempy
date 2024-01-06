@@ -1,6 +1,6 @@
-import mesh
+import p1afempy.mesh as mesh
 import numpy as np
-from scipy.sparse import coo_matrix
+from scipy.sparse import coo_matrix, csc_matrix
 from scipy.sparse.linalg import spsolve
 
 
@@ -37,23 +37,27 @@ def solve_laplace(mesh: mesh.Mesh,
 
     # assembly of right-hand side
     fsT = np.apply_along_axis(f, 1, c1+(d21+d31) / 3)
+    # TODO pad the result of np.bincount to the same size as `x`,
+    # i.e. add zeros, if necessary
     b = np.bincount(
         mesh.elements.flatten(order='F'),
-        weights=np.tile(area4*fsT/12., (3, 1))) - A.dot(x)
+        weights=np.tile(area4*fsT/12., (3, 1)).flatten()) - A.dot(x)
     if neumann.boundary.size > 0:
-        cn1 = mesh.coordinates[neumann.boundary[:, 1], :]
-        cn2 = mesh.coordinates[neumann.boundary[:, 2], :]
+        cn1 = mesh.coordinates[neumann.boundary[:, 0], :]
+        cn2 = mesh.coordinates[neumann.boundary[:, 1], :]
         gmE = np.apply_along_axis(g, 1, (cn1+cn2)/2)
+        # TODO pad if necessary
         b = b + np.bincount(
             neumann.boundary.flatten(order='F'),
             weights=np.tile(
                 np.sqrt(np.sum(np.square(cn2-cn1), axis=1))*gmE/2.,
-                (2, 1)))
+                (2, 1)).flatten())
 
     # computation of P1-FEM approximation
     freenodes = np.setdiff1d(
         np.arange(0, n_coordinates), unique_dirichlet, assume_unique=True)
-    x[freenodes] = spsolve(A[freenodes, freenodes], b[freenodes])
+    A = csc_matrix(A)
+    x[freenodes] = spsolve(A[freenodes, :][:, freenodes], b[freenodes])
     # compute energy || grad(uh) ||^2 of discrete solution
     energy = x.dot(A.dot(x))
 
