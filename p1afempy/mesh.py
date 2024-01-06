@@ -80,6 +80,28 @@ def read_boundary_condition(
 
 
 def read_mesh(path_to_coordinates: Path, path_to_elements: Path) -> Mesh:
+    """
+    Reads vertices and elements from files and
+    returns the corresponding Mesh.
+
+    Parameters
+    ----------
+    path_to_coordinates : pathlib.Path
+        Path to the file containing mesh coordinates data.
+    path_to_elements : pathlib.Path
+        Path to the file containing mesh elements data.
+
+    Returns
+    -------
+    Mesh:
+        An instance of the Mesh class representing the read mesh data.
+
+    Example
+    -------
+    >>> coordinates_path = Path("path/to/coordinates.txt")
+    >>> elements_path = Path("path/to/elements.txt")
+    >>> mesh_instance = read_mesh(coordinates_path, elements_path)
+    """
     coordinates = np.loadtxt(path_to_coordinates)
     elements = np.loadtxt(path_to_elements, dtype=int, converters=float)
     return Mesh(coordinates=coordinates, elements=elements)
