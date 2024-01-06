@@ -49,9 +49,33 @@ def plot_mesh(mesh: Mesh) -> None:
     plt.show()
 
 
-def read_boundary_condition(path_to_boundary: Path) -> BoundaryCondition:
+def read_boundary_condition(
+        path_to_boundary: Path, name: str = "") -> BoundaryCondition:
+    """
+    Reads boundary condition data from a file.
+
+    Parameters
+    ----------
+    path_to_boundary: pathlib.Path
+        Path to the file containing boundary condition data.
+    name: str, optional
+        Name to assign to the BoundaryCondition instance.
+        If not provided, the name will be derived from
+        the filename (excluding the extension).
+
+    Returns
+    -------
+    BoundaryCondition: 
+        An instance of the BoundaryCondition class representing the read data.
+
+    Example
+    -------
+    >>> file_path = Path("path/to/boundary_data.dat")
+    >>> boundary_condition = read_boundary_condition(file_path, name="BC1")
+    """
     data = np.loadtxt(path_to_boundary, dtype=int, converters=float)
-    name = path_to_boundary.stem
+    if not name:
+        name = path_to_boundary.stem
     return BoundaryCondition(name=name, boundary=data)
 
 
