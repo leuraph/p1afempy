@@ -279,8 +279,9 @@ def refineNVB(mesh: Mesh, marked_elements: np.ndarray,
     second_marked = marked_edges[:, 2]
 
     none = np.logical_not(ref_marked)
-    bisec1 = ref_marked & np.logical_not(first_marked) & np.logical_not(second_marked)
-    bisec12 = ref_marked & first_marked & np.logical_not(second_marked)
+    not_second = np.logical_not(second_marked)
+    bisec1 = ref_marked & np.logical_not(first_marked) & not_second
+    bisec12 = ref_marked & first_marked & not_second
     bisec13 = ref_marked & np.logical_not(first_marked) & second_marked
     bisec123 = ref_marked & first_marked & second_marked
 
