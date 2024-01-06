@@ -7,42 +7,38 @@ from pathlib import Path
 # TODO change the functions to be applied to all coordinates
 
 
-def u(r: np.ndarray) -> float:
+def u(r: np.ndarray, omega: float = 7./4. * np.pi) -> float:
     """analytical solution"""
     x, y = r[0], r[1]
-    omega = 7./4. * np.pi
     return np.sin(omega*2.*x)*np.sin(omega*y)
 
 
-def f(r: np.ndarray) -> float:
+def f(r: np.ndarray, omega: float = 7./4. * np.pi) -> float:
     """volume force corresponding to analytical solution"""
     x, y = r[0], r[1]
-    omega = 7./4. * np.pi
     return 5. * omega**2 * np.sin(omega*2.*x) * np.sin(omega*y)
 
 
-def uD(r: np.ndarray) -> float:
+def uD(r: np.ndarray, omega: float = 7./4. * np.pi) -> float:
     """solution value on the Dirichlet boundary"""
-    return u(r)
+    return u(r, omega=omega)
 
 
-def g_right(r: np.ndarray) -> float:
+def g_right(r: np.ndarray, omega: float = 7./4. * np.pi) -> float:
     x, y = r[0], r[1]
-    omega = 7./4. * np.pi
     return -2.*omega*np.sin(omega*y)*np.cos(omega*2.*x)
 
 
-def g_upper(r: np.ndarray) -> float:
+def g_upper(r: np.ndarray, omega: float = 7./4. * np.pi) -> float:
     x, y = r[0], r[1]
-    omega = 7./4. * np.pi
     return omega*np.sin(omega*2.*x) * np.cos(omega*y)
 
 
-def g(r: np.ndarray) -> float:
+def g(r: np.ndarray, omega: float = 7./4. * np.pi) -> float:
     if r[0] == 1.:
-        return g_right(r)
+        return g_right(r, omega=omega)
     elif r[1] == 1.:
-        return g_upper(r)
+        return g_upper(r, omega=omega)
     else:
         raise RuntimeError("Non-boundary evaluation of g")
 
