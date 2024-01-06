@@ -63,7 +63,7 @@ def read_mesh(path_to_coordinates: Path, path_to_elements: Path) -> Mesh:
 
 def provide_geometric_data(domain: Mesh, boundaries: list[BoundaryCondition]):
     """
-    #TODO add complete docstring
+    Provides geometric data about the mesh at hand.
 
     Returns
     -------
@@ -74,7 +74,9 @@ def provide_geometric_data(domain: Mesh, boundaries: list[BoundaryCondition]):
         edge2nodes[k] holds the nodes' indices (i, j)
         of the k-th edge s.t. i < j
     boundaries_to_edges: list[np.ndarray]
-        #TODO describe...
+        boundaries_to_edges[k] holds the mapping
+        s.t. boundaries_to_edges[k][n] gives the indices
+        (i, j) of the n-th edge of the k-th boundary.
     """
     n_elements = domain.elements.shape[0]
     n_boundaries = len(boundaries)
