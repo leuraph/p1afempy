@@ -1,5 +1,5 @@
 import unittest
-import mesh
+import p1afempy.mesh as mesh
 from pathlib import Path
 import numpy as np
 
