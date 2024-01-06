@@ -30,6 +30,15 @@ class Mesh:
         self.elements = elements
 
 
+class BoundaryCondition:
+    name: str
+    boundary: np.ndarray
+
+    def __init__(self, name: str, boundary: np.ndarray) -> None:
+        self.name = name
+        self.boundary = boundary
+
+
 def plot_mesh(mesh: Mesh) -> None:
     for element in mesh.elements:
         r0, r1, r2 = mesh.coordinates[element, :]
@@ -38,15 +47,6 @@ def plot_mesh(mesh: Mesh) -> None:
             [r0[1], r1[1], r2[1], r0[1]],
             'black', linewidth=0.5)
     plt.show()
-
-
-class BoundaryCondition:
-    name: str
-    boundary: np.ndarray
-
-    def __init__(self, name: str, boundary: np.ndarray) -> None:
-        self.name = name
-        self.boundary = boundary
 
 
 def read_boundary_condition(path_to_boundary: Path) -> BoundaryCondition:
