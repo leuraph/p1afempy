@@ -119,7 +119,34 @@ def provide_geometric_data(domain: Mesh, boundaries: list[BoundaryCondition]):
 
 
 def refineNVB(mesh: Mesh, marked_elements: np.ndarray,
-              boundary_conditions: list[BoundaryCondition]):
+              boundary_conditions: list[BoundaryCondition]
+              ) -> tuple[Mesh, list[BoundaryCondition]]:
+    """
+    Refines the mesh based on marked elements and updates boundary conditions.
+
+    Parameters
+    ----------
+    mesh: Mesh
+        The initial mesh to be refined.
+    marked_elements: np.ndarray
+        Indices of the elements to be refined.
+    boundary_conditions: list[BoundaryCondition]
+        List of boundary conditions to update.
+
+    Returns
+    -------
+    refined_mesh: Mesh
+        The refined mesh
+    new_boundaries: list[BoundaryCondition]
+        The refined boundary conditions
+
+    Example
+    -------
+    >>> mesh = Mesh(...)  # Initialize a mesh
+    >>> marked_elements = np.array([0, 2, 3, 4])
+    >>> boundary_conditions = [BC1, BC2, BC3]  # Assuming BC1, BC2, BC3 are instances of BoundaryCondition
+    >>> new_mesh, new_boundary_conditions = refineNVB(mesh, marked_elements, boundary_conditions)
+    """
     elements = mesh.elements
     coordinates = mesh.coordinates
     n_elements = elements.shape[0]
