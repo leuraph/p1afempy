@@ -14,7 +14,7 @@ class Mesh:
         the coordinates of the mesh's vertices.
         The k-th vertex is accessed via coordinates[k, :]
         and returns np.array([x_k, y_k]), i.e.
-        its (x, y) coordinates. 
+        its (x, y) coordinates.
     elements: np.ndarray(dtype=int)
         the elements of the mesh, i.e. the triangles,
         where the k-th element is accessed via elements[k, :]
