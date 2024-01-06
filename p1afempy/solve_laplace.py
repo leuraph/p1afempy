@@ -59,7 +59,9 @@ def solve_laplace(mesh: mesh.Mesh,
     freenodes = np.setdiff1d(
         np.arange(0, n_coordinates), unique_dirichlet, assume_unique=True)
     A = csc_matrix(A)
-    x[freenodes] = spsolve(A[freenodes, :][:, freenodes], b[freenodes])
+    x[freenodes] = spsolve(A[freenodes, :][:, freenodes],
+                           b[freenodes],
+                           use_umfpack=True)
     # compute energy || grad(uh) ||^2 of discrete solution
     energy = x.dot(A.dot(x))
 
