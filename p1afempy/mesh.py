@@ -65,7 +65,7 @@ def read_boundary_condition(
 
     Returns
     -------
-    BoundaryCondition: 
+    BoundaryCondition:
         An instance of the BoundaryCondition class representing the read data.
 
     Example
