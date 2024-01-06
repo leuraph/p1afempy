@@ -2,14 +2,16 @@ import p1afempy.mesh as mesh
 import numpy as np
 from scipy.sparse import coo_matrix, csc_matrix
 from scipy.sparse.linalg import spsolve
+from typing import Callable
 
 
 def solve_laplace(mesh: mesh.Mesh,
                   dirichlet: mesh.BoundaryCondition,
                   neumann: mesh.BoundaryCondition,
-                  f: callable,
-                  g: callable,
-                  uD: callable) -> tuple[np.ndarray, float]:
+                  f: Callable[[np.ndarray], float],
+                  g: Callable[[np.ndarray], float],
+                  uD: Callable[[np.ndarray], float]
+                  ) -> tuple[np.ndarray, float]:
     # n_elements = mesh.elements.shape[0] unused in python context
     n_coordinates = mesh.coordinates.shape[0]
     x = np.zeros(n_coordinates)
