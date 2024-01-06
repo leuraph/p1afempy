@@ -51,12 +51,12 @@ class SolverTest(unittest.TestCase):
 
     def test_solve_laplace(self) -> None:
         path_to_coordinates = Path(
-            'p1afempy/tests/data/laplace_example/coordinates.dat')
-        path_to_elements = Path('p1afempy/tests/data/laplace_example/elements.dat')
-        path_to_neumann = Path('p1afempy/tests/data/laplace_example/neumann.dat')
-        path_to_dirichlet = Path('p1afempy/tests/data/laplace_example/dirichlet.dat')
-        path_to_matlab_x = Path('p1afempy/tests/data/laplace_example/x.dat')
-        path_to_matlab_energy = Path('p1afempy/tests/data/laplace_example/energy.dat')
+            'tests/data/laplace_example/coordinates.dat')
+        path_to_elements = Path('tests/data/laplace_example/elements.dat')
+        path_to_neumann = Path('tests/data/laplace_example/neumann.dat')
+        path_to_dirichlet = Path('tests/data/laplace_example/dirichlet.dat')
+        path_to_matlab_x = Path('tests/data/laplace_example/x.dat')
+        path_to_matlab_energy = Path('tests/data/laplace_example/energy.dat')
 
         square_mesh = mesh.read_mesh(path_to_coordinates=path_to_coordinates,
                                      path_to_elements=path_to_elements)

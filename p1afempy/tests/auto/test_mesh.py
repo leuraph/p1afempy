@@ -8,8 +8,8 @@ class MeshTest(unittest.TestCase):
 
     @staticmethod
     def get_test_mesh() -> mesh.Mesh:
-        path_to_coordinates = Path('p1afempy/tests/data/coordinates.dat')
-        path_to_elements = Path('p1afempy/tests/data/elements.dat')
+        path_to_coordinates = Path('tests/data/coordinates.dat')
+        path_to_elements = Path('tests/data/elements.dat')
         return mesh.read_mesh(path_to_coordinates=path_to_coordinates,
                               path_to_elements=path_to_elements)
 
@@ -27,9 +27,9 @@ class MeshTest(unittest.TestCase):
     def test_provide_geometric_data(self):
         # square-shaped testing domain
         boundary_condition_0 = mesh.read_boundary_condition(
-            Path('p1afempy/tests/data/square_boundary_0.dat'))
+            Path('tests/data/square_boundary_0.dat'))
         boundary_condition_1 = mesh.read_boundary_condition(
-            Path('p1afempy/tests/data/square_boundary_1.dat'))
+            Path('tests/data/square_boundary_1.dat'))
         boundary_conditions = [boundary_condition_0, boundary_condition_1]
 
         domain = MeshTest.get_test_mesh()
@@ -52,16 +52,16 @@ class MeshTest(unittest.TestCase):
 
         # L-shaped testing domain
         boundary_condition_0 = mesh.read_boundary_condition(
-            Path('p1afempy/tests/data/l_shape_bc_0.dat'))
+            Path('tests/data/l_shape_bc_0.dat'))
         boundary_condition_1 = mesh.read_boundary_condition(
-            Path('p1afempy/tests/data/l_shape_bc_1.dat'))
+            Path('tests/data/l_shape_bc_1.dat'))
         boundary_condition_2 = mesh.read_boundary_condition(
-            Path('p1afempy/tests/data/l_shape_bc_2.dat'))
+            Path('tests/data/l_shape_bc_2.dat'))
         boundary_conditions = [boundary_condition_0,
                                boundary_condition_1,
                                boundary_condition_2]
-        path_to_coordinates = Path('p1afempy/tests/data/l_shape_coordinates.dat')
-        path_to_elements = Path('p1afempy/tests/data/l_shape_elements.dat')
+        path_to_coordinates = Path('tests/data/l_shape_coordinates.dat')
+        path_to_elements = Path('tests/data/l_shape_elements.dat')
         l_shape_domain = mesh.read_mesh(
             path_to_coordinates=path_to_coordinates,
             path_to_elements=path_to_elements)
@@ -99,9 +99,9 @@ class MeshTest(unittest.TestCase):
     def test_refineNVB(self) -> None:
         # Square Domain
         boundary_condition_0 = mesh.read_boundary_condition(
-            Path('p1afempy/tests/data/square_boundary_0.dat'))
+            Path('tests/data/square_boundary_0.dat'))
         boundary_condition_1 = mesh.read_boundary_condition(
-            Path('p1afempy/tests/data/square_boundary_1.dat'))
+            Path('tests/data/square_boundary_1.dat'))
         boundary_conditions = [boundary_condition_0, boundary_condition_1]
         domain = MeshTest.get_test_mesh()
 
@@ -145,11 +145,11 @@ class MeshTest(unittest.TestCase):
             np.all(expected_refined_bc_1 == new_boundaries[1].boundary))
 
         # L-shaped Domain
-        path_to_coordinates = Path('p1afempy/tests/data/l_shape_coordinates.dat')
-        path_to_elements = Path('p1afempy/tests/data/l_shape_elements.dat')
-        path_to_bc_0 = Path('p1afempy/tests/data/l_shape_bc_0.dat')
-        path_to_bc_1 = Path('p1afempy/tests/data/l_shape_bc_1.dat')
-        path_to_bc_2 = Path('p1afempy/tests/data/l_shape_bc_2.dat')
+        path_to_coordinates = Path('tests/data/l_shape_coordinates.dat')
+        path_to_elements = Path('tests/data/l_shape_elements.dat')
+        path_to_bc_0 = Path('tests/data/l_shape_bc_0.dat')
+        path_to_bc_1 = Path('tests/data/l_shape_bc_1.dat')
+        path_to_bc_2 = Path('tests/data/l_shape_bc_2.dat')
         domain = mesh.read_mesh(path_to_coordinates=path_to_coordinates,
                                 path_to_elements=path_to_elements)
         marked_elements = np.array([0, 1, 3, 5])
@@ -162,18 +162,18 @@ class MeshTest(unittest.TestCase):
                                mesh.read_boundary_condition(path_to_bc_2)])
 
         path_to_refined_coordinates = Path(
-            'p1afempy/tests/data/l_shape_coordinates_refined.dat')
+            'tests/data/l_shape_coordinates_refined.dat')
         path_to_refined_elements = Path(
-            'p1afempy/tests/data/l_shape_elements_refined.dat')
+            'tests/data/l_shape_elements_refined.dat')
         expected_refined_mesh = mesh.read_mesh(
             path_to_coordinates=path_to_refined_coordinates,
             path_to_elements=path_to_refined_elements)
         refined_bc_0 = mesh.read_boundary_condition(
-            Path('p1afempy/tests/data/l_shape_boundary_0_refined.dat'))
+            Path('tests/data/l_shape_boundary_0_refined.dat'))
         refined_bc_1 = mesh.read_boundary_condition(
-            Path('p1afempy/tests/data/l_shape_boundary_1_refined.dat'))
+            Path('tests/data/l_shape_boundary_1_refined.dat'))
         refined_bc_2 = mesh.read_boundary_condition(
-            Path('p1afempy/tests/data/l_shape_boundary_2_refined.dat'))
+            Path('tests/data/l_shape_boundary_2_refined.dat'))
 
         self.assertTrue(np.all(
             refined_mesh.coordinates == expected_refined_mesh.coordinates))
