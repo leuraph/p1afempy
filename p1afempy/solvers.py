@@ -65,34 +65,14 @@ def solve_laplace(mesh: mesh.Mesh,
     n_coordinates = mesh.coordinates.shape[0]
     x = np.zeros(n_coordinates)
 
-    # first vertex of elements and corresponding edge vectors
-    c1 = mesh.coordinates[mesh.elements[:, 0], :]
-    d21 = mesh.coordinates[mesh.elements[:, 1], :] - c1
-    d31 = mesh.coordinates[mesh.elements[:, 2], :] - c1
-
-    # vector of element areas 4*|T|
-    area4 = 2 * (d21[:, 0]*d31[:, 1] - d21[:, 1] * d31[:, 0])
-
-    I = (mesh.elements[:, [0, 1, 2, 0, 1, 2, 0, 1, 2]].T).flatten(order='F')
-    J = (mesh.elements[:, [0, 0, 0, 1, 1, 1, 2, 2, 2]].T).flatten(order='F')
-    a = (np.sum(d21*d31, axis=1)/area4)
-    b = (np.sum(d31*d31, axis=1)/area4)
-    c = (np.sum(d21*d21, axis=1)/area4)
-    A = np.vstack([-2.*a+b+c, a-b, a-c, a-b, b, -a, a-c, -a, c])
-    A = coo_matrix((A.flatten(order='F'), (I, J)))
+    A = get_stiffness_matrix(mesh=mesh)
 
     # prescribe values at dirichlet nodes
     unique_dirichlet = np.unique(dirichlet.boundary)
     x[unique_dirichlet] = np.apply_along_axis(
         uD, 1, mesh.coordinates[unique_dirichlet, :])
 
-    # assembly of right-hand side
-    fsT = np.apply_along_axis(f, 1, c1+(d21+d31) / 3)
-    # TODO pad the result of np.bincount to the same size as `x`,
-    # i.e. add zeros, if necessary
-    b = np.bincount(
-        mesh.elements.flatten(order='F'),
-        weights=np.tile(area4*fsT/12., (3, 1)).flatten()) - A.dot(x)
+    b = get_right_hand_side(mesh=mesh, f=f) - A.dot(x)
     if neumann.boundary.size > 0:
         cn1 = mesh.coordinates[neumann.boundary[:, 0], :]
         cn2 = mesh.coordinates[neumann.boundary[:, 1], :]
