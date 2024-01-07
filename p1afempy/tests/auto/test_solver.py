@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
 import p1afempy.mesh as mesh
-from p1afempy.solve_laplace import solve_laplace
+from p1afempy.solvers import solve_laplace
 from pathlib import Path
 
 # TODO change the functions to be applied to all coordinates

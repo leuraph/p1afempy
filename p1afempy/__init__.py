@@ -4,4 +4,4 @@ __author__="Raphael Leu"
 __version__="@VERSION@"
 
 from .mesh import *
-from .solve_laplace import *
+from .solvers import *
