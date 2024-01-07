@@ -36,6 +36,24 @@ def get_stiffness_matrix(mesh: mesh.Mesh):
     return coo_matrix((A.flatten(order='F'), (I, J)))
 
 
+def get_right_hand_side(mesh: mesh.Mesh,
+                        f: Callable[[np.ndarray], float]):
+    c1 = mesh.coordinates[mesh.elements[:, 0], :]
+    d21 = mesh.coordinates[mesh.elements[:, 1], :] - c1
+    d31 = mesh.coordinates[mesh.elements[:, 2], :] - c1
+
+    # vector of element areas 4*|T|
+    area4 = 2 * (d21[:, 0]*d31[:, 1] - d21[:, 1] * d31[:, 0])
+    # assembly of right-hand side
+    fsT = np.apply_along_axis(f, 1, c1+(d21+d31) / 3)
+    # TODO pad the result of np.bincount to the same size as `x`,
+    # i.e. add zeros, if necessary
+    b = np.bincount(
+        mesh.elements.flatten(order='F'),
+        weights=np.tile(area4*fsT/12., (3, 1)).flatten())
+    return b
+
+
 def solve_laplace(mesh: mesh.Mesh,
                   dirichlet: mesh.BoundaryCondition,
                   neumann: mesh.BoundaryCondition,
