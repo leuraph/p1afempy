@@ -9,14 +9,12 @@ from pathlib import Path
 
 def u(r: np.ndarray, omega: float = 7./4. * np.pi) -> float:
     """analytical solution"""
-    x, y = r[0], r[1]
-    return np.sin(omega*2.*x)*np.sin(omega*y)
+    return np.sin(omega*2.*r[:, 0])*np.sin(omega*r[:, 1])
 
 
 def f(r: np.ndarray, omega: float = 7./4. * np.pi) -> float:
     """volume force corresponding to analytical solution"""
-    x, y = r[0], r[1]
-    return 5. * omega**2 * np.sin(omega*2.*x) * np.sin(omega*y)
+    return 5. * omega**2 * np.sin(omega*2.*r[:, 0]) * np.sin(omega*r[:, 1])
 
 
 def uD(r: np.ndarray, omega: float = 7./4. * np.pi) -> float:
