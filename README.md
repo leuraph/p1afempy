@@ -5,3 +5,14 @@ whose code can be found
 [here (ZIP)](https://www.tuwien.at/index.php?eID=dumpFile&t=f&f=180536&token=1b5f89369acab20d59455e42569bf1e0b2db8b41)
 and whose details are described in the paper (open access)
 [Computational Methods in Applied Mathematics, 11 (2011)](http://dx.doi.org/10.2478/cmam-2011-0026).
+
+## Performance tests
+
+In order to perform a profiled performance test, you can use the existing sccripts in
+the manual tests directory, i.e. `p1afempy/tests/manual`.
+For example, to perform a profiled test, you can do
+
+```sh
+cd p1afempy
+python -m cProfile -s time -m tests.manual.<script> > benchmark.out
+```
