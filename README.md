@@ -17,11 +17,11 @@ cd p1afempy
 python -m cProfile -s time -m tests.manual.<script> > benchmark.out
 ```
 
-### Notes
+### Performance upgrade
 
-First, note the following.
-In the `solve_laplace` function, we make use of `scipy.sparse.linalg.spsolve`.
-Note that we explicitly set `use_umfpack` to `True`.
+In order to get a performance upgrade for `solve_laplace`,
+consider the following. 
+First, note that in the `solve_laplace` function, we make use of `scipy.sparse.linalg.spsolve` and explicitly set `use_umfpack` to `True`.
 In the documentation (`scipy==1.11.4`) of this function, we read the following.
 
 > if True (default) then use UMFPACK for the solution.
@@ -30,7 +30,7 @@ In the documentation (`scipy==1.11.4`) of this function, we read the following.
 Therefore, in order to make use of the performance upgrade, you should make sure you have
 `scikits.umfpack` installed.
 Secondly, we point out the following problem when trying to install `scikits.umfpack` on a mac.
-In orderto install `scikits.umfpack` via pip, you (along other things) need to make sure you
+In order to install `scikits.umfpack` via pip, you (along other things, as mentioned [here](https://pypi.org/project/scikit-umfpack/)) need to make sure you
 have a working version of `suite-sparse` installed on your machine (`scikits.umfpack` will use
 its headers and link against its library).
 However, it seems that using the `suite-sparse` version shipped via homebrew does conflict
