@@ -54,6 +54,27 @@ def get_right_hand_side(mesh: mesh.Mesh,
     return b
 
 
+def apply_neumann(neumann_bc: mesh.BoundaryCondition,
+                  mesh: mesh.Mesh,
+                  g: Callable[[np.ndarray], float],
+                  b: np.ndarray):
+    """
+    applies neuman boundary conditions to b and returns new b
+    """
+    # TODO channge b in place, do not return it or
+    # at least check if this version generates computational overhead
+    cn1 = mesh.coordinates[neumann_bc.boundary[:, 0], :]
+    cn2 = mesh.coordinates[neumann_bc.boundary[:, 1], :]
+    gmE = np.apply_along_axis(g, 1, (cn1+cn2)/2)
+    # TODO pad if necessary
+    b = b + np.bincount(
+        neumann_bc.boundary.flatten(order='F'),
+        weights=np.tile(
+            np.sqrt(np.sum(np.square(cn2-cn1), axis=1))*gmE/2.,
+            (2, 1)).flatten())
+    return b
+
+
 def solve_laplace(mesh: mesh.Mesh,
                   dirichlet: mesh.BoundaryCondition,
                   neumann: mesh.BoundaryCondition,
@@ -74,15 +95,8 @@ def solve_laplace(mesh: mesh.Mesh,
 
     b = get_right_hand_side(mesh=mesh, f=f) - A.dot(x)
     if neumann.boundary.size > 0:
-        cn1 = mesh.coordinates[neumann.boundary[:, 0], :]
-        cn2 = mesh.coordinates[neumann.boundary[:, 1], :]
-        gmE = np.apply_along_axis(g, 1, (cn1+cn2)/2)
-        # TODO pad if necessary
-        b = b + np.bincount(
-            neumann.boundary.flatten(order='F'),
-            weights=np.tile(
-                np.sqrt(np.sum(np.square(cn2-cn1), axis=1))*gmE/2.,
-                (2, 1)).flatten())
+        b = apply_neumann(neumann_bc=neumann, mesh=mesh,
+                          g=g, b=b)
 
     # computation of P1-FEM approximation
     freenodes = np.setdiff1d(
