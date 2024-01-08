@@ -24,10 +24,8 @@ In the `solve_laplace` function, we make use of `scipy.sparse.linalg.spsolve`.
 Note that we explicitly set `use_umfpack` to `True`.
 In the documentation (`scipy==1.11.4`) of this function, we read the following.
 
-```
-if True (default) then use UMFPACK for the solution.
-This is only referenced if b is a vector and ``scikits.umfpack`` is installed.
-```
+> if True (default) then use UMFPACK for the solution.
+> This is only referenced if b is a vector and ``scikits.umfpack`` is installed.
 
 Therefore, in order to make use of the performance upgrade, you should make sure you have
 `scikits.umfpack` installed.
