@@ -3,8 +3,6 @@ import p1afempy.mesh as mesh
 from p1afempy.solvers import solve_laplace
 from pathlib import Path
 
-# TODO change the functions to be applied to all coordinates
-
 # TODO split this performance test in refining/solving
 
 

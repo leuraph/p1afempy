@@ -4,8 +4,6 @@ import p1afempy.mesh as mesh
 from p1afempy.solvers import solve_laplace
 from pathlib import Path
 
-# TODO change the functions to be applied to all coordinates
-
 
 def u(r: np.ndarray, omega: float = 7./4. * np.pi) -> float:
     """analytical solution"""
