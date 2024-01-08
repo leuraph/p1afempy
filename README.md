@@ -36,7 +36,7 @@ its headers and link against its library).
 However, it seems that using the `suite-sparse` version shipped via homebrew does conflict
 with the `scikits.umfpack` version installed via pip.
 For a reference, check the following [issue](https://github.com/scikit-umfpack/scikit-umfpack/issues/98) on github.
-The problem is resolved when installing `suite-sparse` via `conda`.
+The problem is resolved when installing `suite-sparse` via `conda` (as it ships an older version that seems to be compatible).
 Thirdly, when installing `scikits.umfpack`, your machine may not automatically detect `suite-sparse`'s
 header and library files.
 In order to resolve this issue, you can install `scikits.umfpack` by first creating a `nativefile.ini`
