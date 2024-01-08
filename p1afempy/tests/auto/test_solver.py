@@ -32,8 +32,10 @@ def g_upper(r: np.ndarray, omega: float = 7./4. * np.pi) -> float:
 
 def g(r: np.ndarray, omega: float = 7./4. * np.pi) -> float:
     out = np.zeros(r.shape[0])
-    out[r[:, 0] == 1] = g_right(r[r[:, 0] == 1], omega)
-    out[r[:, 1] == 1] = g_upper(r[r[:, 1] == 1], omega)
+    right_indices = r[:, 0] == 1
+    upper_indices = r[:, 1] == 1
+    out[right_indices] = g_right(r[right_indices], omega)
+    out[upper_indices] = g_upper(r[upper_indices], omega)
     return out
 
 

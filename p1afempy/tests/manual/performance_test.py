@@ -10,14 +10,12 @@ from pathlib import Path
 
 def u(r: np.ndarray, omega: float = 7./4. * np.pi) -> float:
     """analytical solution"""
-    x, y = r[0], r[1]
-    return np.sin(omega*2.*x)*np.sin(omega*y)
+    return np.sin(omega*2.*r[:, 0])*np.sin(omega*r[:, 1])
 
 
 def f(r: np.ndarray, omega: float = 7./4. * np.pi) -> float:
     """volume force corresponding to analytical solution"""
-    x, y = r[0], r[1]
-    return 5. * omega**2 * np.sin(omega*2.*x) * np.sin(omega*y)
+    return 5. * omega**2 * np.sin(omega*2.*r[:, 0]) * np.sin(omega*r[:, 1])
 
 
 def uD(r: np.ndarray, omega: float = 7./4. * np.pi) -> float:
@@ -26,22 +24,20 @@ def uD(r: np.ndarray, omega: float = 7./4. * np.pi) -> float:
 
 
 def g_right(r: np.ndarray, omega: float = 7./4. * np.pi) -> float:
-    x, y = r[0], r[1]
-    return -2.*omega*np.sin(omega*y)*np.cos(omega*2.*x)
+    return -2.*omega*np.sin(omega*r[:, 1])*np.cos(omega*2.*r[:, 0])
 
 
 def g_upper(r: np.ndarray, omega: float = 7./4. * np.pi) -> float:
-    x, y = r[0], r[1]
-    return omega*np.sin(omega*2.*x) * np.cos(omega*y)
+    return omega*np.sin(omega*2.*r[:, 0]) * np.cos(omega*r[:, 1])
 
 
 def g(r: np.ndarray, omega: float = 7./4. * np.pi) -> float:
-    if r[0] == 1.:
-        return g_right(r, omega=omega)
-    elif r[1] == 1.:
-        return g_upper(r, omega=omega)
-    else:
-        raise RuntimeError("Non-boundary evaluation of g")
+    out = np.zeros(r.shape[0])
+    right_indices = r[:, 0] == 1
+    upper_indices = r[:, 1] == 1
+    out[right_indices] = g_right(r[right_indices], omega)
+    out[upper_indices] = g_upper(r[upper_indices], omega)
+    return out
 
 
 def main() -> None:
