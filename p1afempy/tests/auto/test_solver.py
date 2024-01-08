@@ -23,26 +23,18 @@ def uD(r: np.ndarray, omega: float = 7./4. * np.pi) -> float:
 
 
 def g_right(r: np.ndarray, omega: float = 7./4. * np.pi) -> float:
-    x, y = r[0], r[1]
-    return -2.*omega*np.sin(omega*y)*np.cos(omega*2.*x)
+    return -2.*omega*np.sin(omega*r[:, 1])*np.cos(omega*2.*r[:, 0])
 
 
 def g_upper(r: np.ndarray, omega: float = 7./4. * np.pi) -> float:
-    x, y = r[0], r[1]
-    return omega*np.sin(omega*2.*x) * np.cos(omega*y)
+    return omega*np.sin(omega*2.*r[:, 0]) * np.cos(omega*r[:, 1])
 
 
 def g(r: np.ndarray, omega: float = 7./4. * np.pi) -> float:
-    # out = np.zeros(r.shape[0])
-    # out[r[:, 0] == 1] = g_right(r[r[:, 0] == 1].T, omega)
-    # out[r[:, 1] == 1] = g_right(r[r[:, 1] == 1].T, omega)
-    # return out
-    if r[0] == 1.:
-        return g_right(r, omega=omega)
-    elif r[1] == 1.:
-        return g_upper(r, omega=omega)
-    else:
-        raise RuntimeError("Non-boundary evaluation of g")
+    out = np.zeros(r.shape[0])
+    out[r[:, 0] == 1] = g_right(r[r[:, 0] == 1], omega)
+    out[r[:, 1] == 1] = g_upper(r[r[:, 1] == 1], omega)
+    return out
 
 
 class SolverTest(unittest.TestCase):

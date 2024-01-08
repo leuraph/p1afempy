@@ -65,7 +65,7 @@ def apply_neumann(neumann_bc: mesh.BoundaryCondition,
     # at least check if this version generates computational overhead
     cn1 = mesh.coordinates[neumann_bc.boundary[:, 0], :]
     cn2 = mesh.coordinates[neumann_bc.boundary[:, 1], :]
-    gmE = np.apply_along_axis(g, 1, (cn1+cn2)/2)
+    gmE = g((cn1+cn2)/2)
     # TODO pad if necessary
     b = b + np.bincount(
         neumann_bc.boundary.flatten(order='F'),
