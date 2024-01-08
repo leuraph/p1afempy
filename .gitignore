@@ -162,3 +162,5 @@ cython_debug/
 p1afem/
 example/
 .vscode/
+labbook.md 
+*.out
