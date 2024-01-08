@@ -35,6 +35,10 @@ def g_upper(r: np.ndarray, omega: float = 7./4. * np.pi) -> float:
 
 
 def g(r: np.ndarray, omega: float = 7./4. * np.pi) -> float:
+    # out = np.zeros(r.shape[0])
+    # out[r[:, 0] == 1] = g_right(r[r[:, 0] == 1].T, omega)
+    # out[r[:, 1] == 1] = g_right(r[r[:, 1] == 1].T, omega)
+    # return out
     if r[0] == 1.:
         return g_right(r, omega=omega)
     elif r[1] == 1.:

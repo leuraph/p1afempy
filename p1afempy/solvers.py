@@ -45,7 +45,7 @@ def get_right_hand_side(mesh: mesh.Mesh,
     # vector of element areas 4*|T|
     area4 = 2 * (d21[:, 0]*d31[:, 1] - d21[:, 1] * d31[:, 0])
     # assembly of right-hand side
-    fsT = np.apply_along_axis(f, 1, c1+(d21+d31) / 3)
+    fsT = f((c1+(d21+d31) / 3).T)
     # TODO pad the result of np.bincount to the same size as `x`,
     # i.e. add zeros, if necessary
     b = np.bincount(
@@ -90,8 +90,7 @@ def solve_laplace(mesh: mesh.Mesh,
 
     # prescribe values at dirichlet nodes
     unique_dirichlet = np.unique(dirichlet.boundary)
-    x[unique_dirichlet] = np.apply_along_axis(
-        uD, 1, mesh.coordinates[unique_dirichlet, :])
+    x[unique_dirichlet] = uD((mesh.coordinates[unique_dirichlet, :]).T)
 
     b = get_right_hand_side(mesh=mesh, f=f) - A.dot(x)
     if neumann.boundary.size > 0:

@@ -1,4 +1,3 @@
-import unittest
 import numpy as np
 import p1afempy.mesh as mesh
 from p1afempy.solvers import solve_laplace
