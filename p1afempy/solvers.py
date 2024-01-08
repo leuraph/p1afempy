@@ -46,11 +46,10 @@ def get_right_hand_side(mesh: mesh.Mesh,
     area4 = 2 * (d21[:, 0]*d31[:, 1] - d21[:, 1] * d31[:, 0])
     # assembly of right-hand side
     fsT = f((c1+(d21+d31) / 3))
-    # TODO pad the result of np.bincount to the same size as `x`,
-    # i.e. add zeros, if necessary
     b = np.bincount(
         mesh.elements.flatten(order='F'),
-        weights=np.tile(area4*fsT/12., (3, 1)).flatten())
+        weights=np.tile(area4*fsT/12., (3, 1)).flatten(),
+        minlength=mesh.coordinates.shape[0])
     return b
 
 
@@ -66,12 +65,11 @@ def apply_neumann(neumann_bc: mesh.BoundaryCondition,
     cn1 = mesh.coordinates[neumann_bc.boundary[:, 0], :]
     cn2 = mesh.coordinates[neumann_bc.boundary[:, 1], :]
     gmE = g((cn1+cn2)/2)
-    # TODO pad if necessary
     b = b + np.bincount(
         neumann_bc.boundary.flatten(order='F'),
         weights=np.tile(
             np.sqrt(np.sum(np.square(cn2-cn1), axis=1))*gmE/2.,
-            (2, 1)).flatten())
+            (2, 1)).flatten(), minlength=b.size)
     return b
 
 
