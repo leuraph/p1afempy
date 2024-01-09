@@ -181,6 +181,13 @@ def provide_geometric_data(domain: Mesh, boundaries: list[BoundaryCondition]):
     return element2edges, edge2nodes, boundaries_to_edges
 
 
+def refineRGB(mesh: Mesh, marked_elements: np.ndarray,
+              boundary_conditions: list[BoundaryCondition]
+              ) -> tuple[Mesh, list[BoundaryCondition]]:
+    # TODO implement
+    return mesh, boundary_conditions
+
+
 def refineNVB(mesh: Mesh, marked_elements: np.ndarray,
               boundary_conditions: list[BoundaryCondition]
               ) -> tuple[Mesh, list[BoundaryCondition]]:
