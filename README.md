@@ -61,10 +61,10 @@ To install scikit-umfpack and make it use a custom Suite-Sparse library, follow 
 
 It seems that using the `suite-sparse` version shipped via Homebrew conflicts with the `scikit-umfpack` version installed via pip.
 For reference, check the following [issue](https://github.com/scikit-umfpack/scikit-umfpack/issues/98) on GitHub.
-An easy way around this would be to use install `suite-sparse` via `conda`, as it ships an older version that seems to be compatible.
+An easy way around this would be to install `suite-sparse` via `conda`, as it ships an older version that seems to be compatible.
 However, conda comes with OpenBLAS, which causes a dramatic performance degredation (as mentioned [above](openblas)).
 In order to resolve the issue and not fall into a performance degredation pitfall, make sure you have a compatible version of Suite-Sparse (as mentioned in [this isse](https://github.com/scikit-umfpack/scikit-umfpack/issues/98); at least v5.10.1 seems to work) available, linking against the correct BLAS library.
-Finally, install scikit-umfpack making use of this Suite-Sparse installation (Instructions on how to install scikit-umfpack with a custom Suite-Sparse are described [below](#custom).).
+Finally, install scikit-umfpack making use of this Suite-Sparse installation (instructions on how to install scikit-umfpack with a custom Suite-Sparse are described [below](#custom)).
 
 #### <a name="custom"></a>Installing scikit-umfpack with custom Suite-Sparse
 
