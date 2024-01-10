@@ -8,7 +8,7 @@ and whose details are described in the paper (open access)
 
 ## Performance tests
 
-In order to perform a profiled performance test, you can use the existing sccripts in
+In order to perform a profiled performance test, you can use the existing scripts in
 the manual tests directory, i.e. `p1afempy/tests/manual`.
 For example, to perform a profiled test, you can do
 
@@ -17,38 +17,64 @@ cd p1afempy
 python -m cProfile -s time -m tests.manual.<script> > benchmark.out
 ```
 
-### Performance upgrade
+## Performance upgrade
 
-In order to get a performance upgrade for `solve_laplace`,
-consider the following. 
-First, note that in the `solve_laplace` function, we make use of `scipy.sparse.linalg.spsolve` and explicitly set `use_umfpack` to `True`.
-In the documentation (`scipy==1.11.4`) of this function, we read the following.
+In the following, we describe how to get more (the most) performance out of `solve_laplace`.
+
+### Use UMFPACK
+
+**TL;DR;**
+*Make sure you have `scikit.umfpack` installed (can be found on [pypi](https://pypi.org/project/scikit-umfpack/)).*
+
+In the `solve_laplace` function, we make use of `scipy.sparse.linalg.spsolve` and explicitly set `use_umfpack` to `True`.
+However, in the documentation (`scipy==1.11.4`) of this function, we read that
 
 > if True (default) then use UMFPACK for the solution.
-> This is only referenced if b is a vector and ``scikits.umfpack`` is installed.
+> This is only referenced if b is a vector and ``scikit.umfpack`` is installed.
 
-Therefore, in order to make use of the performance upgrade, you should make sure you have
-`scikits.umfpack` installed.
-Secondly, we point out the following problem when trying to install `scikits.umfpack` on a mac.
-In order to install `scikits.umfpack` via pip, you (along other things, as mentioned [here](https://pypi.org/project/scikit-umfpack/)) need to make sure you
-have a working version of `suite-sparse` installed on your machine (`scikits.umfpack` will use
-its headers and link against its library).
-However, it seems that using the `suite-sparse` version shipped via homebrew does conflict
-with the `scikits.umfpack` version installed via pip.
+Therefore, make sure you have `scikit.umfpack` installed (can be found on [pypi](https://pypi.org/project/scikit-umfpack/)).
+In case your installation can not figure out where to find the UMFPACK (Suite-Sparse) headers and library
+or you want to make use of your own Suite-Sparse version, 
+
+### <a name="openblas"></a>Do not link Suite-Sparse against OpenBLAS
+
+**TL;DR;**
+*Make sure the Suite-Sparse library your scikit-umfpack is pointing to does not link against OpenBLAS but rather against either Intel MKL BLAS or, if you are on a mac, the BLAS and LAPACK libraries under the Accelerate framework.*
+
+Note that Suite-Sparse makes use of BLAS routines.
+As can be read in 
+[this issue](https://github.com/DrTimothyAldenDavis/SuiteSparse/issues/1) 
+and 
+[this part of the readme](https://github.com/DrTimothyAldenDavis/SuiteSparse?tab=readme-ov-file#about-the-blas-and-lapack-libraries),
+in a 2019 test, OpenBLAS caused severe performance degradation.
+It is therefore recommended your Suite-Sparse library (used by scikit-umfpack) links against the corresponding BLAS library.
+Hence, you need to:
+
+- Make sure the Suite-Sparse library used by scikit-umfpack is pointing to the correct BLAS library. Instructions on how to link Suite-Sparse to a custom BLAS library
+can be found [in the very same part of the readme](https://github.com/DrTimothyAldenDavis/SuiteSparse?tab=readme-ov-file#about-the-blas-and-lapack-libraries) as mentioned above.
+- Make sure your installation of scikit-umfpack is using the correct Suite-Sparse library, i.e. one that points to the correct BLAS library. To install scikit-umfpack and make it use a custom Suite-Sparse library, you proceed as mentioned in the [troubleshooting](#troubleshooting) further below.
+
+### <a name="troubleshooting"></a>Troubleshooting
+
+#### Installing scikit-umfpack on a mac
+
+It seems that using the `suite-sparse` version shipped via homebrew does conflict with the `scikit.umfpack` version installed via pip.
 For a reference, check the following [issue](https://github.com/scikit-umfpack/scikit-umfpack/issues/98) on github.
-The problem is resolved when installing `suite-sparse` via `conda` (as it ships an older version that seems to be compatible).
-Thirdly, when installing `scikits.umfpack`, your machine may not automatically detect `suite-sparse`'s
-header and library files.
-In order to resolve this issue, you can install `scikits.umfpack` by first creating a `nativefile.ini`
-file with the content as listed further below and then do:
+An easy way around this would be to use install `suite-sparse` via `conda` (as it ships an older version that seems to be compatible).
+However, conda comes with OpenBLAS, which causes a dramatic performance degredation (as mentioned [above](openblas)).
+In order to resolve the issue and not fall into a performance degredation pitfall, make sure you have a compatible version of Suite-Sparse (as mentioned in [this isse](https://github.com/scikit-umfpack/scikit-umfpack/issues/98), at least v5.10.1 seems to work) available that links against the correct BLAS library and install scikit-umfpack making use of this Suite-Sparse installation (how to install scikit-umfpack with custom Suite-Sparse is described [below](#custom)).
+
+#### <a name="custom"></a>Installing scikit-umfpack with custom Suite-Sparse
+
+In order to install scikit-umfpack pointing to a custom Suite-Sparse, you first create a `nativefile.ini` with the content as listed further below and then do:
 
 ```sh
 pip install --config-settings setup-args=--native-file=$PWD/nativefile.ini scikit-umfpack
 ```
 
-The `nativefile.ini` file should look like this:
+The `nativefile.ini` should look like this:
 ```ini
 [properties]
-umfpack-libdir = 'path/to/umfpack/lib/files'
-umfpack-includedir = 'path/to/umfpack/include/files'
+umfpack-libdir = 'path/to/suite-sparse/lib'
+umfpack-includedir = 'path/to/suite-sparse/include'
 ```
