@@ -165,3 +165,4 @@ example/
 labbook.md 
 *.out
 jupyter_notebooks/
+.DS_Store
