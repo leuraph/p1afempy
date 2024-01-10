@@ -184,12 +184,14 @@ def provide_geometric_data(domain: Mesh, boundaries: list[BoundaryCondition]):
 def refineRGB(mesh: Mesh, marked_elements: np.ndarray,
               boundary_conditions: list[BoundaryCondition]
               ) -> tuple[Mesh, list[BoundaryCondition]]:
-    # TODO implement
-    return mesh, boundary_conditions
+    return refineNVB(mesh, marked_elements,
+                     boundary_conditions,
+                     sort_for_longest_egde=True)
 
 
 def refineNVB(mesh: Mesh, marked_elements: np.ndarray,
-              boundary_conditions: list[BoundaryCondition]
+              boundary_conditions: list[BoundaryCondition],
+              sort_for_longest_egde: bool = False
               ) -> tuple[Mesh, list[BoundaryCondition]]:
     """
     Refines the mesh based on marked elements and updates boundary conditions.
@@ -222,6 +224,20 @@ def refineNVB(mesh: Mesh, marked_elements: np.ndarray,
     elements = mesh.elements
     coordinates = mesh.coordinates
     n_elements = elements.shape[0]
+
+    if sort_for_longest_egde:
+        # Sort elements such that first edge is longest
+        dx = (coordinates[elements[:, [1, 2, 0]], 0]
+              - coordinates[elements, 0]).flatten(order='F')
+        dy = (coordinates[elements[:, [1, 2, 0]], 1]
+              - coordinates[elements, 1]).flatten(order='F')
+        idxMax = np.argmax(
+            (np.square(dx)+np.square(dy)).reshape((n_elements, 3), order='F'),
+            axis=1)
+        idx = idxMax == 1
+        elements[idx, :] = elements[idx][:, [1, 2, 0]]
+        idx = idxMax == 2
+        elements[idx, :] = elements[idx][:, [2, 0, 1]]
 
     # obtain geometric information on edges
     element2edges, edge2nodes, boundaries_to_edges = provide_geometric_data(
@@ -341,23 +357,42 @@ def refineNVB(mesh: Mesh, marked_elements: np.ndarray,
              np.column_stack([elements[bisec13, 1],
                               elements[bisec13, 2],
                               new_nodes[bisec13, 0]])])
-    newElements[np.hstack([idx[np.hstack((bisec123, False))],
-                           1+idx[np.hstack((bisec123, False))],
-                           2+idx[np.hstack((bisec123, False))],
-                           3+idx[np.hstack((bisec123, False))]]), :] \
-        = np.vstack([
-            np.column_stack([new_nodes[bisec123, 0],
-                             elements[bisec123, 2],
-                             new_nodes[bisec123, 2]]),
-            np.column_stack([elements[bisec123, 0],
-                             new_nodes[bisec123, 0],
-                             new_nodes[bisec123, 2]]),
-            np.column_stack([new_nodes[bisec123, 0],
-                             elements[bisec123, 1],
-                             new_nodes[bisec123, 1]]),
-            np.column_stack([elements[bisec123, 2],
-                             new_nodes[bisec123, 0],
-                             new_nodes[bisec123, 1]])])
+    if sort_for_longest_egde:
+        newElements[np.hstack([idx[np.hstack([bisec123, False])],
+                               1+idx[np.hstack([bisec123, False])],
+                               2+idx[np.hstack([bisec123, False])],
+                               3+idx[np.hstack([bisec123, False])]]), :] \
+            = np.vstack([
+                np.column_stack([elements[bisec123, 0],
+                                 new_nodes[bisec123, 0],
+                                 new_nodes[bisec123, 2]]),
+                np.column_stack([new_nodes[bisec123, 0],
+                                 elements[bisec123, 1],
+                                 new_nodes[bisec123, 1]]),
+                np.column_stack([new_nodes[bisec123, 2],
+                                 new_nodes[bisec123, 1],
+                                 elements[bisec123, 2]]),
+                np.column_stack([new_nodes[bisec123, 1],
+                                 new_nodes[bisec123, 2],
+                                 new_nodes[bisec123, 0]])])
+    else:
+        newElements[np.hstack([idx[np.hstack((bisec123, False))],
+                               1+idx[np.hstack((bisec123, False))],
+                               2+idx[np.hstack((bisec123, False))],
+                               3+idx[np.hstack((bisec123, False))]]), :] \
+            = np.vstack([
+                np.column_stack([new_nodes[bisec123, 0],
+                                elements[bisec123, 2],
+                                new_nodes[bisec123, 2]]),
+                np.column_stack([elements[bisec123, 0],
+                                new_nodes[bisec123, 0],
+                                new_nodes[bisec123, 2]]),
+                np.column_stack([new_nodes[bisec123, 0],
+                                elements[bisec123, 1],
+                                new_nodes[bisec123, 1]]),
+                np.column_stack([elements[bisec123, 2],
+                                new_nodes[bisec123, 0],
+                                new_nodes[bisec123, 1]])])
 
     refined_mesh = Mesh(coordinates=coordinates, elements=newElements)
     return refined_mesh, new_boundaries
