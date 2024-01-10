@@ -27,7 +27,7 @@ In the following, we describe how to get more (the most) performance out of `sol
 *Make sure you have `scikit.umfpack` installed (can be found on [pypi](https://pypi.org/project/scikit-umfpack/)).*
 
 In the `solve_laplace` function, we make use of `scipy.sparse.linalg.spsolve` and explicitly set `use_umfpack` to `True`.
-However, in the documentation (`scipy==1.11.4`) of this function, we read that
+However, in the documentation (`scipy==1.11.4`) of this function, we read the following.
 
 > if True (default) then use UMFPACK for the solution.
 > This is only referenced if b is a vector and ``scikit.umfpack`` is installed.
@@ -47,22 +47,24 @@ As can be read in
 and 
 [this part of the readme](https://github.com/DrTimothyAldenDavis/SuiteSparse?tab=readme-ov-file#about-the-blas-and-lapack-libraries),
 in a 2019 test, OpenBLAS caused severe performance degradation.
-It is therefore recommended your Suite-Sparse library (used by scikit-umfpack) links against the corresponding BLAS library.
+Therefore, it is recommended that your Suite-Sparse library (used by scikit-umfpack) links against the corresponding BLAS library.
 Hence, you need to:
 
-- Make sure the Suite-Sparse library used by scikit-umfpack is pointing to the correct BLAS library. Instructions on how to link Suite-Sparse to a custom BLAS library
+- Ensure that the Suite-Sparse library used by scikit-umfpack is pointing to the correct BLAS library. Instructions on how to link Suite-Sparse to a custom BLAS library
 can be found [in the very same part of the readme](https://github.com/DrTimothyAldenDavis/SuiteSparse?tab=readme-ov-file#about-the-blas-and-lapack-libraries) as mentioned above.
-- Make sure your installation of scikit-umfpack is using the correct Suite-Sparse library, i.e. one that points to the correct BLAS library. To install scikit-umfpack and make it use a custom Suite-Sparse library, you proceed as mentioned in the [troubleshooting](#troubleshooting) further below.
+- Make sure your installation of scikit-umfpack is using the correct Suite-Sparse library, i.e. one that points to the correct BLAS library.
+To install scikit-umfpack and make it use a custom Suite-Sparse library, follow the steps mentioned in the [troubleshooting](#troubleshooting) section below.
 
 ### <a name="troubleshooting"></a>Troubleshooting
 
 #### Installing scikit-umfpack on a mac
 
-It seems that using the `suite-sparse` version shipped via homebrew does conflict with the `scikit.umfpack` version installed via pip.
-For a reference, check the following [issue](https://github.com/scikit-umfpack/scikit-umfpack/issues/98) on github.
-An easy way around this would be to use install `suite-sparse` via `conda` (as it ships an older version that seems to be compatible).
+It seems that using the `suite-sparse` version shipped via Homebrew conflicts with the `scikit-umfpack` version installed via pip.
+For reference, check the following [issue](https://github.com/scikit-umfpack/scikit-umfpack/issues/98) on GitHub.
+An easy way around this would be to use install `suite-sparse` via `conda`, as it ships an older version that seems to be compatible.
 However, conda comes with OpenBLAS, which causes a dramatic performance degredation (as mentioned [above](openblas)).
-In order to resolve the issue and not fall into a performance degredation pitfall, make sure you have a compatible version of Suite-Sparse (as mentioned in [this isse](https://github.com/scikit-umfpack/scikit-umfpack/issues/98), at least v5.10.1 seems to work) available that links against the correct BLAS library and install scikit-umfpack making use of this Suite-Sparse installation (how to install scikit-umfpack with custom Suite-Sparse is described [below](#custom)).
+In order to resolve the issue and not fall into a performance degredation pitfall, make sure you have a compatible version of Suite-Sparse (as mentioned in [this isse](https://github.com/scikit-umfpack/scikit-umfpack/issues/98); at least v5.10.1 seems to work) available, linking against the correct BLAS library.
+Finally, install scikit-umfpack making use of this Suite-Sparse installation (Instructions on how to install scikit-umfpack with a custom Suite-Sparse are described [below](#custom).).
 
 #### <a name="custom"></a>Installing scikit-umfpack with custom Suite-Sparse
 
