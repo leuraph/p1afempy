@@ -76,7 +76,7 @@ class IndicatorTest(unittest.TestCase):
 
         indicators_matlab = np.loadtxt(path_to_matlab_indicators)
 
-        self.assertTrue(np.isclose(ref_indicators, indicators_matlab))
+        self.assertTrue(np.allclose(ref_indicators, indicators_matlab))
         pass
 
 
