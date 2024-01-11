@@ -9,7 +9,30 @@ def compute_eta_r(x: np.ndarray, mesh: Mesh,
                   f: Callable[[np.ndarray], float],
                   g: Callable[[np.ndarray], float]) -> np.ndarray:
     """
-    # TODO doc
+    computes residual-based error estimator for finite element
+    solution of Laplace problem with mixed Dirichlet-Neumann
+    boundary conditions.
+
+    parameters
+    ----------
+    x: np.ndarray
+        the current solution iterate
+    mesh: Mesh
+        the mesh on which the laplace problems should be solved
+    dirichlet: BoundaryCondition
+    neumann: BoundaryCondition
+    f: Callable[[np.ndarray], float]
+        Function correspnding to Dirichlet BC.
+        Expected to be callable like
+        f(np.array([[x1, y1], [x2, y2], [x3, y3]])).
+    g: Callable[[np.ndarray], float]
+        Function correspnding to Neumann BC.
+        Expected to be callable like
+        g(np.array([[x1, y1], [x2, y2], [x3, y3]])).
+    returns
+    -------
+    etaR: np.ndarray
+        the residual-based error estimator
     """
     boundary_conditions = [dirichlet, neumann]
     element2edges, edge2nodes, boundaries_to_edges = \
