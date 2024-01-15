@@ -45,6 +45,27 @@ def get_mass_matrix(mesh: mesh.Mesh) -> coo_matrix:
     pass
 
 
+def get_mass_matrix_elements(
+        mesh: mesh.Mesh) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """
+    returns the mass matrix of the mesh provided
+    for the P1 FEM with Legendre basis
+
+    returns
+    -------
+    I: np.ndarray
+    J: np.ndarray
+    D: np.ndarray
+        D[m] represents a mass matrix contribution
+        belonging to its (I[m], J[m]) coordinate
+    """
+    # TODO implement
+    I = np.array([])
+    J = np.array([])
+    D = np.array([])
+    return I, J, D
+
+
 def get_right_hand_side(mesh: mesh.Mesh,
                         f: Callable[[np.ndarray], float]):
     """
