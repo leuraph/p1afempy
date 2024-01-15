@@ -7,7 +7,7 @@ import numpy as np
 class MeshTest(unittest.TestCase):
 
     @staticmethod
-    def get_test_mesh() -> mesh.Mesh:
+    def get_simple_square_mesh() -> mesh.Mesh:
         path_to_coordinates = Path('tests/data/coordinates.dat')
         path_to_elements = Path('tests/data/elements.dat')
         return mesh.read_mesh(path_to_coordinates=path_to_coordinates,
@@ -19,7 +19,7 @@ class MeshTest(unittest.TestCase):
         expected_coordinates = np.array([z0, z1, z2, z3])
         expected_elements = np.array([e0, e1])
 
-        domain = MeshTest.get_test_mesh()
+        domain = MeshTest.get_simple_square_mesh()
 
         self.assertTrue(np.all(expected_coordinates == domain.coordinates))
         self.assertTrue(np.all(expected_elements == domain.elements))
@@ -32,7 +32,7 @@ class MeshTest(unittest.TestCase):
             Path('tests/data/square_boundary_1.dat'))
         boundary_conditions = [boundary_condition_0, boundary_condition_1]
 
-        domain = MeshTest.get_test_mesh()
+        domain = MeshTest.get_simple_square_mesh()
         element2edges, edge2nodes, boundaries_to_edges = \
             mesh.provide_geometric_data(domain, boundary_conditions)
 
@@ -103,7 +103,7 @@ class MeshTest(unittest.TestCase):
         boundary_condition_1 = mesh.read_boundary_condition(
             Path('tests/data/square_boundary_1.dat'))
         boundary_conditions = [boundary_condition_0, boundary_condition_1]
-        domain = MeshTest.get_test_mesh()
+        domain = MeshTest.get_simple_square_mesh()
 
         refined_mesh, new_boundaries = mesh.refineNVB(
             mesh=domain,
