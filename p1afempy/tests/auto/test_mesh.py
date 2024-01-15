@@ -8,8 +8,10 @@ class MeshTest(unittest.TestCase):
 
     @staticmethod
     def get_simple_square_mesh() -> mesh.Mesh:
-        path_to_coordinates = Path('tests/data/coordinates.dat')
-        path_to_elements = Path('tests/data/elements.dat')
+        path_to_coordinates = Path(
+            'tests/data/simple_square_mesh/coordinates.dat')
+        path_to_elements = Path(
+            'tests/data/simple_square_mesh/elements.dat')
         return mesh.read_mesh(path_to_coordinates=path_to_coordinates,
                               path_to_elements=path_to_elements)
 
