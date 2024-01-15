@@ -2,7 +2,6 @@ import numpy as np
 
 
 OMEGA = 7./4. * np.pi
-N_REFINEMENTS = 3
 
 
 def u(r: np.ndarray) -> float:

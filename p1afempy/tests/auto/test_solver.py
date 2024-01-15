@@ -3,7 +3,7 @@ import numpy as np
 import p1afempy.mesh as mesh
 from p1afempy.solvers import solve_laplace
 from pathlib import Path
-from example_setup import g, f, uD, N_REFINEMENTS
+from example_setup import g, f, uD
 
 
 class SolverTest(unittest.TestCase):
@@ -25,7 +25,8 @@ class SolverTest(unittest.TestCase):
             path_to_boundary=path_to_dirichlet)
         boundary_conditions = [dirichlet_bc, neumann_bc]
 
-        for _ in range(N_REFINEMENTS):
+        n_refinements = 3
+        for _ in range(n_refinements):
             marked_elements = np.arange(square_mesh.elements.shape[0])
             square_mesh, boundary_conditions = mesh.refineNVB(
                 mesh=square_mesh,
