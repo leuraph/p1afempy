@@ -2,7 +2,7 @@ import unittest
 from p1afempy import mesh, solvers, indicators
 from pathlib import Path
 import numpy as np
-from example_setup import f, g, uD
+import example_setup
 
 
 class IndicatorTest(unittest.TestCase):
@@ -36,12 +36,13 @@ class IndicatorTest(unittest.TestCase):
             mesh=square_mesh,
             dirichlet=boundary_conditions[0],
             neumann=boundary_conditions[1],
-            f=f, g=g, uD=uD)
+            f=example_setup.f, g=example_setup.g, uD=example_setup.uD)
 
         ref_indicators = indicators.compute_eta_r(
             x, square_mesh,
             dirichlet=boundary_conditions[0],
-            neumann=boundary_conditions[1], f=f, g=g)
+            neumann=boundary_conditions[1],
+            f=example_setup.f, g=example_setup.g)
 
         indicators_matlab = np.loadtxt(path_to_matlab_indicators)
 

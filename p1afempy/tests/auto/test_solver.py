@@ -3,7 +3,7 @@ import numpy as np
 import p1afempy.mesh as mesh
 from p1afempy.solvers import solve_laplace
 from pathlib import Path
-from example_setup import g, f, uD
+import example_setup
 
 
 class SolverTest(unittest.TestCase):
@@ -37,7 +37,7 @@ class SolverTest(unittest.TestCase):
             mesh=square_mesh,
             dirichlet=boundary_conditions[0],
             neumann=boundary_conditions[1],
-            f=f, g=g, uD=uD)
+            f=example_setup.f, g=example_setup.g, uD=example_setup.uD)
 
         x_matlab = np.loadtxt(path_to_matlab_x)
         energy_matlab = np.loadtxt(path_to_matlab_energy).reshape((1,))[0]
