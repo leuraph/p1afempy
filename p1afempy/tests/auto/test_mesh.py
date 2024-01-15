@@ -62,8 +62,10 @@ class MeshTest(unittest.TestCase):
         boundary_conditions = [boundary_condition_0,
                                boundary_condition_1,
                                boundary_condition_2]
-        path_to_coordinates = Path('tests/data/l_shape_coordinates.dat')
-        path_to_elements = Path('tests/data/l_shape_elements.dat')
+        path_to_coordinates = Path(
+            'tests/data/l_shape_mesh/l_shape_coordinates.dat')
+        path_to_elements = Path(
+            'tests/data/l_shape_mesh/l_shape_elements.dat')
         l_shape_domain = mesh.read_mesh(
             path_to_coordinates=path_to_coordinates,
             path_to_elements=path_to_elements)
@@ -147,8 +149,10 @@ class MeshTest(unittest.TestCase):
             np.all(expected_refined_bc_1 == new_boundaries[1].boundary))
 
         # L-shaped Domain
-        path_to_coordinates = Path('tests/data/l_shape_coordinates.dat')
-        path_to_elements = Path('tests/data/l_shape_elements.dat')
+        path_to_coordinates = Path(
+            'tests/data/l_shape_mesh/l_shape_coordinates.dat')
+        path_to_elements = Path(
+            'tests/data/l_shape_mesh/l_shape_elements.dat')
         path_to_bc_0 = Path('tests/data/l_shape_mesh/l_shape_bc_0.dat')
         path_to_bc_1 = Path('tests/data/l_shape_mesh/l_shape_bc_1.dat')
         path_to_bc_2 = Path('tests/data/l_shape_mesh/l_shape_bc_2.dat')
@@ -190,8 +194,10 @@ class MeshTest(unittest.TestCase):
 
     def test_refineRGB(self) -> None:
         # L-shaped Domain
-        path_to_coordinates = Path('tests/data/l_shape_coordinates.dat')
-        path_to_elements = Path('tests/data/l_shape_elements.dat')
+        path_to_coordinates = Path(
+            'tests/data/l_shape_mesh/l_shape_coordinates.dat')
+        path_to_elements = Path(
+            'tests/data/l_shape_mesh/l_shape_elements.dat')
         path_to_bc_0 = Path('tests/data/l_shape_mesh/l_shape_bc_0.dat')
         path_to_bc_1 = Path('tests/data/l_shape_mesh/l_shape_bc_1.dat')
         path_to_bc_2 = Path('tests/data/l_shape_mesh/l_shape_bc_2.dat')
