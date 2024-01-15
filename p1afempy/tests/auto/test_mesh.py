@@ -171,11 +171,11 @@ class MeshTest(unittest.TestCase):
             path_to_coordinates=path_to_refined_coordinates,
             path_to_elements=path_to_refined_elements)
         refined_bc_0 = mesh.read_boundary_condition(
-            Path('tests/data/l_shape_boundary_0_refined.dat'))
+            Path('tests/data/refined_nvb/l_shape_boundary_0_refined.dat'))
         refined_bc_1 = mesh.read_boundary_condition(
-            Path('tests/data/l_shape_boundary_1_refined.dat'))
+            Path('tests/data/refined_nvb/l_shape_boundary_1_refined.dat'))
         refined_bc_2 = mesh.read_boundary_condition(
-            Path('tests/data/l_shape_boundary_2_refined.dat'))
+            Path('tests/data/refined_nvb/l_shape_boundary_2_refined.dat'))
 
         self.assertTrue(np.all(
             refined_mesh.coordinates == expected_refined_mesh.coordinates))
