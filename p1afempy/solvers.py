@@ -5,7 +5,7 @@ from scipy.sparse.linalg import spsolve
 from typing import Callable
 
 
-def get_stiffness_matrix(mesh: mesh.Mesh):
+def get_stiffness_matrix(mesh: mesh.Mesh) -> coo_matrix:
     """
     returns the stiffness matrix for the P1 FEM
     with Legendre basis
@@ -34,6 +34,15 @@ def get_stiffness_matrix(mesh: mesh.Mesh):
     c = (np.sum(d21*d21, axis=1)/area4)
     A = np.vstack([-2.*a+b+c, a-b, a-c, a-b, b, -a, a-c, -a, c])
     return coo_matrix((A.flatten(order='F'), (I, J)))
+
+
+def get_mass_matrix(mesh: mesh.Mesh) -> coo_matrix:
+    """
+    returns the mass matrix of the mesh provided
+    for the P1 FEM with Legendre basis
+    """
+    # TODO implement
+    pass
 
 
 def get_right_hand_side(mesh: mesh.Mesh,
