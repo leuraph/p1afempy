@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
 import p1afempy.mesh as mesh
-from p1afempy.solvers import solve_laplace
+from p1afempy.solvers import solve_laplace, get_mass_matrix_elements
 from pathlib import Path
 import example_setup
 
@@ -44,6 +44,30 @@ class SolverTest(unittest.TestCase):
 
         self.assertTrue(np.allclose(x, x_matlab))
         self.assertTrue(np.isclose(energy, energy_matlab))
+
+    def test_get_mass_matrix_elements(self) -> None:
+        path_to_coordinates = Path(
+            'tests/data/ahw_codes_example_mesh/coordinates.dat')
+        path_to_elements = Path(
+            'tests/data/ahw_codes_example_mesh/elements.dat')
+        mesh_ahw = mesh.read_mesh(path_to_coordinates=path_to_coordinates,
+                                  path_to_elements=path_to_elements)
+
+        path_to_expected_I = Path(
+            'tests/data/ahw_codes_example_mesh/mass_matrix_I.dat')
+        path_to_expected_J = Path(
+            'tests/data/ahw_codes_example_mesh/mass_matrix_J.dat')
+        path_to_expected_D = Path(
+            'tests/data/ahw_codes_example_mesh/mass_matrix_D.dat')
+        expected_I = np.loadtxt(path_to_expected_I)
+        expected_J = np.loadtxt(path_to_expected_J)
+        expected_D = np.loadtxt(path_to_expected_D)
+
+        I, J, D = get_mass_matrix_elements(mesh=mesh_ahw)
+
+        self.assertTrue(np.allclose(I, expected_I))
+        self.assertTrue(np.allclose(J, expected_J))
+        self.assertTrue(np.allclose(D, expected_D))
 
 
 if __name__ == "__main__":
