@@ -101,7 +101,40 @@ def solve_laplace(mesh: mesh.Mesh,
                   g: Callable[[np.ndarray], float],
                   uD: Callable[[np.ndarray], float]
                   ) -> tuple[np.ndarray, float]:
-    # n_elements = mesh.elements.shape[0] unused in python context
+    """
+    solves the given laplace equation on the provided mesh
+    using P1 FEM with Legendre basis
+
+    parameters
+    ----------
+    mesh: mesh.Mesh
+        the mesh on which to calculate the solution on
+    dirichlet: mesh.BoundaryCondition
+        the dirichlet boundary of the problem
+    neumann: mesh.BoundaryCondition
+        the neumann boundary of the problem
+    f: Callable[[np.ndarray], float]
+        the right-hand-side function (volume force) of the problem
+    g: Callable[[np.ndarray], float]
+        the neumann boundary function, i.e.
+        u(x) = g(x) on Gamma_N
+    uD: Callable[[np.ndarray], float]
+        the dirichlet boundary function, i.e.
+        du/dn(x) = uD(x) on Gamma_D
+
+    returns
+    -------
+    x: np.ndarray
+        the solution of the given laplace problem
+        on the mesh provided
+    energy: float
+        the energy (A-norm: x.T*A*x) of the solution found
+
+    notes
+    -----
+    the functions f, g, and uD are all expected to be callable like
+    f(coordinates), where coordinates is an (n_coordinates x 2) array
+    """
     n_coordinates = mesh.coordinates.shape[0]
     x = np.zeros(n_coordinates)
 
