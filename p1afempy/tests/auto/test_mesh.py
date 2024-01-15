@@ -54,11 +54,11 @@ class MeshTest(unittest.TestCase):
 
         # L-shaped testing domain
         boundary_condition_0 = mesh.read_boundary_condition(
-            Path('tests/data/l_shape_bc_0.dat'))
+            Path('tests/data/l_shape_mesh/l_shape_bc_0.dat'))
         boundary_condition_1 = mesh.read_boundary_condition(
-            Path('tests/data/l_shape_bc_1.dat'))
+            Path('tests/data/l_shape_mesh/l_shape_bc_1.dat'))
         boundary_condition_2 = mesh.read_boundary_condition(
-            Path('tests/data/l_shape_bc_2.dat'))
+            Path('tests/data/l_shape_mesh/l_shape_bc_2.dat'))
         boundary_conditions = [boundary_condition_0,
                                boundary_condition_1,
                                boundary_condition_2]
@@ -149,9 +149,9 @@ class MeshTest(unittest.TestCase):
         # L-shaped Domain
         path_to_coordinates = Path('tests/data/l_shape_coordinates.dat')
         path_to_elements = Path('tests/data/l_shape_elements.dat')
-        path_to_bc_0 = Path('tests/data/l_shape_bc_0.dat')
-        path_to_bc_1 = Path('tests/data/l_shape_bc_1.dat')
-        path_to_bc_2 = Path('tests/data/l_shape_bc_2.dat')
+        path_to_bc_0 = Path('tests/data/l_shape_mesh/l_shape_bc_0.dat')
+        path_to_bc_1 = Path('tests/data/l_shape_mesh/l_shape_bc_1.dat')
+        path_to_bc_2 = Path('tests/data/l_shape_mesh/l_shape_bc_2.dat')
         domain = mesh.read_mesh(path_to_coordinates=path_to_coordinates,
                                 path_to_elements=path_to_elements)
         marked_elements = np.array([0, 1, 3, 5])
@@ -192,9 +192,9 @@ class MeshTest(unittest.TestCase):
         # L-shaped Domain
         path_to_coordinates = Path('tests/data/l_shape_coordinates.dat')
         path_to_elements = Path('tests/data/l_shape_elements.dat')
-        path_to_bc_0 = Path('tests/data/l_shape_bc_0.dat')
-        path_to_bc_1 = Path('tests/data/l_shape_bc_1.dat')
-        path_to_bc_2 = Path('tests/data/l_shape_bc_2.dat')
+        path_to_bc_0 = Path('tests/data/l_shape_mesh/l_shape_bc_0.dat')
+        path_to_bc_1 = Path('tests/data/l_shape_mesh/l_shape_bc_1.dat')
+        path_to_bc_2 = Path('tests/data/l_shape_mesh/l_shape_bc_2.dat')
         domain = mesh.read_mesh(path_to_coordinates=path_to_coordinates,
                                 path_to_elements=path_to_elements)
         marked_elements = np.array([0, 1, 3, 5])
