@@ -38,6 +38,27 @@ def get_stiffness_matrix(mesh: mesh.Mesh):
 
 def get_right_hand_side(mesh: mesh.Mesh,
                         f: Callable[[np.ndarray], float]):
+    """
+    returns the load vector for the P1 FEM with Legendre basis
+
+    parameters
+    ----------
+    mesh: mesh.Mesh
+        the mesh which to evaluate the load vector on
+    f: Callable[[np.ndarray], float]
+        the function for which to evaluate the load vector
+
+    returns
+    -------
+    b: np.ndarray
+        the P1 FEM load vector of f on the mesh at hand
+
+    notes
+    -----
+    the load vector F_i := int f(x)phi_i(x) dx
+    is approximated as sum_T |T| * f(sT) * phi_i(sT),
+    where sT denotes the center of mass of triangle T
+    """
     c1 = mesh.coordinates[mesh.elements[:, 0], :]
     d21 = mesh.coordinates[mesh.elements[:, 1], :] - c1
     d31 = mesh.coordinates[mesh.elements[:, 2], :] - c1
