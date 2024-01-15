@@ -5,35 +5,39 @@ from p1afempy.solvers import solve_laplace
 from pathlib import Path
 
 
-def u(r: np.ndarray, omega: float = 7./4. * np.pi) -> float:
+OMEGA = 7./4. * np.pi
+N_REFINEMENTS = 3
+
+
+def u(r: np.ndarray) -> float:
     """analytical solution"""
-    return np.sin(omega*2.*r[:, 0])*np.sin(omega*r[:, 1])
+    return np.sin(OMEGA*2.*r[:, 0])*np.sin(OMEGA*r[:, 1])
 
 
-def f(r: np.ndarray, omega: float = 7./4. * np.pi) -> float:
+def f(r: np.ndarray) -> float:
     """volume force corresponding to analytical solution"""
-    return 5. * omega**2 * np.sin(omega*2.*r[:, 0]) * np.sin(omega*r[:, 1])
+    return 5. * OMEGA**2 * np.sin(OMEGA*2.*r[:, 0]) * np.sin(OMEGA*r[:, 1])
 
 
-def uD(r: np.ndarray, omega: float = 7./4. * np.pi) -> float:
+def uD(r: np.ndarray) -> float:
     """solution value on the Dirichlet boundary"""
-    return u(r, omega=omega)
+    return u(r)
 
 
-def g_right(r: np.ndarray, omega: float = 7./4. * np.pi) -> float:
-    return -2.*omega*np.sin(omega*r[:, 1])*np.cos(omega*2.*r[:, 0])
+def g_right(r: np.ndarray) -> float:
+    return -2.*OMEGA*np.sin(OMEGA*r[:, 1])*np.cos(OMEGA*2.*r[:, 0])
 
 
-def g_upper(r: np.ndarray, omega: float = 7./4. * np.pi) -> float:
-    return omega*np.sin(omega*2.*r[:, 0]) * np.cos(omega*r[:, 1])
+def g_upper(r: np.ndarray) -> float:
+    return OMEGA*np.sin(OMEGA*2.*r[:, 0]) * np.cos(OMEGA*r[:, 1])
 
 
-def g(r: np.ndarray, omega: float = 7./4. * np.pi) -> float:
+def g(r: np.ndarray) -> float:
     out = np.zeros(r.shape[0])
     right_indices = r[:, 0] == 1
     upper_indices = r[:, 1] == 1
-    out[right_indices] = g_right(r[right_indices], omega)
-    out[upper_indices] = g_upper(r[upper_indices], omega)
+    out[right_indices] = g_right(r[right_indices])
+    out[upper_indices] = g_upper(r[upper_indices])
     return out
 
 
@@ -56,8 +60,7 @@ class SolverTest(unittest.TestCase):
             path_to_boundary=path_to_dirichlet)
         boundary_conditions = [dirichlet_bc, neumann_bc]
 
-        n_refinements = 3
-        for _ in range(n_refinements):
+        for _ in range(N_REFINEMENTS):
             marked_elements = np.arange(square_mesh.elements.shape[0])
             square_mesh, boundary_conditions = mesh.refineNVB(
                 mesh=square_mesh,
