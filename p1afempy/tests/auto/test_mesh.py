@@ -29,9 +29,9 @@ class MeshTest(unittest.TestCase):
     def test_provide_geometric_data(self):
         # square-shaped testing domain
         boundary_condition_0 = mesh.read_boundary_condition(
-            Path('tests/data/square_boundary_0.dat'))
+            Path('tests/data/simple_square_mesh/square_boundary_0.dat'))
         boundary_condition_1 = mesh.read_boundary_condition(
-            Path('tests/data/square_boundary_1.dat'))
+            Path('tests/data/simple_square_mesh/square_boundary_1.dat'))
         boundary_conditions = [boundary_condition_0, boundary_condition_1]
 
         domain = MeshTest.get_simple_square_mesh()
@@ -101,9 +101,9 @@ class MeshTest(unittest.TestCase):
     def test_refineNVB(self) -> None:
         # Square Domain
         boundary_condition_0 = mesh.read_boundary_condition(
-            Path('tests/data/square_boundary_0.dat'))
+            Path('tests/data/simple_square_mesh/square_boundary_0.dat'))
         boundary_condition_1 = mesh.read_boundary_condition(
-            Path('tests/data/square_boundary_1.dat'))
+            Path('tests/data/simple_square_mesh/square_boundary_1.dat'))
         boundary_conditions = [boundary_condition_0, boundary_condition_1]
         domain = MeshTest.get_simple_square_mesh()
 
