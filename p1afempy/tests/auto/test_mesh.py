@@ -168,9 +168,9 @@ class MeshTest(unittest.TestCase):
                                mesh.read_boundary_condition(path_to_bc_2)])
 
         path_to_refined_coordinates = Path(
-            'tests/data/l_shape_coordinates_refined.dat')
+            'tests/data/refined_nvb/l_shape_coordinates_refined.dat')
         path_to_refined_elements = Path(
-            'tests/data/l_shape_elements_refined.dat')
+            'tests/data/refined_nvb/l_shape_elements_refined.dat')
         expected_refined_mesh = mesh.read_mesh(
             path_to_coordinates=path_to_refined_coordinates,
             path_to_elements=path_to_refined_elements)
