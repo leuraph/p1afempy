@@ -90,7 +90,8 @@ def read_boundary_condition(
     return BoundaryCondition(name=name, boundary=data)
 
 
-def read_mesh(path_to_coordinates: Path, path_to_elements: Path) -> Mesh:
+def read_mesh(path_to_coordinates: Path, path_to_elements: Path,
+              shift_indices: bool = False) -> Mesh:
     """
     Reads vertices and elements from files and
     returns the corresponding Mesh.
@@ -101,6 +102,11 @@ def read_mesh(path_to_coordinates: Path, path_to_elements: Path) -> Mesh:
         Path to the file containing mesh coordinates data.
     path_to_elements : pathlib.Path
         Path to the file containing mesh elements data.
+    shift_indices: bool (default=False)
+        If true, shifts the elements' indices according to i':=i-1.
+        This can come in handy, if, e.g., one wants to read data
+        that is compatible with Matlab/Fortran/Julia indexing
+        (starting at 1, instead of 0).
 
     Returns
     -------
@@ -115,6 +121,8 @@ def read_mesh(path_to_coordinates: Path, path_to_elements: Path) -> Mesh:
     """
     coordinates = np.loadtxt(path_to_coordinates)
     elements = np.loadtxt(path_to_elements, dtype=int, converters=float)
+    if shift_indices:
+        elements = elements - 1
     return Mesh(coordinates=coordinates, elements=elements)
 
 
