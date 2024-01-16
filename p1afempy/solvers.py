@@ -59,10 +59,19 @@ def get_mass_matrix_elements(
         D[m] represents a mass matrix contribution
         belonging to its (I[m], J[m]) coordinate
     """
-    # TODO implement
-    I = np.array([])
-    J = np.array([])
-    D = np.array([])
+    # TODO extract this into a get_areas(mesh) method
+    c1 = mesh.coordinates[mesh.elements[:, 0], :]
+    d21 = mesh.coordinates[mesh.elements[:, 1], :] - c1
+    d31 = mesh.coordinates[mesh.elements[:, 2], :] - c1
+    # vector of element areas 4*|T|
+    area = 0.5 * (d21[:, 0]*d31[:, 1] - d21[:, 1] * d31[:, 0])
+
+    I = (mesh.elements[:, [0, 1, 2, 0, 1, 2, 0, 1, 2]].T).flatten(order='F')
+    J = (mesh.elements[:, [0, 0, 0, 1, 1, 1, 2, 2, 2]].T).flatten(order='F')
+    D = np.vstack(
+        [area/6., area/12., area/12.,
+         area/12., area/6., area/12.,
+         area/12., area/12., area/6.]).flatten(order='F')
     return I, J, D
 
 
