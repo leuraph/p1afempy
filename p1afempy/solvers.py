@@ -92,14 +92,12 @@ def get_right_hand_side(mesh: mesh.Mesh,
     is approximated as sum_T |T| * f(sT) * phi_i(sT),
     where sT denotes the center of mass of triangle T
     """
-    c1 = mesh.coordinates[mesh.elements[:, 0], :]
-    d21 = mesh.coordinates[mesh.elements[:, 1], :] - c1
-    d31 = mesh.coordinates[mesh.elements[:, 2], :] - c1
-
     # vector of element areas 4*|T|
-    area4 = 2 * (d21[:, 0]*d31[:, 1] - d21[:, 1] * d31[:, 0])
+    area4 = 4. * mesh.get_area()
+
     # assembly of right-hand side
-    fsT = f((c1+(d21+d31) / 3))
+    d21, d31 = mesh.get_directional_vectors()
+    fsT = f((mesh.coordinates[mesh.elements[:, 0], :]+(d21+d31) / 3))
     b = np.bincount(
         mesh.elements.flatten(order='F'),
         weights=np.tile(area4*fsT/12., (3, 1)).flatten(),
