@@ -133,8 +133,13 @@ def solve_laplace(mesh: mesh.Mesh,
                   uD: Callable[[np.ndarray], float]
                   ) -> tuple[np.ndarray, float]:
     """
-    solves the given laplace equation on the provided mesh
-    using P1 FEM with Legendre basis
+    solves the laplace equation, i.e.
+
+    -Delta u = f, on Omega
+    u = uD, on Gamma_D
+    du/dn = g, on Gamma_N
+
+    on the provided mesh using P1 FEM with Legendre basis
 
     parameters
     ----------
