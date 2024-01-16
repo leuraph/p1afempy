@@ -39,15 +39,11 @@ def compute_eta_r(x: np.ndarray, mesh: Mesh,
         provide_geometric_data(domain=mesh,
                                boundaries=boundary_conditions)
 
-    # first vertex of elements and corresponding edge vectors
-    c1 = mesh.coordinates[mesh.elements[:, 0], :]
-    d21 = mesh.coordinates[mesh.elements[:, 1], :] - c1
-    d31 = mesh.coordinates[mesh.elements[:, 2], :] - c1
-
     # vector of element volumes 2*|T|
-    area2 = d21[:, 0] * d31[:, 1] - d21[:, 1] * d31[:, 0]
+    area2 = 2. * mesh.get_area()
 
     # compute curl
+    d21, d31 = mesh.get_directional_vectors()
     tmp1 = x[mesh.elements[:, 1]] - x[mesh.elements[:, 0]]
     tmp2 = x[mesh.elements[:, 2]] - x[mesh.elements[:, 0]]
     u21 = np.column_stack([tmp1, tmp1])
@@ -79,6 +75,6 @@ def compute_eta_r(x: np.ndarray, mesh: Mesh,
     # assemble edge contributions of indicators
     etaR = np.sum(np.square(etaR[element2edges]), axis=1)
     # add volume residual to indicators
-    fsT = f((c1+(d21+d31) / 3.))
+    fsT = f((mesh.coordinates[mesh.elements[:, 0]]+(d21+d31) / 3.))
     etaR = etaR + np.square(0.5 * area2 * fsT)
     return etaR
