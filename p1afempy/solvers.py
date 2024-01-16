@@ -41,8 +41,8 @@ def get_mass_matrix(mesh: mesh.Mesh) -> coo_matrix:
     returns the mass matrix of the mesh provided
     for the P1 FEM with Legendre basis
     """
-    # TODO implement
-    pass
+    I, J, D = get_mass_matrix_elements(mesh=mesh)
+    return coo_matrix((D, (I, J)))
 
 
 def get_mass_matrix_elements(
