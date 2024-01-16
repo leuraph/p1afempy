@@ -51,9 +51,7 @@ class Mesh:
         """
         returns the area of each element
         """
-        c1 = self.coordinates[self.elements[:, 0], :]
-        d21 = self.coordinates[self.elements[:, 1], :] - c1
-        d31 = self.coordinates[self.elements[:, 2], :] - c1
+        d21, d31 = self.get_directional_vectors()
 
         # vector of element areas 4*|T|
         return 0.5 * (d21[:, 0]*d31[:, 1] - d21[:, 1] * d31[:, 0])
