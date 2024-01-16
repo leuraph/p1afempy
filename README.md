@@ -80,3 +80,10 @@ The `nativefile.ini` should look like this:
 umfpack-libdir = 'path/to/suite-sparse/lib'
 umfpack-includedir = 'path/to/suite-sparse/include'
 ```
+
+## Notes
+
+Note that this repo includes some functionalities that were not provided in the original
+P1AFEM Matlab package.
+The following provides a complete list of added functionalities.
+- Calculation of mass matrices.
