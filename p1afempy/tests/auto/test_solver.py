@@ -3,7 +3,7 @@ import numpy as np
 import p1afempy.mesh as mesh
 from p1afempy.solvers import solve_laplace, get_mass_matrix_elements
 from pathlib import Path
-import example_setup
+from p1afempy.tests.auto import example_setup
 
 
 class SolverTest(unittest.TestCase):
@@ -51,7 +51,8 @@ class SolverTest(unittest.TestCase):
         path_to_elements = Path(
             'tests/data/ahw_codes_example_mesh/elements.dat')
         mesh_ahw = mesh.read_mesh(path_to_coordinates=path_to_coordinates,
-                                  path_to_elements=path_to_elements)
+                                  path_to_elements=path_to_elements,
+                                  shift_indices=True)
 
         path_to_expected_I = Path(
             'tests/data/ahw_codes_example_mesh/mass_matrix_I.dat')
@@ -59,14 +60,16 @@ class SolverTest(unittest.TestCase):
             'tests/data/ahw_codes_example_mesh/mass_matrix_J.dat')
         path_to_expected_D = Path(
             'tests/data/ahw_codes_example_mesh/mass_matrix_D.dat')
-        expected_I = np.loadtxt(path_to_expected_I)
-        expected_J = np.loadtxt(path_to_expected_J)
+        expected_I = np.loadtxt(
+            path_to_expected_I, dtype=int, converters=float)
+        expected_J = np.loadtxt(
+            path_to_expected_J, dtype=int, converters=float)
         expected_D = np.loadtxt(path_to_expected_D)
 
         I, J, D = get_mass_matrix_elements(mesh=mesh_ahw)
 
-        self.assertTrue(np.allclose(I, expected_I))
-        self.assertTrue(np.allclose(J, expected_J))
+        self.assertTrue(np.allclose(I+1, expected_I))
+        self.assertTrue(np.allclose(J+1, expected_J))
         self.assertTrue(np.allclose(D, expected_D))
 
 
