@@ -33,8 +33,12 @@ class Mesh:
         """
         returns the area of each element
         """
-        # TODO implement
-        return np.zeros(self.elements.shape[0])
+        c1 = self.coordinates[self.elements[:, 0], :]
+        d21 = self.coordinates[self.elements[:, 1], :] - c1
+        d31 = self.coordinates[self.elements[:, 2], :] - c1
+
+        # vector of element areas 4*|T|
+        return 0.5 * (d21[:, 0]*d31[:, 1] - d21[:, 1] * d31[:, 0])
 
 
 class BoundaryCondition:
