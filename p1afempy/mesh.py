@@ -29,6 +29,13 @@ class Mesh:
         self.coordinates = coordinates
         self.elements = elements
 
+    def get_area(self) -> np.ndarray:
+        """
+        returns the area of each element
+        """
+        # TODO implement
+        return np.zeros(self.elements.shape[0])
+
 
 class BoundaryCondition:
     """
