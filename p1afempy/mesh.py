@@ -29,6 +29,24 @@ class Mesh:
         self.coordinates = coordinates
         self.elements = elements
 
+    def get_directional_vectors(self) -> tuple[np.ndarray, np.ndarray]:
+        """
+        returns the vectors pointing from vertex[0] to vertex[1]
+        and vertex[2], respectively, for each triangular element
+
+        returns
+        -------
+        d21: np.ndarray (M x 2)
+            d21[k, :] points from vertex 0 to vertex 1 in the k-th element
+        d31: np.ndarray (M x 2)
+            d31[k, :] points from vertex 0 to vertex 2 in the k-th element
+        """
+        c1 = self.coordinates[self.elements[:, 0], :]
+        d21 = self.coordinates[self.elements[:, 1], :] - c1
+        d31 = self.coordinates[self.elements[:, 2], :] - c1
+
+        return d21, d31
+
     def get_area(self) -> np.ndarray:
         """
         returns the area of each element
