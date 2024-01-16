@@ -237,6 +237,21 @@ class MeshTest(unittest.TestCase):
         self.assertTrue(np.all(
             new_boundaries[2].boundary == refined_bc_2.boundary - 1))
 
+    def test_get_area(self) -> None:
+        path_to_coordinates = Path(
+            'tests/data/ahw_codes_example_mesh/coordinates.dat')
+        path_to_elements = Path(
+            'tests/data/ahw_codes_example_mesh/elements.dat')
+        mesh_ahw = mesh.read_mesh(path_to_coordinates=path_to_coordinates,
+                                  path_to_elements=path_to_elements,
+                                  shift_indices=True)
+
+        path_to_expected_area = Path(
+            'tests/data/ahw_codes_example_mesh/area.dat')
+        expected_area = np.loadtxt(path_to_expected_area)
+
+        self.assertTrue(np.allclose(expected_area, mesh_ahw.get_area()))
+
 
 if __name__ == '__main__':
     unittest.main()
