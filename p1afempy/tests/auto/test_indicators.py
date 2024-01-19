@@ -39,7 +39,9 @@ class IndicatorTest(unittest.TestCase):
             f=example_setup.f, g=example_setup.g, uD=example_setup.uD)
 
         ref_indicators = indicators.compute_eta_r(
-            x, square_mesh,
+            x=x,
+            coordinates=square_mesh.coordinates,
+            elements=square_mesh.elements,
             dirichlet=boundary_conditions[0],
             neumann=boundary_conditions[1],
             f=example_setup.f, g=example_setup.g)

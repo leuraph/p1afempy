@@ -3,7 +3,9 @@ from p1afempy.mesh import Mesh, provide_geometric_data, BoundaryCondition, get_d
 from typing import Callable
 
 
-def compute_eta_r(x: np.ndarray, mesh: Mesh,
+def compute_eta_r(x: np.ndarray,
+                  coordinates: np.ndarray,
+                  elements: np.ndarray,
                   dirichlet: BoundaryCondition,
                   neumann: BoundaryCondition,
                   f: Callable[[np.ndarray], float],
@@ -17,8 +19,10 @@ def compute_eta_r(x: np.ndarray, mesh: Mesh,
     ----------
     x: np.ndarray
         the current solution iterate
-    mesh: Mesh
-        the mesh on which the laplace problems should be solved
+    coordinates: np.ndarray
+        coordinates of the mesh
+    elements: np.ndarray
+        elements of the mesh
     dirichlet: BoundaryCondition
     neumann: BoundaryCondition
     f: Callable[[np.ndarray], float]
@@ -36,19 +40,19 @@ def compute_eta_r(x: np.ndarray, mesh: Mesh,
     """
     boundary_conditions = [dirichlet, neumann]
     element2edges, edge2nodes, boundaries_to_edges = \
-        provide_geometric_data(coordinates=mesh.coordinates,
-                               elements=mesh.elements,
+        provide_geometric_data(coordinates=coordinates,
+                               elements=elements,
                                boundaries=boundary_conditions)
 
     # vector of element volumes 2*|T|
-    area2 = 2. * get_area(coordinates=mesh.coordinates,
-                          elements=mesh.elements)
+    area2 = 2. * get_area(coordinates=coordinates,
+                          elements=elements)
 
     # compute curl
-    d21, d31 = get_directional_vectors(coordinates=mesh.coordinates,
-                                       elements=mesh.elements)
-    tmp1 = x[mesh.elements[:, 1]] - x[mesh.elements[:, 0]]
-    tmp2 = x[mesh.elements[:, 2]] - x[mesh.elements[:, 0]]
+    d21, d31 = get_directional_vectors(coordinates=coordinates,
+                                       elements=elements)
+    tmp1 = x[elements[:, 1]] - x[elements[:, 0]]
+    tmp2 = x[elements[:, 2]] - x[elements[:, 0]]
     u21 = np.column_stack([tmp1, tmp1])
     u31 = np.column_stack([tmp2, tmp2])
     curl = (d31 * u21 - d21 * u31) / np.column_stack([area2, area2])
@@ -64,8 +68,8 @@ def compute_eta_r(x: np.ndarray, mesh: Mesh,
 
     # incorporate Neumann data
     if neumann.boundary.size > 0:
-        cn1 = mesh.coordinates[neumann.boundary[:, 0], :]
-        cn2 = mesh.coordinates[neumann.boundary[:, 1], :]
+        cn1 = coordinates[neumann.boundary[:, 0], :]
+        cn2 = coordinates[neumann.boundary[:, 1], :]
         gmE = g((cn1+cn2) / 2.)
         neumann2edges = boundaries_to_edges[1]
         etaR[neumann2edges] = etaR[neumann2edges] - np.sqrt(np.sum(
@@ -78,6 +82,6 @@ def compute_eta_r(x: np.ndarray, mesh: Mesh,
     # assemble edge contributions of indicators
     etaR = np.sum(np.square(etaR[element2edges]), axis=1)
     # add volume residual to indicators
-    fsT = f((mesh.coordinates[mesh.elements[:, 0]]+(d21+d31) / 3.))
+    fsT = f((coordinates[elements[:, 0]]+(d21+d31) / 3.))
     etaR = etaR + np.square(0.5 * area2 * fsT)
     return etaR
