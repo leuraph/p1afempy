@@ -153,9 +153,23 @@ def read_mesh(path_to_coordinates: Path, path_to_elements: Path,
     return Mesh(coordinates=coordinates, elements=elements)
 
 
-def provide_geometric_data(domain: Mesh, boundaries: list[BoundaryCondition]):
+def provide_geometric_data(coordinates: np.ndarray,
+                           elements: np.ndarray,
+                           boundaries: list[BoundaryCondition]):
     """
     Provides geometric data about the mesh at hand.
+
+    Parameeters
+    -----------
+    coordinates: np.ndarray
+        the coordinates of the mesh's vertices, i.e.
+        an Nx2 array where each row represents a vertex
+        of the mesh
+    elements: np.ndarray
+        the elements of the mesh, i.e.
+        an Mx3 array where each row represents an element
+    boundaries: list[BoundaryCondition]
+        boundary conditions defined on the mesh
 
     Returns
     -------
@@ -170,13 +184,13 @@ def provide_geometric_data(domain: Mesh, boundaries: list[BoundaryCondition]):
         s.t. boundaries_to_edges[k][n] gives the indices
         (i, j) of the n-th edge of the k-th boundary.
     """
-    n_elements = domain.elements.shape[0]
+    n_elements = elements.shape[0]
     n_boundaries = len(boundaries)
 
     # Extracting all directed edges E_l:=(I[l], J[l])
     # (interior edges appear twice)
-    I = domain.elements.flatten(order='F')
-    J = domain.elements[:, [1, 2, 0]].flatten(order='F')
+    I = elements.flatten(order='F')
+    J = elements[:, [1, 2, 0]].flatten(order='F')
 
     # Symmetrize I and J (so far boundary edges appear only once)
     pointer = np.concatenate(([0, 3*n_elements-1],
@@ -305,7 +319,9 @@ def refineNVB(mesh: Mesh, marked_elements: np.ndarray,
 
     # obtain geometric information on edges
     element2edges, edge2nodes, boundaries_to_edges = provide_geometric_data(
-        domain=mesh, boundaries=boundary_conditions)
+        coordinates=mesh.coordinates,
+        elements=mesh.elements,
+        boundaries=boundary_conditions)
 
     # mark all edges of marked elements for refinement
     edge2newNode = np.zeros(edge2nodes.shape[0], dtype=int)

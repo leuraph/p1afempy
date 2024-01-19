@@ -36,7 +36,8 @@ def compute_eta_r(x: np.ndarray, mesh: Mesh,
     """
     boundary_conditions = [dirichlet, neumann]
     element2edges, edge2nodes, boundaries_to_edges = \
-        provide_geometric_data(domain=mesh,
+        provide_geometric_data(coordinates=mesh.coordinates,
+                               elements=mesh.elements,
                                boundaries=boundary_conditions)
 
     # vector of element volumes 2*|T|
