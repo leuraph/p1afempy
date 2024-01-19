@@ -84,9 +84,10 @@ class BoundaryCondition:
         self.boundary = boundary
 
 
-def plot_mesh(mesh: Mesh) -> None:
-    for element in mesh.elements:
-        r0, r1, r2 = mesh.coordinates[element, :]
+def plot_mesh(coordinates: np.ndarray,
+              elements: np.ndarray) -> None:
+    for element in elements:
+        r0, r1, r2 = coordinates[element, :]
         plt.plot(
             [r0[0], r1[0], r2[0], r0[0]],
             [r0[1], r1[1], r2[1], r0[1]],
