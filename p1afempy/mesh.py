@@ -29,15 +29,17 @@ class Mesh:
         self.coordinates = coordinates
         self.elements = elements
 
-    def get_area(self) -> np.ndarray:
-        """
-        returns the area of each element
-        """
-        d21, d31 = get_directional_vectors(coordinates=self.coordinates,
-                                           elements=self.elements)
 
-        # vector of element areas 4*|T|
-        return 0.5 * (d21[:, 0]*d31[:, 1] - d21[:, 1] * d31[:, 0])
+def get_area(coordinates: np.ndarray,
+             elements: np.ndarray) -> np.ndarray:
+    """
+    returns the area of each element
+    """
+    d21, d31 = get_directional_vectors(coordinates=coordinates,
+                                       elements=elements)
+
+    # vector of element areas 4*|T|
+    return 0.5 * (d21[:, 0]*d31[:, 1] - d21[:, 1] * d31[:, 0])
 
 
 def get_directional_vectors(coordinates: np.ndarray,

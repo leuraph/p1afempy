@@ -254,7 +254,9 @@ class MeshTest(unittest.TestCase):
             'tests/data/ahw_codes_example_mesh/area.dat')
         expected_area = np.loadtxt(path_to_expected_area)
 
-        self.assertTrue(np.allclose(expected_area, mesh_ahw.get_area()))
+        self.assertTrue(np.allclose(
+            expected_area, mesh.get_area(coordinates=mesh_ahw.coordinates,
+                                         elements=mesh_ahw.elements)))
 
 
 if __name__ == '__main__':

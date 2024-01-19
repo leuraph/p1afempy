@@ -1,5 +1,5 @@
 import p1afempy.mesh as mesh
-from p1afempy.mesh import get_directional_vectors
+from p1afempy.mesh import get_directional_vectors, get_area
 import numpy as np
 from scipy.sparse import coo_matrix, csc_matrix
 from scipy.sparse.linalg import spsolve
@@ -22,7 +22,8 @@ def get_stiffness_matrix(mesh: mesh.Mesh) -> coo_matrix:
     scipy.sparse.coo_matrix: the sparse stiffness matrix
     """
     # vector of element areas 4*|T|
-    area4 = 4. * mesh.get_area()
+    area4 = 4. * get_area(coordinates=mesh.coordinates,
+                          elements=mesh.elements)
 
     I = (mesh.elements[:, [0, 1, 2, 0, 1, 2, 0, 1, 2]].T).flatten(order='F')
     J = (mesh.elements[:, [0, 0, 0, 1, 1, 1, 2, 2, 2]].T).flatten(order='F')
@@ -63,7 +64,8 @@ def get_mass_matrix_elements(
     I = (mesh.elements[:, [0, 1, 2, 0, 1, 2, 0, 1, 2]].T).flatten(order='F')
     J = (mesh.elements[:, [0, 0, 0, 1, 1, 1, 2, 2, 2]].T).flatten(order='F')
 
-    area = mesh.get_area()
+    area = get_area(coordinates=mesh.coordinates,
+                    elements=mesh.elements)
     D = np.vstack(
         [area/6., area/12., area/12.,
          area/12., area/6., area/12.,
@@ -95,7 +97,8 @@ def get_right_hand_side(mesh: mesh.Mesh,
     where sT denotes the center of mass of triangle T
     """
     # vector of element areas 4*|T|
-    area4 = 4. * mesh.get_area()
+    area4 = 4. * get_area(coordinates=mesh.coordinates,
+                          elements=mesh.elements)
 
     # assembly of right-hand side
     d21, d31 = get_directional_vectors(coordinates=mesh.coordinates,
