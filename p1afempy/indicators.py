@@ -1,5 +1,5 @@
 import numpy as np
-from p1afempy.mesh import Mesh, provide_geometric_data, BoundaryCondition
+from p1afempy.mesh import Mesh, provide_geometric_data, BoundaryCondition, get_directional_vectors
 from typing import Callable
 
 
@@ -44,7 +44,8 @@ def compute_eta_r(x: np.ndarray, mesh: Mesh,
     area2 = 2. * mesh.get_area()
 
     # compute curl
-    d21, d31 = mesh.get_directional_vectors()
+    d21, d31 = get_directional_vectors(coordinates=mesh.coordinates,
+                                       elements=mesh.elements)
     tmp1 = x[mesh.elements[:, 1]] - x[mesh.elements[:, 0]]
     tmp2 = x[mesh.elements[:, 2]] - x[mesh.elements[:, 0]]
     u21 = np.column_stack([tmp1, tmp1])

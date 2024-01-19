@@ -33,28 +33,33 @@ class Mesh:
         """
         returns the area of each element
         """
-        d21, d31 = self.get_directional_vectors()
+        d21, d31 = get_directional_vectors(coordinates=self.coordinates,
+                                           elements=self.elements)
 
         # vector of element areas 4*|T|
         return 0.5 * (d21[:, 0]*d31[:, 1] - d21[:, 1] * d31[:, 0])
 
-    def get_directional_vectors(self) -> tuple[np.ndarray, np.ndarray]:
-        """
-        returns the vectors pointing from vertex[0] to vertex[1]
-        and vertex[2], respectively, for each triangular element
 
-        returns
-        -------
-        d21: np.ndarray (M x 2)
-            d21[k, :] points from vertex 0 to vertex 1 in the k-th element
-        d31: np.ndarray (M x 2)
-            d31[k, :] points from vertex 0 to vertex 2 in the k-th element
-        """
-        c1 = self.coordinates[self.elements[:, 0], :]
-        d21 = self.coordinates[self.elements[:, 1], :] - c1
-        d31 = self.coordinates[self.elements[:, 2], :] - c1
+def get_directional_vectors(coordinates: np.ndarray,
+                            elements: np.ndarray) -> tuple[np.ndarray,
+                                                           np.ndarray]:
+    """
+    returns the vectors pointing from vertex[0] to vertex[1]
+    and vertex[2], respectively, for each triangular element,
+    i.e. for each row in elements
 
-        return d21, d31
+    Returns
+    -------
+    d21: np.ndarray (M x 2)
+        d21[k, :] points from vertex 0 to vertex 1 in the k-th element
+    d31: np.ndarray (M x 2)
+        d31[k, :] points from vertex 0 to vertex 2 in the k-th element
+    """
+    c1 = coordinates[elements[:, 0], :]
+    d21 = coordinates[elements[:, 1], :] - c1
+    d31 = coordinates[elements[:, 2], :] - c1
+
+    return d21, d31
 
 
 class BoundaryCondition:

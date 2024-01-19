@@ -1,4 +1,5 @@
 import p1afempy.mesh as mesh
+from p1afempy.mesh import get_directional_vectors
 import numpy as np
 from scipy.sparse import coo_matrix, csc_matrix
 from scipy.sparse.linalg import spsolve
@@ -26,7 +27,8 @@ def get_stiffness_matrix(mesh: mesh.Mesh) -> coo_matrix:
     I = (mesh.elements[:, [0, 1, 2, 0, 1, 2, 0, 1, 2]].T).flatten(order='F')
     J = (mesh.elements[:, [0, 0, 0, 1, 1, 1, 2, 2, 2]].T).flatten(order='F')
 
-    d21, d31 = mesh.get_directional_vectors()
+    d21, d31 = get_directional_vectors(coordinates=mesh.coordinates,
+                                       elements=mesh.elements)
     a = (np.sum(d21*d31, axis=1)/area4)
     b = (np.sum(d31*d31, axis=1)/area4)
     c = (np.sum(d21*d21, axis=1)/area4)
@@ -96,7 +98,8 @@ def get_right_hand_side(mesh: mesh.Mesh,
     area4 = 4. * mesh.get_area()
 
     # assembly of right-hand side
-    d21, d31 = mesh.get_directional_vectors()
+    d21, d31 = get_directional_vectors(coordinates=mesh.coordinates,
+                                       elements=mesh.elements)
     fsT = f((mesh.coordinates[mesh.elements[:, 0], :]+(d21+d31) / 3))
     b = np.bincount(
         mesh.elements.flatten(order='F'),
