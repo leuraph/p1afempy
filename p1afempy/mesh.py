@@ -233,9 +233,11 @@ def provide_geometric_data(elements: np.ndarray,
     return element2edges, edge2nodes, boundaries_to_edges
 
 
-def refineRGB(mesh: Mesh, marked_elements: np.ndarray,
+def refineRGB(coordinates: np.ndarray,
+              elements: np.ndarray,
+              marked_elements: np.ndarray,
               boundary_conditions: list[BoundaryCondition]
-              ) -> tuple[Mesh, list[BoundaryCondition]]:
+              ) -> tuple[np.ndarray, np.ndarray, list[BoundaryCondition]]:
     """
     Refines the mesh and boundary conditions based on the
     red-green-blue (RGB) refinement strategy.
@@ -251,8 +253,10 @@ def refineRGB(mesh: Mesh, marked_elements: np.ndarray,
 
     Returns
     -------
-    refined_mesh: Mesh
-        The refined mesh
+    new_coordinates: np.ndarray
+        the coordinates of the refined mesh
+    new_elements: np.ndarray
+        the elements of the refined mesh
     new_boundaries: list[BoundaryCondition]
         The refined boundary conditions
 
@@ -265,8 +269,8 @@ def refineRGB(mesh: Mesh, marked_elements: np.ndarray,
             mesh,
             marked_elements, boundary_conditions)
     """
-    return refineNVB(mesh.coordinates,
-                     mesh.elements,
+    return refineNVB(coordinates,
+                     elements,
                      marked_elements,
                      boundary_conditions,
                      sort_for_longest_egde=True)
@@ -277,7 +281,7 @@ def refineNVB(coordinates: np.ndarray,
               marked_elements: np.ndarray,
               boundary_conditions: list[BoundaryCondition],
               sort_for_longest_egde: bool = False
-              ) -> tuple[Mesh, list[BoundaryCondition]]:
+              ) -> tuple[np.ndarray, np.ndarray, list[BoundaryCondition]]:
     """
     Refines the mesh based on newest vertex bisection (NVB).
 
@@ -292,8 +296,10 @@ def refineNVB(coordinates: np.ndarray,
 
     Returns
     -------
-    refined_mesh: Mesh
-        The refined mesh
+    new_coordinates: np.ndarray
+        the coordinates of the refined mesh
+    new_elements: np.ndarray
+        the elements of the refined mesh
     new_boundaries: list[BoundaryCondition]
         The refined boundary conditions
 
@@ -356,7 +362,7 @@ def refineNVB(coordinates: np.ndarray,
     new_node_coordinates = (
         coordinates[edge2nodes[idx, 0], :] +
         coordinates[edge2nodes[idx, 1], :]) / 2.
-    coordinates = np.vstack([coordinates, new_node_coordinates])
+    new_coordinates = np.vstack([coordinates, new_node_coordinates])
 
     # refine boundary conditions
     new_boundaries = []
@@ -402,9 +408,9 @@ def refineNVB(coordinates: np.ndarray,
     idx = np.hstack([0, np.cumsum(idx)])  # TODO maybe bug source
 
     # generate new elements
-    newElements = np.zeros((idx[-1], 3), dtype=int)
-    newElements[idx[np.hstack((none, False))], :] = elements[none, :]
-    newElements[np.hstack([idx[np.hstack((bisec1, False))],
+    new_elements = np.zeros((idx[-1], 3), dtype=int)
+    new_elements[idx[np.hstack((none, False))], :] = elements[none, :]
+    new_elements[np.hstack([idx[np.hstack((bisec1, False))],
                            1+idx[np.hstack((bisec1, False))]]), :] \
         = np.vstack(
             [np.column_stack([
@@ -415,7 +421,7 @@ def refineNVB(coordinates: np.ndarray,
                  elements[bisec1, 1],
                  elements[bisec1, 2],
                  new_nodes[bisec1, 0]])])
-    newElements[np.hstack([idx[np.hstack((bisec12, False))],
+    new_elements[np.hstack([idx[np.hstack((bisec12, False))],
                            1+idx[np.hstack((bisec12, False))],
                            2+idx[np.hstack((bisec12, False))]]), :] \
         = np.vstack(
@@ -428,7 +434,7 @@ def refineNVB(coordinates: np.ndarray,
              np.column_stack([elements[bisec12, 2],
                               new_nodes[bisec12, 0],
                               new_nodes[bisec12, 1]])])
-    newElements[np.hstack([idx[np.hstack((bisec13, False))],
+    new_elements[np.hstack([idx[np.hstack((bisec13, False))],
                            1+idx[np.hstack((bisec13, False))],
                            2+idx[np.hstack((bisec13, False))]]), :] \
         = np.vstack(
@@ -442,7 +448,7 @@ def refineNVB(coordinates: np.ndarray,
                               elements[bisec13, 2],
                               new_nodes[bisec13, 0]])])
     if sort_for_longest_egde:
-        newElements[np.hstack([idx[np.hstack([bisec123, False])],
+        new_elements[np.hstack([idx[np.hstack([bisec123, False])],
                                1+idx[np.hstack([bisec123, False])],
                                2+idx[np.hstack([bisec123, False])],
                                3+idx[np.hstack([bisec123, False])]]), :] \
@@ -460,7 +466,7 @@ def refineNVB(coordinates: np.ndarray,
                                  new_nodes[bisec123, 2],
                                  new_nodes[bisec123, 0]])])
     else:
-        newElements[np.hstack([idx[np.hstack((bisec123, False))],
+        new_elements[np.hstack([idx[np.hstack((bisec123, False))],
                                1+idx[np.hstack((bisec123, False))],
                                2+idx[np.hstack((bisec123, False))],
                                3+idx[np.hstack((bisec123, False))]]), :] \
@@ -478,5 +484,4 @@ def refineNVB(coordinates: np.ndarray,
                                 new_nodes[bisec123, 0],
                                 new_nodes[bisec123, 1]])])
 
-    refined_mesh = Mesh(coordinates=coordinates, elements=newElements)
-    return refined_mesh, new_boundaries
+    return new_coordinates, new_elements, new_boundaries

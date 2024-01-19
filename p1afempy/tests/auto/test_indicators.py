@@ -18,6 +18,8 @@ class IndicatorTest(unittest.TestCase):
 
         square_mesh = mesh.read_mesh(path_to_coordinates=path_to_coordinates,
                                      path_to_elements=path_to_elements)
+        coordinates = square_mesh.coordinates
+        elements = square_mesh.elements
         neumann_bc = mesh.read_boundary_condition(
             path_to_boundary=path_to_neumann)
         dirichlet_bc = mesh.read_boundary_condition(
@@ -26,23 +28,23 @@ class IndicatorTest(unittest.TestCase):
 
         n_refinements = 2
         for _ in range(n_refinements):
-            marked_elements = np.arange(square_mesh.elements.shape[0])
-            square_mesh, boundary_conditions = mesh.refineNVB(
-                coordinates=square_mesh.coordinates,
-                elements=square_mesh.elements,
-                marked_elements=marked_elements,
-                boundary_conditions=boundary_conditions)
+            marked_elements = np.arange(elements.shape[0])
+            coordinates, elements, boundary_conditions = \
+                mesh.refineNVB(coordinates=coordinates,
+                               elements=elements,
+                               marked_elements=marked_elements,
+                               boundary_conditions=boundary_conditions)
 
         x, energy = solvers.solve_laplace(
-            mesh=square_mesh,
+            mesh=mesh.Mesh(coordinates=coordinates, elements=elements),
             dirichlet=boundary_conditions[0],
             neumann=boundary_conditions[1],
             f=example_setup.f, g=example_setup.g, uD=example_setup.uD)
 
         ref_indicators = indicators.compute_eta_r(
             x=x,
-            coordinates=square_mesh.coordinates,
-            elements=square_mesh.elements,
+            coordinates=coordinates,
+            elements=elements,
             dirichlet=boundary_conditions[0],
             neumann=boundary_conditions[1],
             f=example_setup.f, g=example_setup.g)
