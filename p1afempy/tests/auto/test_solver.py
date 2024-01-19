@@ -17,10 +17,9 @@ class SolverTest(unittest.TestCase):
         path_to_matlab_x = Path('tests/data/laplace_example/x.dat')
         path_to_matlab_energy = Path('tests/data/laplace_example/energy.dat')
 
-        square_mesh = mesh.read_mesh(path_to_coordinates=path_to_coordinates,
-                                     path_to_elements=path_to_elements)
-        coordinates = square_mesh.coordinates
-        elements = square_mesh.elements
+        coordinates, elements = mesh.read_mesh(
+            path_to_coordinates=path_to_coordinates,
+            path_to_elements=path_to_elements)
         neumann_bc = mesh.read_boundary_condition(
             path_to_boundary=path_to_neumann)
         dirichlet_bc = mesh.read_boundary_condition(
@@ -53,9 +52,10 @@ class SolverTest(unittest.TestCase):
             'tests/data/ahw_codes_example_mesh/coordinates.dat')
         path_to_elements = Path(
             'tests/data/ahw_codes_example_mesh/elements.dat')
-        mesh_ahw = mesh.read_mesh(path_to_coordinates=path_to_coordinates,
-                                  path_to_elements=path_to_elements,
-                                  shift_indices=True)
+        mesh_ahw_coordinates, mesh_ahw_elements = mesh.read_mesh(
+            path_to_coordinates=path_to_coordinates,
+            path_to_elements=path_to_elements,
+            shift_indices=True)
 
         path_to_expected_I = Path(
             'tests/data/ahw_codes_example_mesh/mass_matrix_I.dat')
@@ -69,7 +69,10 @@ class SolverTest(unittest.TestCase):
             path_to_expected_J, dtype=int, converters=float)
         expected_D = np.loadtxt(path_to_expected_D)
 
-        I, J, D = get_mass_matrix_elements(mesh=mesh_ahw)
+        I, J, D = get_mass_matrix_elements(
+            mesh=mesh.Mesh(
+                coordinates=mesh_ahw_coordinates,
+                elements=mesh_ahw_elements))
 
         self.assertTrue(np.allclose(I+1, expected_I))
         self.assertTrue(np.allclose(J+1, expected_J))

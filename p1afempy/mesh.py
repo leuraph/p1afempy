@@ -126,7 +126,7 @@ def read_boundary_condition(
 
 
 def read_mesh(path_to_coordinates: Path, path_to_elements: Path,
-              shift_indices: bool = False) -> Mesh:
+              shift_indices: bool = False) -> tuple[np.ndarray, np.ndarray]:
     """
     Reads vertices and elements from files and
     returns the corresponding Mesh.
@@ -145,20 +145,22 @@ def read_mesh(path_to_coordinates: Path, path_to_elements: Path,
 
     Returns
     -------
-    Mesh:
-        An instance of the Mesh class representing the read mesh data.
+    coordinates: np.ndarray
+        coordinates of the mesh's vertices
+    elements: np.ndarray
+        elements of the mesh
 
     Example
     -------
     >>> coordinates_path = Path("path/to/coordinates.txt")
     >>> elements_path = Path("path/to/elements.txt")
-    >>> mesh_instance = read_mesh(coordinates_path, elements_path)
+    >>> coordinates, elements = read_mesh(coordinates_path, elements_path)
     """
     coordinates = np.loadtxt(path_to_coordinates)
     elements = np.loadtxt(path_to_elements, dtype=int, converters=float)
     if shift_indices:
         elements = elements - 1
-    return Mesh(coordinates=coordinates, elements=elements)
+    return coordinates, elements
 
 
 def provide_geometric_data(elements: np.ndarray,

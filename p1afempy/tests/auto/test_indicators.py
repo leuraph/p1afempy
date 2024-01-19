@@ -16,10 +16,9 @@ class IndicatorTest(unittest.TestCase):
         path_to_matlab_indicators = Path(
             'tests/data/laplace_example/indicators.dat')
 
-        square_mesh = mesh.read_mesh(path_to_coordinates=path_to_coordinates,
-                                     path_to_elements=path_to_elements)
-        coordinates = square_mesh.coordinates
-        elements = square_mesh.elements
+        coordinates, elements = mesh.read_mesh(
+            path_to_coordinates=path_to_coordinates,
+            path_to_elements=path_to_elements)
         neumann_bc = mesh.read_boundary_condition(
             path_to_boundary=path_to_neumann)
         dirichlet_bc = mesh.read_boundary_condition(

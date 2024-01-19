@@ -7,7 +7,8 @@ import numpy as np
 class MeshTest(unittest.TestCase):
 
     @staticmethod
-    def get_simple_square_mesh() -> mesh.Mesh:
+    # TODO Refactor the calls to get_simple_square_mesh
+    def get_simple_square_mesh() -> tuple[np.ndarray, np.ndarray]:
         path_to_coordinates = Path(
             'tests/data/simple_square_mesh/coordinates.dat')
         path_to_elements = Path(
@@ -21,10 +22,10 @@ class MeshTest(unittest.TestCase):
         expected_coordinates = np.array([z0, z1, z2, z3])
         expected_elements = np.array([e0, e1])
 
-        domain = MeshTest.get_simple_square_mesh()
+        coordinates, elements = MeshTest.get_simple_square_mesh()
 
-        self.assertTrue(np.all(expected_coordinates == domain.coordinates))
-        self.assertTrue(np.all(expected_elements == domain.elements))
+        self.assertTrue(np.all(expected_coordinates == coordinates))
+        self.assertTrue(np.all(expected_elements == elements))
 
     def test_provide_geometric_data(self):
         # square-shaped testing domain
@@ -34,9 +35,9 @@ class MeshTest(unittest.TestCase):
             Path('tests/data/simple_square_mesh/square_boundary_1.dat'))
         boundary_conditions = [boundary_condition_0, boundary_condition_1]
 
-        domain = MeshTest.get_simple_square_mesh()
+        _, elements = MeshTest.get_simple_square_mesh()
         element2edges, edge2nodes, boundaries_to_edges = \
-            mesh.provide_geometric_data(elements=domain.elements,
+            mesh.provide_geometric_data(elements=elements,
                                         boundaries=boundary_conditions)
 
         self.assertTrue(np.all(element2edges[0] == [0, 2, 1]))
@@ -67,11 +68,11 @@ class MeshTest(unittest.TestCase):
             'tests/data/l_shape_mesh/l_shape_coordinates.dat')
         path_to_elements = Path(
             'tests/data/l_shape_mesh/l_shape_elements.dat')
-        l_shape_domain = mesh.read_mesh(
+        _, l_shape_elements = mesh.read_mesh(
             path_to_coordinates=path_to_coordinates,
             path_to_elements=path_to_elements)
         element2edges, edge2nodes, boundaries_to_edges = \
-            mesh.provide_geometric_data(elements=l_shape_domain.elements,
+            mesh.provide_geometric_data(elements=l_shape_elements,
                                         boundaries=boundary_conditions)
 
         self.assertTrue(np.all(element2edges[0] == [0, 5, 1]))
@@ -109,11 +110,11 @@ class MeshTest(unittest.TestCase):
         boundary_condition_1 = mesh.read_boundary_condition(
             Path('tests/data/simple_square_mesh/square_boundary_1.dat'))
         boundary_conditions = [boundary_condition_0, boundary_condition_1]
-        domain = MeshTest.get_simple_square_mesh()
+        coordinates, elements = MeshTest.get_simple_square_mesh()
 
         refined_coordinates, refined_elements, new_boundaries = mesh.refineNVB(
-            coordinates=domain.coordinates,
-            elements=domain.elements,
+            coordinates=coordinates,
+            elements=elements,
             marked_elements=np.array([0, 1]),
             boundary_conditions=boundary_conditions)
 
@@ -159,12 +160,13 @@ class MeshTest(unittest.TestCase):
         path_to_bc_0 = Path('tests/data/l_shape_mesh/l_shape_bc_0.dat')
         path_to_bc_1 = Path('tests/data/l_shape_mesh/l_shape_bc_1.dat')
         path_to_bc_2 = Path('tests/data/l_shape_mesh/l_shape_bc_2.dat')
-        domain = mesh.read_mesh(path_to_coordinates=path_to_coordinates,
-                                path_to_elements=path_to_elements)
+        coordinates, elements = mesh.read_mesh(
+            path_to_coordinates=path_to_coordinates,
+            path_to_elements=path_to_elements)
         marked_elements = np.array([0, 1, 3, 5])
         refined_coordinates, refined_elements, new_boundaries = \
-            mesh.refineNVB(coordinates=domain.coordinates,
-                           elements=domain.elements,
+            mesh.refineNVB(coordinates=coordinates,
+                           elements=elements,
                            marked_elements=marked_elements,
                            boundary_conditions=[
                                mesh.read_boundary_condition(path_to_bc_0),
@@ -175,7 +177,7 @@ class MeshTest(unittest.TestCase):
             'tests/data/refined_nvb/l_shape_coordinates_refined.dat')
         path_to_refined_elements = Path(
             'tests/data/refined_nvb/l_shape_elements_refined.dat')
-        expected_refined_mesh = mesh.read_mesh(
+        expected_coordinates, expected_elements = mesh.read_mesh(
             path_to_coordinates=path_to_refined_coordinates,
             path_to_elements=path_to_refined_elements)
         refined_bc_0 = mesh.read_boundary_condition(
@@ -186,9 +188,9 @@ class MeshTest(unittest.TestCase):
             Path('tests/data/refined_nvb/l_shape_boundary_2_refined.dat'))
 
         self.assertTrue(np.all(
-            refined_coordinates == expected_refined_mesh.coordinates))
+            refined_coordinates == expected_coordinates))
         self.assertTrue(np.all(
-            refined_elements == expected_refined_mesh.elements - 1))
+            refined_elements == expected_elements - 1))
         self.assertTrue(np.all(
             new_boundaries[0].boundary == refined_bc_0.boundary - 1))
         self.assertTrue(np.all(
@@ -205,12 +207,13 @@ class MeshTest(unittest.TestCase):
         path_to_bc_0 = Path('tests/data/l_shape_mesh/l_shape_bc_0.dat')
         path_to_bc_1 = Path('tests/data/l_shape_mesh/l_shape_bc_1.dat')
         path_to_bc_2 = Path('tests/data/l_shape_mesh/l_shape_bc_2.dat')
-        domain = mesh.read_mesh(path_to_coordinates=path_to_coordinates,
-                                path_to_elements=path_to_elements)
+        coordinates, elements = mesh.read_mesh(
+            path_to_coordinates=path_to_coordinates,
+            path_to_elements=path_to_elements)
         marked_elements = np.array([0, 1, 3, 5])
         refined_coordinates, refined_elements, new_boundaries = \
-            mesh.refineRGB(coordinates=domain.coordinates,
-                           elements=domain.elements,
+            mesh.refineRGB(coordinates=coordinates,
+                           elements=elements,
                            marked_elements=marked_elements,
                            boundary_conditions=[
                                mesh.read_boundary_condition(path_to_bc_0),
@@ -221,7 +224,7 @@ class MeshTest(unittest.TestCase):
             'tests/data/refined_rgb/l_shape_coordinates_refined.dat')
         path_to_refined_elements = Path(
             'tests/data/refined_rgb/l_shape_elements_refined.dat')
-        expected_refined_mesh = mesh.read_mesh(
+        expected_coordinates, expected_elements = mesh.read_mesh(
             path_to_coordinates=path_to_refined_coordinates,
             path_to_elements=path_to_refined_elements)
         refined_bc_0 = mesh.read_boundary_condition(
@@ -232,9 +235,9 @@ class MeshTest(unittest.TestCase):
             Path('tests/data/refined_rgb/l_shape_boundary_2_refined.dat'))
 
         self.assertTrue(np.all(
-            refined_coordinates == expected_refined_mesh.coordinates))
+            refined_coordinates == expected_coordinates))
         self.assertTrue(np.all(
-            refined_elements == expected_refined_mesh.elements - 1))
+            refined_elements == expected_elements - 1))
         self.assertTrue(np.all(
             new_boundaries[0].boundary == refined_bc_0.boundary - 1))
         self.assertTrue(np.all(
@@ -247,17 +250,18 @@ class MeshTest(unittest.TestCase):
             'tests/data/ahw_codes_example_mesh/coordinates.dat')
         path_to_elements = Path(
             'tests/data/ahw_codes_example_mesh/elements.dat')
-        mesh_ahw = mesh.read_mesh(path_to_coordinates=path_to_coordinates,
-                                  path_to_elements=path_to_elements,
-                                  shift_indices=True)
+        ahw_coordinates, ahw_elements = mesh.read_mesh(
+            path_to_coordinates=path_to_coordinates,
+            path_to_elements=path_to_elements,
+            shift_indices=True)
 
         path_to_expected_area = Path(
             'tests/data/ahw_codes_example_mesh/area.dat')
         expected_area = np.loadtxt(path_to_expected_area)
 
         self.assertTrue(np.allclose(
-            expected_area, mesh.get_area(coordinates=mesh_ahw.coordinates,
-                                         elements=mesh_ahw.elements)))
+            expected_area, mesh.get_area(coordinates=ahw_coordinates,
+                                         elements=ahw_elements)))
 
 
 if __name__ == '__main__':
