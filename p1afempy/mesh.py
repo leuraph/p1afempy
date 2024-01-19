@@ -29,6 +29,15 @@ class Mesh:
         self.coordinates = coordinates
         self.elements = elements
 
+    def get_area(self) -> np.ndarray:
+        """
+        returns the area of each element
+        """
+        d21, d31 = self.get_directional_vectors()
+
+        # vector of element areas 4*|T|
+        return 0.5 * (d21[:, 0]*d31[:, 1] - d21[:, 1] * d31[:, 0])
+
     def get_directional_vectors(self) -> tuple[np.ndarray, np.ndarray]:
         """
         returns the vectors pointing from vertex[0] to vertex[1]
@@ -46,15 +55,6 @@ class Mesh:
         d31 = self.coordinates[self.elements[:, 2], :] - c1
 
         return d21, d31
-
-    def get_area(self) -> np.ndarray:
-        """
-        returns the area of each element
-        """
-        d21, d31 = self.get_directional_vectors()
-
-        # vector of element areas 4*|T|
-        return 0.5 * (d21[:, 0]*d31[:, 1] - d21[:, 1] * d31[:, 0])
 
 
 class BoundaryCondition:
