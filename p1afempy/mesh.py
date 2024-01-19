@@ -161,18 +161,13 @@ def read_mesh(path_to_coordinates: Path, path_to_elements: Path,
     return Mesh(coordinates=coordinates, elements=elements)
 
 
-def provide_geometric_data(coordinates: np.ndarray,
-                           elements: np.ndarray,
+def provide_geometric_data(elements: np.ndarray,
                            boundaries: list[BoundaryCondition]):
     """
     Provides geometric data about the mesh at hand.
 
     Parameeters
     -----------
-    coordinates: np.ndarray
-        the coordinates of the mesh's vertices, i.e.
-        an Nx2 array where each row represents a vertex
-        of the mesh
     elements: np.ndarray
         the elements of the mesh, i.e.
         an Mx3 array where each row represents an element
@@ -327,7 +322,6 @@ def refineNVB(mesh: Mesh, marked_elements: np.ndarray,
 
     # obtain geometric information on edges
     element2edges, edge2nodes, boundaries_to_edges = provide_geometric_data(
-        coordinates=mesh.coordinates,
         elements=mesh.elements,
         boundaries=boundary_conditions)
 

@@ -36,8 +36,7 @@ class MeshTest(unittest.TestCase):
 
         domain = MeshTest.get_simple_square_mesh()
         element2edges, edge2nodes, boundaries_to_edges = \
-            mesh.provide_geometric_data(coordinates=domain.coordinates,
-                                        elements=domain.elements,
+            mesh.provide_geometric_data(elements=domain.elements,
                                         boundaries=boundary_conditions)
 
         self.assertTrue(np.all(element2edges[0] == [0, 2, 1]))
@@ -72,8 +71,7 @@ class MeshTest(unittest.TestCase):
             path_to_coordinates=path_to_coordinates,
             path_to_elements=path_to_elements)
         element2edges, edge2nodes, boundaries_to_edges = \
-            mesh.provide_geometric_data(coordinates=l_shape_domain.coordinates,
-                                        elements=l_shape_domain.elements,
+            mesh.provide_geometric_data(elements=l_shape_domain.elements,
                                         boundaries=boundary_conditions)
 
         self.assertTrue(np.all(element2edges[0] == [0, 5, 1]))
