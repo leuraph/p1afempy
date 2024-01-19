@@ -265,12 +265,16 @@ def refineRGB(mesh: Mesh, marked_elements: np.ndarray,
             mesh,
             marked_elements, boundary_conditions)
     """
-    return refineNVB(mesh, marked_elements,
+    return refineNVB(mesh.coordinates,
+                     mesh.elements,
+                     marked_elements,
                      boundary_conditions,
                      sort_for_longest_egde=True)
 
 
-def refineNVB(mesh: Mesh, marked_elements: np.ndarray,
+def refineNVB(coordinates: np.ndarray,
+              elements: np.ndarray,
+              marked_elements: np.ndarray,
               boundary_conditions: list[BoundaryCondition],
               sort_for_longest_egde: bool = False
               ) -> tuple[Mesh, list[BoundaryCondition]]:
@@ -299,11 +303,9 @@ def refineNVB(mesh: Mesh, marked_elements: np.ndarray,
     >>> marked_elements = np.array([0, 2, 3, 4])
     >>> boundary_conditions = [BC1, BC2, BC3]  # instances of BoundaryCondition
     >>> new_mesh, new_boundary_conditions = refineNVB(
-            mesh,
+            mesh.coordinates, mesh.elements,
             marked_elements, boundary_conditions)
     """
-    elements = mesh.elements
-    coordinates = mesh.coordinates
     n_elements = elements.shape[0]
 
     if sort_for_longest_egde:
@@ -322,7 +324,7 @@ def refineNVB(mesh: Mesh, marked_elements: np.ndarray,
 
     # obtain geometric information on edges
     element2edges, edge2nodes, boundaries_to_edges = provide_geometric_data(
-        elements=mesh.elements,
+        elements=elements,
         boundaries=boundary_conditions)
 
     # mark all edges of marked elements for refinement

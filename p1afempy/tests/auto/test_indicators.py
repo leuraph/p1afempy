@@ -28,7 +28,8 @@ class IndicatorTest(unittest.TestCase):
         for _ in range(n_refinements):
             marked_elements = np.arange(square_mesh.elements.shape[0])
             square_mesh, boundary_conditions = mesh.refineNVB(
-                mesh=square_mesh,
+                coordinates=square_mesh.coordinates,
+                elements=square_mesh.elements,
                 marked_elements=marked_elements,
                 boundary_conditions=boundary_conditions)
 
