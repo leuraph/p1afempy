@@ -69,10 +69,10 @@ class SolverTest(unittest.TestCase):
             path_to_expected_J, dtype=int, converters=float)
         expected_D = np.loadtxt(path_to_expected_D)
 
+
         I, J, D = get_mass_matrix_elements(
-            mesh=mesh.Mesh(
-                coordinates=mesh_ahw_coordinates,
-                elements=mesh_ahw_elements))
+            coordinates=mesh_ahw_coordinates,
+            elements=mesh_ahw_elements)
 
         self.assertTrue(np.allclose(I+1, expected_I))
         self.assertTrue(np.allclose(J+1, expected_J))

@@ -43,12 +43,14 @@ def get_mass_matrix(mesh: mesh.Mesh) -> coo_matrix:
     returns the mass matrix of the mesh provided
     for the P1 FEM with Legendre basis
     """
-    I, J, D = get_mass_matrix_elements(mesh=mesh)
+    I, J, D = get_mass_matrix_elements(coordinates=mesh.coordinates,
+                                       elements=mesh.elements)
     return coo_matrix((D, (I, J)))
 
 
 def get_mass_matrix_elements(
-        mesh: mesh.Mesh) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+        coordinates: np.ndarray,
+        elements: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     returns the mass matrix of the mesh provided
     for the P1 FEM with Legendre basis
@@ -61,11 +63,11 @@ def get_mass_matrix_elements(
         D[m] represents a mass matrix contribution
         belonging to its (I[m], J[m]) coordinate
     """
-    I = (mesh.elements[:, [0, 1, 2, 0, 1, 2, 0, 1, 2]].T).flatten(order='F')
-    J = (mesh.elements[:, [0, 0, 0, 1, 1, 1, 2, 2, 2]].T).flatten(order='F')
+    I = (elements[:, [0, 1, 2, 0, 1, 2, 0, 1, 2]].T).flatten(order='F')
+    J = (elements[:, [0, 0, 0, 1, 1, 1, 2, 2, 2]].T).flatten(order='F')
 
-    area = get_area(coordinates=mesh.coordinates,
-                    elements=mesh.elements)
+    area = get_area(coordinates=coordinates,
+                    elements=elements)
     D = np.vstack(
         [area/6., area/12., area/12.,
          area/12., area/6., area/12.,
