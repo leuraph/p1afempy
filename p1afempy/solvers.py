@@ -135,7 +135,8 @@ def apply_neumann(neumann_bc: mesh.BoundaryCondition,
     return b
 
 
-def solve_laplace(mesh: mesh.Mesh,
+def solve_laplace(coordinates: np.ndarray,
+                  elements: np.ndarray,
                   dirichlet: mesh.BoundaryCondition,
                   neumann: mesh.BoundaryCondition,
                   f: Callable[[np.ndarray], float],
@@ -153,8 +154,8 @@ def solve_laplace(mesh: mesh.Mesh,
 
     parameters
     ----------
-    mesh: mesh.Mesh
-        the mesh on which to calculate the solution on
+    coordinates: np.ndarray
+    elements: np.ndarray
     dirichlet: mesh.BoundaryCondition
         the dirichlet boundary of the problem
     neumann: mesh.BoundaryCondition
@@ -181,20 +182,23 @@ def solve_laplace(mesh: mesh.Mesh,
     the functions f, g, and uD are all expected to be callable like
     f(coordinates), where coordinates is an (n_coordinates x 2) array
     """
-    n_coordinates = mesh.coordinates.shape[0]
+    n_coordinates = coordinates.shape[0]
     x = np.zeros(n_coordinates)
 
-    A = get_stiffness_matrix(coordinates=mesh.coordinates,
-                             elements=mesh.elements)
+    A = get_stiffness_matrix(coordinates=coordinates,
+                             elements=elements)
 
     # prescribe values at dirichlet nodes
     unique_dirichlet = np.unique(dirichlet.boundary)
-    x[unique_dirichlet] = uD((mesh.coordinates[unique_dirichlet, :]))
+    x[unique_dirichlet] = uD((coordinates[unique_dirichlet, :]))
 
-    b = get_right_hand_side(coordinates=mesh.coordinates,
-                            elements=mesh.elements, f=f) - A.dot(x)
+    b = get_right_hand_side(coordinates=coordinates,
+                            elements=elements, f=f) - A.dot(x)
     if neumann.boundary.size > 0:
-        b = apply_neumann(neumann_bc=neumann, mesh=mesh,
+        b = apply_neumann(neumann_bc=neumann,
+                          mesh=mesh.Mesh(
+                              coordinates=coordinates,
+                              elements=elements),
                           g=g, b=b)
 
     # computation of P1-FEM approximation

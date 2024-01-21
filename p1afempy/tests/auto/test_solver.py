@@ -36,7 +36,7 @@ class SolverTest(unittest.TestCase):
                 boundary_conditions=boundary_conditions)
 
         x, energy = solve_laplace(
-            mesh=mesh.Mesh(coordinates=coordinates, elements=elements),
+            coordinates=coordinates, elements=elements,
             dirichlet=boundary_conditions[0],
             neumann=boundary_conditions[1],
             f=example_setup.f, g=example_setup.g, uD=example_setup.uD)
