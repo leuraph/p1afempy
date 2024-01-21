@@ -6,30 +6,30 @@ from scipy.sparse.linalg import spsolve
 from typing import Callable
 
 
-def get_stiffness_matrix(mesh: mesh.Mesh) -> coo_matrix:
+def get_stiffness_matrix(coordinates: np.ndarray,
+                         elements: np.ndarray) -> coo_matrix:
     """
     returns the stiffness matrix for the P1 FEM
     with Legendre basis
 
     parameters
     ----------
-    mesh: mesh.Mesh
-        the mesh used for the construction of the
-        stiffness matrix
+    coordinates: np.ndarray
+    elements: np.ndarray
 
     returns
     -------
     scipy.sparse.coo_matrix: the sparse stiffness matrix
     """
     # vector of element areas 4*|T|
-    area4 = 4. * get_area(coordinates=mesh.coordinates,
-                          elements=mesh.elements)
+    area4 = 4. * get_area(coordinates=coordinates,
+                          elements=elements)
 
-    I = (mesh.elements[:, [0, 1, 2, 0, 1, 2, 0, 1, 2]].T).flatten(order='F')
-    J = (mesh.elements[:, [0, 0, 0, 1, 1, 1, 2, 2, 2]].T).flatten(order='F')
+    I = (elements[:, [0, 1, 2, 0, 1, 2, 0, 1, 2]].T).flatten(order='F')
+    J = (elements[:, [0, 0, 0, 1, 1, 1, 2, 2, 2]].T).flatten(order='F')
 
-    d21, d31 = get_directional_vectors(coordinates=mesh.coordinates,
-                                       elements=mesh.elements)
+    d21, d31 = get_directional_vectors(coordinates=coordinates,
+                                       elements=elements)
     a = (np.sum(d21*d31, axis=1)/area4)
     b = (np.sum(d31*d31, axis=1)/area4)
     c = (np.sum(d21*d21, axis=1)/area4)
@@ -180,7 +180,8 @@ def solve_laplace(mesh: mesh.Mesh,
     n_coordinates = mesh.coordinates.shape[0]
     x = np.zeros(n_coordinates)
 
-    A = get_stiffness_matrix(mesh=mesh)
+    A = get_stiffness_matrix(coordinates=mesh.coordinates,
+                             elements=mesh.elements)
 
     # prescribe values at dirichlet nodes
     unique_dirichlet = np.unique(dirichlet.boundary)
