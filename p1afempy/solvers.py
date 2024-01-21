@@ -76,15 +76,16 @@ def get_mass_matrix_elements(
     return I, J, D
 
 
-def get_right_hand_side(mesh: mesh.Mesh,
+def get_right_hand_side(coordinates: np.ndarray,
+                        elements: np.ndarray,
                         f: Callable[[np.ndarray], float]):
     """
     returns the load vector for the P1 FEM with Legendre basis
 
     parameters
     ----------
-    mesh: mesh.Mesh
-        the mesh which to evaluate the load vector on
+    coordinates: np.ndarray
+    elements: np.ndarray
     f: Callable[[np.ndarray], float]
         the function for which to evaluate the load vector
 
@@ -100,17 +101,17 @@ def get_right_hand_side(mesh: mesh.Mesh,
     where sT denotes the center of mass of triangle T
     """
     # vector of element areas 4*|T|
-    area4 = 4. * get_area(coordinates=mesh.coordinates,
-                          elements=mesh.elements)
+    area4 = 4. * get_area(coordinates=coordinates,
+                          elements=elements)
 
     # assembly of right-hand side
-    d21, d31 = get_directional_vectors(coordinates=mesh.coordinates,
-                                       elements=mesh.elements)
-    fsT = f((mesh.coordinates[mesh.elements[:, 0], :]+(d21+d31) / 3))
+    d21, d31 = get_directional_vectors(coordinates=coordinates,
+                                       elements=elements)
+    fsT = f((coordinates[elements[:, 0], :]+(d21+d31) / 3))
     b = np.bincount(
-        mesh.elements.flatten(order='F'),
+        elements.flatten(order='F'),
         weights=np.tile(area4*fsT/12., (3, 1)).flatten(),
-        minlength=mesh.coordinates.shape[0])
+        minlength=coordinates.shape[0])
     return b
 
 
@@ -190,7 +191,8 @@ def solve_laplace(mesh: mesh.Mesh,
     unique_dirichlet = np.unique(dirichlet.boundary)
     x[unique_dirichlet] = uD((mesh.coordinates[unique_dirichlet, :]))
 
-    b = get_right_hand_side(mesh=mesh, f=f) - A.dot(x)
+    b = get_right_hand_side(coordinates=mesh.coordinates,
+                            elements=mesh.elements, f=f) - A.dot(x)
     if neumann.boundary.size > 0:
         b = apply_neumann(neumann_bc=neumann, mesh=mesh,
                           g=g, b=b)
