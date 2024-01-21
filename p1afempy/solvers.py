@@ -116,7 +116,7 @@ def get_right_hand_side(coordinates: np.ndarray,
 
 
 def apply_neumann(neumann_bc: mesh.BoundaryCondition,
-                  mesh: mesh.Mesh,
+                  coordinates: np.ndarray,
                   g: Callable[[np.ndarray], float],
                   b: np.ndarray):
     """
@@ -124,8 +124,8 @@ def apply_neumann(neumann_bc: mesh.BoundaryCondition,
     """
     # TODO channge b in place, do not return it or
     # at least check if this version generates computational overhead
-    cn1 = mesh.coordinates[neumann_bc.boundary[:, 0], :]
-    cn2 = mesh.coordinates[neumann_bc.boundary[:, 1], :]
+    cn1 = coordinates[neumann_bc.boundary[:, 0], :]
+    cn2 = coordinates[neumann_bc.boundary[:, 1], :]
     gmE = g((cn1+cn2)/2)
     b = b + np.bincount(
         neumann_bc.boundary.flatten(order='F'),
@@ -196,9 +196,7 @@ def solve_laplace(coordinates: np.ndarray,
                             elements=elements, f=f) - A.dot(x)
     if neumann.boundary.size > 0:
         b = apply_neumann(neumann_bc=neumann,
-                          mesh=mesh.Mesh(
-                              coordinates=coordinates,
-                              elements=elements),
+                          coordinates=coordinates,
                           g=g, b=b)
 
     # computation of P1-FEM approximation
