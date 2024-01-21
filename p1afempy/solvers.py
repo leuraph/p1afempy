@@ -38,13 +38,14 @@ def get_stiffness_matrix(coordinates: np.ndarray,
     return coo_matrix((A.flatten(order='F'), (I, J)))
 
 
-def get_mass_matrix(mesh: mesh.Mesh) -> coo_matrix:
+def get_mass_matrix(coordinates: np.ndarray,
+                    elements: np.ndarray) -> coo_matrix:
     """
     returns the mass matrix of the mesh provided
     for the P1 FEM with Legendre basis
     """
-    I, J, D = get_mass_matrix_elements(coordinates=mesh.coordinates,
-                                       elements=mesh.elements)
+    I, J, D = get_mass_matrix_elements(coordinates=coordinates,
+                                       elements=elements)
     return coo_matrix((D, (I, J)))
 
 
