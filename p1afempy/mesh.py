@@ -246,8 +246,8 @@ def refineRGB(coordinates: np.ndarray,
 
     Parameters
     ----------
-    mesh: Mesh
-        The initial mesh to be refined.
+    coordinates: np.ndarray
+    elements: np.ndarray
     marked_elements: np.ndarray
         Indices of the elements to be refined.
     boundary_conditions: list[BoundaryCondition]
@@ -264,11 +264,11 @@ def refineRGB(coordinates: np.ndarray,
 
     Example
     -------
-    >>> mesh = Mesh(...)  # Initialize a mesh
+    >>> coordinates, elements = ...  # Initialize a mesh
     >>> marked_elements = np.array([0, 2, 3, 4])
     >>> boundary_conditions = [BC1, BC2, BC3]  # instances of BoundaryCondition
-    >>> new_mesh, new_boundary_conditions = refineRGB(
-            mesh,
+    >>> new_coordinates, new_elements, new_boundary_conditions = refineRGB(
+            coordinates, elements,
             marked_elements, boundary_conditions)
     """
     return refineNVB(coordinates,
@@ -289,8 +289,8 @@ def refineNVB(coordinates: np.ndarray,
 
     Parameters
     ----------
-    mesh: Mesh
-        The initial mesh to be refined.
+    coordinates: np.ndarray
+    elements: np.ndarray
     marked_elements: np.ndarray
         Indices of the elements to be refined.
     boundary_conditions: list[BoundaryCondition]
@@ -307,10 +307,10 @@ def refineNVB(coordinates: np.ndarray,
 
     Example
     -------
-    >>> mesh = Mesh(...)  # Initialize a mesh
+    >>> coordinates, elements = Mesh(...)  # Initialize a mesh
     >>> marked_elements = np.array([0, 2, 3, 4])
     >>> boundary_conditions = [BC1, BC2, BC3]  # instances of BoundaryCondition
-    >>> new_mesh, new_boundary_conditions = refineNVB(
+    >>> new_coordinates, new_elements, new_boundary_conditions = refineNVB(
             mesh.coordinates, mesh.elements,
             marked_elements, boundary_conditions)
     """
