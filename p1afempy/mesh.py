@@ -176,8 +176,11 @@ def read_mesh(path_to_coordinates: Path,
     return coordinates, elements
 
 
-def provide_geometric_data(elements: np.ndarray,
-                           boundaries: list[np.ndarray]):
+def provide_geometric_data(
+        elements: np.ndarray,
+        boundaries: list[np.ndarray]) -> tuple[np.ndarray,
+                                               np.ndarray,
+                                               list[np.ndarray]]:
     """
     Provides geometric data about the mesh at hand.
 
