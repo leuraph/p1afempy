@@ -30,8 +30,7 @@ def get_directional_vectors(coordinates: np.ndarray,
                                                            np.ndarray]:
     """
     returns the vectors pointing from vertex[0] to vertex[1]
-    and vertex[2], respectively, for each triangular element,
-    i.e. for each row in elements
+    and vertex[2], respectively, for each element
 
     Returns
     -------
