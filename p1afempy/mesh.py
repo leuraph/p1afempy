@@ -83,6 +83,61 @@ def read_boundary_condition(path_to_boundary: Path) -> np.ndarray:
     return boundary_indices
 
 
+def read_coordinates(path_to_coordinates: Path) -> np.ndarray:
+    """
+    reads and returns vertices from file
+
+    Parameters
+    ----------
+    path_to_coordinates : pathlib.Path
+        Path to the file containing mesh coordinates data.
+    path_to_elements : pathlib.Path
+
+    Returns
+    -------
+    coordinates: np.ndarray
+        coordinates of the mesh's vertices
+
+    Example
+    -------
+    >>> coordinates_path = Path("path/to/coordinates.txt")
+    >>> coordinates = read_coordinates(coordinates_path)
+    """
+    coordinates = np.loadtxt(path_to_coordinates)
+    return coordinates
+
+
+def read_elements(path_to_elements: Path,
+                  shift_indices: bool = False) -> np.ndarray:
+    """
+    reads and returns elements from file.
+
+    Parameters
+    ----------
+    path_to_elements : pathlib.Path
+        Path to the file containing mesh elements data.
+    shift_indices: bool (default=False)
+        If true, shifts the elements' indices according to i':=i-1.
+        This can come in handy if, e.g., one wants to read data
+        that is compatible with Matlab/Fortran/Julia indexing
+        (starting at 1, instead of 0).
+
+    Returns
+    -------
+    elements: np.ndarray
+        elements of the mesh
+
+    Example
+    -------
+    >>> elements_path = Path("path/to/elements_from_matlab_code.txt")
+    >>> elements = read_elements(elements_path, shift_indices=True)
+    """
+    elements = np.loadtxt(path_to_elements).astype(np.uint32)
+    if shift_indices:
+        elements = elements - 1
+    return elements
+
+
 def read_mesh(path_to_coordinates: Path,
               path_to_elements: Path,
               shift_indices: bool = False) -> tuple[np.ndarray, np.ndarray]:
