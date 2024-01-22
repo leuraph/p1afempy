@@ -6,8 +6,8 @@ from typing import Callable
 def compute_eta_r(x: np.ndarray,
                   coordinates: np.ndarray,
                   elements: np.ndarray,
-                  dirichlet: BoundaryCondition,
-                  neumann: BoundaryCondition,
+                  dirichlet: np.ndarray,
+                  neumann: np.ndarray,
                   f: Callable[[np.ndarray], float],
                   g: Callable[[np.ndarray], float]) -> np.ndarray:
     """
@@ -23,8 +23,8 @@ def compute_eta_r(x: np.ndarray,
         coordinates of the mesh
     elements: np.ndarray
         elements of the mesh
-    dirichlet: BoundaryCondition
-    neumann: BoundaryCondition
+    dirichlet: np.ndarray
+    neumann: np.ndarray
     f: Callable[[np.ndarray], float]
         Function correspnding to Dirichlet BC.
         Expected to be callable like
@@ -38,7 +38,7 @@ def compute_eta_r(x: np.ndarray,
     etaR: np.ndarray
         the residual-based error estimator
     """
-    boundary_conditions = [dirichlet.boundary, neumann.boundary]
+    boundary_conditions = [dirichlet, neumann]
     element2edges, edge2nodes, boundaries_to_edges = \
         provide_geometric_data(elements=elements,
                                boundaries=boundary_conditions)
@@ -66,9 +66,9 @@ def compute_eta_r(x: np.ndarray,
         minlength=edge2nodes.shape[0])
 
     # incorporate Neumann data
-    if neumann.boundary.size > 0:
-        cn1 = coordinates[neumann.boundary[:, 0], :]
-        cn2 = coordinates[neumann.boundary[:, 1], :]
+    if neumann.size > 0:
+        cn1 = coordinates[neumann[:, 0], :]
+        cn2 = coordinates[neumann[:, 1], :]
         gmE = g((cn1+cn2) / 2.)
         neumann2edges = boundaries_to_edges[1]
         etaR[neumann2edges] = etaR[neumann2edges] - np.sqrt(np.sum(

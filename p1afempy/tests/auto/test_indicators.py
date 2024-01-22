@@ -41,9 +41,6 @@ class IndicatorTest(unittest.TestCase):
             neumann=boundary_conditions[1],
             f=example_setup.f, g=example_setup.g, uD=example_setup.uD)
 
-        boundary_conditions = [
-            BoundaryCondition(
-                name='', boundary=bc) for bc in boundary_conditions]
         ref_indicators = indicators.compute_eta_r(
             x=x,
             coordinates=coordinates,
