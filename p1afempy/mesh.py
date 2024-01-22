@@ -170,10 +170,9 @@ def read_mesh(path_to_coordinates: Path,
     >>> elements_path = Path("path/to/elements.txt")
     >>> coordinates, elements = read_mesh(coordinates_path, elements_path)
     """
-    coordinates = np.loadtxt(path_to_coordinates)
-    elements = np.loadtxt(path_to_elements).astype(np.uint32)
-    if shift_indices:
-        elements = elements - 1
+    coordinates = read_coordinates(path_to_coordinates=path_to_coordinates)
+    elements = read_elements(path_to_elements=path_to_elements,
+                             shift_indices=shift_indices)
     return coordinates, elements
 
 
