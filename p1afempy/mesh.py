@@ -69,6 +69,7 @@ def plot_mesh(coordinates: np.ndarray,
     plt.show()
 
 
+# TODO refactor or remove
 def read_boundary_condition(
         path_to_boundary: Path, name: str = "") -> BoundaryCondition:
     """
