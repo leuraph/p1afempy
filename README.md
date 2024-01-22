@@ -13,8 +13,8 @@ We explicitly neglect from implementing any additional data structures,
 e.g. classes like `Mesh` or `BoundaryCondition`, in order to remain the original "low-level" usability of the code.
 In this way, any user can decide whether to implement additional data structures and, possibly, wrappers thereof.
 
-As a quick reference, we refer to figure 3.1 below (copied from [[1]](#1))
-For more details about the expected format of the data structures,
+As a quick reference, we refer to figure 3.1 below (copied from [[1]](#1)).
+For more details about the expected format of the data structures
 we refer to chapter 3.1 of [[1]](#1).
 
 <img alt="Figure 3.1 from ref. [1]" src="figures/fig_3-1.jpeg">
