@@ -9,7 +9,7 @@ and whose details are described in the paper (open access) [[1]](#1).
 
 Regarding the underlying data structures used, we follow the original code as closely as possible, i.e.
 elements, coordinates, and boundary conditions are all handled as simple `numpy` arrays.
-We explicitly neglect from implementing any additional data strictures,
+We explicitly neglect from implementing any additional data structures,
 e.g. classes like `Mesh` or `BoundaryCondition`, in order to remain the original "low-level" usability of the code.
 In this way, any user can decide whether to implement additional data structures and, possibly, wrappers thereof.
 
