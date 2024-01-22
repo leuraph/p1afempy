@@ -7,12 +7,21 @@ from matplotlib import pyplot as plt
 def get_area(coordinates: np.ndarray,
              elements: np.ndarray) -> np.ndarray:
     """
-    returns the area of each element
+    calculates and returns the area of each element as numpy array
+
+    parameters
+    ----------
+    coordinates: np.ndarray
+        vertices of the mesh
+    elements: np.ndarray
+        triangular elements of the mesh
+
+    returns
+    -------
+    np.ndarray: the area of each element as Mx1 array
     """
     d21, d31 = get_directional_vectors(coordinates=coordinates,
                                        elements=elements)
-
-    # vector of element areas 4*|T|
     return 0.5 * (d21[:, 0]*d31[:, 1] - d21[:, 1] * d31[:, 0])
 
 
