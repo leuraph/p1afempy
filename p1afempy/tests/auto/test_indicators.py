@@ -23,7 +23,7 @@ class IndicatorTest(unittest.TestCase):
             path_to_boundary=path_to_neumann)
         dirichlet_bc = mesh.read_boundary_condition(
             path_to_boundary=path_to_dirichlet)
-        boundary_conditions = [dirichlet_bc.boundary, neumann_bc.boundary]
+        boundary_conditions = [dirichlet_bc, neumann_bc]
 
         n_refinements = 2
         for _ in range(n_refinements):

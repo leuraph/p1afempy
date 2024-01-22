@@ -69,9 +69,7 @@ def plot_mesh(coordinates: np.ndarray,
     plt.show()
 
 
-# TODO refactor or remove
-def read_boundary_condition(
-        path_to_boundary: Path, name: str = "") -> BoundaryCondition:
+def read_boundary_condition(path_to_boundary: Path) -> np.ndarray:
     """
     Reads boundary condition data from a file.
 
@@ -79,25 +77,22 @@ def read_boundary_condition(
     ----------
     path_to_boundary: pathlib.Path
         Path to the file containing boundary condition data.
-    name: str, optional
-        Name to assign to the BoundaryCondition instance.
-        If not provided, the name will be derived from
-        the filename (excluding the extension).
 
     Returns
     -------
-    BoundaryCondition:
-        An instance of the BoundaryCondition class representing the read data.
+    boundary_indices: np.ndarray:
+        boundary conditions as np.nndarray, i.e.
+        boundary_indices[k] gives the indices (i_k, j_k) of the
+        vertices belonging to the k-th edge of the boundary condition at hand
 
     Example
     -------
     >>> file_path = Path("path/to/boundary_data.dat")
-    >>> boundary_condition = read_boundary_condition(file_path, name="BC1")
+    >>> boundary_condition = read_boundary_condition(file_path)
     """
-    data = np.loadtxt(path_to_boundary, dtype=int, converters=float)
-    if not name:
-        name = path_to_boundary.stem
-    return BoundaryCondition(name=name, boundary=data)
+    boundary_indices = np.loadtxt(
+        path_to_boundary, dtype=int, converters=float)
+    return boundary_indices
 
 
 def read_mesh(path_to_coordinates: Path,
