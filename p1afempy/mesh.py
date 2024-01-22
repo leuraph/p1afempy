@@ -4,32 +4,6 @@ from scipy.sparse import coo_matrix, find
 from matplotlib import pyplot as plt
 
 
-class Mesh:
-    """
-    A triangular mesh.
-
-    instance variables
-    ------------------
-    coordinates: np.ndarray(dtype=float)
-        the coordinates of the mesh's vertices.
-        The k-th vertex is accessed via coordinates[k, :]
-        and returns np.array([x_k, y_k]), i.e.
-        its (x, y) coordinates.
-    elements: np.ndarray(dtype=int)
-        the elements of the mesh, i.e. the triangles,
-        where the k-th element is accessed via elements[k, :]
-        and returns np.array([i, j, k]), i.e.
-        the indices (starting at 0) of the corresponding
-        vertices.
-    """
-    coordinates: np.ndarray
-    elements: np.ndarray
-
-    def __init__(self, coordinates: np.ndarray, elements: np.ndarray) -> None:
-        self.coordinates = coordinates
-        self.elements = elements
-
-
 def get_area(coordinates: np.ndarray,
              elements: np.ndarray) -> np.ndarray:
     """
