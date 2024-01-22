@@ -182,10 +182,10 @@ def provide_geometric_data(
                                                np.ndarray,
                                                list[np.ndarray]]:
     """
-    Provides geometric data about the mesh at hand.
+    provides geometric data about the mesh (elements and boundaries) at hand
 
-    Parameeters
-    -----------
+    Parameters
+    ----------
     elements: np.ndarray
         the elements of the mesh, i.e.
         an Mx3 array where each row represents an element
@@ -194,11 +194,11 @@ def provide_geometric_data(
 
     Returns
     -------
-    element2edges: np.ndarray
-        element2edges[k] holds the edges' indices of
+    element_to_edges: np.ndarray
+        element_to_edges[k] holds the edges' indices of
         the k-th element (counter-clockwise)
-    edge2nodes: np.ndarray
-        edge2nodes[k] holds the nodes' indices (i, j)
+    edge_to_nodes: np.ndarray
+        edge_to_nodes[k] holds the nodes' indices (i, j)
         of the k-th edge s.t. i < j
     boundaries_to_edges: list[np.ndarray]
         boundaries_to_edges[k] holds the mapping
@@ -239,15 +239,15 @@ def provide_geometric_data(
     # NOTE Here, it coincides with Matlab again, though.
     edge_number[idx_JI2IJ - 1] = numbering_IJ - 1
 
-    element2edges = edge_number[0:3*n_elements].reshape(n_elements, 3,
+    element_to_edges = edge_number[0:3*n_elements].reshape(n_elements, 3,
                                                         order='F')
-    edge2nodes = np.column_stack((I[idx_IJ], J[idx_IJ]))
+    edge_to_nodes = np.column_stack((I[idx_IJ], J[idx_IJ]))
     # Provide boundary2edges
     boundaries_to_edges = []
     for j in np.arange(n_boundaries):
         boundaries_to_edges.append(
             edge_number[np.arange(pointer[j+1]+1, pointer[j+2]+1, dtype=int)])
-    return element2edges, edge2nodes, boundaries_to_edges
+    return element_to_edges, edge_to_nodes, boundaries_to_edges
 
 
 def refineRGB(coordinates: np.ndarray,
@@ -348,12 +348,12 @@ def refineNVB(coordinates: np.ndarray,
         elements[idx, :] = elements[idx][:, [2, 0, 1]]
 
     # obtain geometric information on edges
-    element2edges, edge2nodes, boundaries_to_edges = provide_geometric_data(
+    element2edges, edge_to_nodes, boundaries_to_edges = provide_geometric_data(
         elements=elements,
         boundaries=boundary_conditions)
 
     # mark all edges of marked elements for refinement
-    edge2newNode = np.zeros(edge2nodes.shape[0], dtype=int)
+    edge2newNode = np.zeros(edge_to_nodes.shape[0], dtype=int)
     edge2newNode[element2edges[marked_elements].flatten()] = 1
 
     # closure of edge marking, i.e.
@@ -379,8 +379,8 @@ def refineNVB(coordinates: np.ndarray,
         coordinates.shape[0] + n_new_nodes)
     idx = np.nonzero(edge2newNode)[0]
     new_node_coordinates = (
-        coordinates[edge2nodes[idx, 0], :] +
-        coordinates[edge2nodes[idx, 1], :]) / 2.
+        coordinates[edge_to_nodes[idx, 0], :] +
+        coordinates[edge_to_nodes[idx, 1], :]) / 2.
     new_coordinates = np.vstack([coordinates, new_node_coordinates])
 
     # refine boundary conditions
