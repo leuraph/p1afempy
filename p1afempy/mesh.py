@@ -79,8 +79,7 @@ def read_boundary_condition(path_to_boundary: Path) -> np.ndarray:
     >>> file_path = Path("path/to/boundary_data.dat")
     >>> boundary_condition = read_boundary_condition(file_path)
     """
-    boundary_indices = np.loadtxt(
-        path_to_boundary, dtype=int, converters=float)
+    boundary_indices = np.loadtxt(path_to_boundary).astype(np.uint32)
     return boundary_indices
 
 
@@ -117,7 +116,7 @@ def read_mesh(path_to_coordinates: Path,
     >>> coordinates, elements = read_mesh(coordinates_path, elements_path)
     """
     coordinates = np.loadtxt(path_to_coordinates)
-    elements = np.loadtxt(path_to_elements, dtype=int, converters=float)
+    elements = np.loadtxt(path_to_elements).astype(np.uint32)
     if shift_indices:
         elements = elements - 1
     return coordinates, elements

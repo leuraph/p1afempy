@@ -63,10 +63,8 @@ class SolverTest(unittest.TestCase):
             'tests/data/ahw_codes_example_mesh/mass_matrix_J.dat')
         path_to_expected_D = Path(
             'tests/data/ahw_codes_example_mesh/mass_matrix_D.dat')
-        expected_I = np.loadtxt(
-            path_to_expected_I, dtype=int, converters=float)
-        expected_J = np.loadtxt(
-            path_to_expected_J, dtype=int, converters=float)
+        expected_I = np.loadtxt(path_to_expected_I).astype(np.uint32)
+        expected_J = np.loadtxt(path_to_expected_J).astype(np.uint32)
         expected_D = np.loadtxt(path_to_expected_D)
 
 
