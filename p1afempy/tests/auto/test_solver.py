@@ -1,6 +1,7 @@
 import unittest
 import numpy as np
 import p1afempy.mesh as mesh
+from mesh import BoundaryCondition
 from p1afempy.solvers import solve_laplace, get_mass_matrix_elements
 from pathlib import Path
 from p1afempy.tests.auto import example_setup
@@ -24,7 +25,7 @@ class SolverTest(unittest.TestCase):
             path_to_boundary=path_to_neumann)
         dirichlet_bc = mesh.read_boundary_condition(
             path_to_boundary=path_to_dirichlet)
-        boundary_conditions = [dirichlet_bc, neumann_bc]
+        boundary_conditions = [dirichlet_bc.boundary, neumann_bc.boundary]
 
         n_refinements = 3
         for _ in range(n_refinements):
@@ -37,8 +38,10 @@ class SolverTest(unittest.TestCase):
 
         x, energy = solve_laplace(
             coordinates=coordinates, elements=elements,
-            dirichlet=boundary_conditions[0],
-            neumann=boundary_conditions[1],
+            dirichlet=BoundaryCondition(
+                name='', boundary=boundary_conditions[0]),
+            neumann=BoundaryCondition(
+                name='', boundary=boundary_conditions[1]),
             f=example_setup.f, g=example_setup.g, uD=example_setup.uD)
 
         x_matlab = np.loadtxt(path_to_matlab_x)

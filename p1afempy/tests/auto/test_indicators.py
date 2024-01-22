@@ -1,5 +1,6 @@
 import unittest
 from p1afempy import mesh, solvers, indicators
+from mesh import BoundaryCondition
 from pathlib import Path
 import numpy as np
 import example_setup
@@ -23,7 +24,7 @@ class IndicatorTest(unittest.TestCase):
             path_to_boundary=path_to_neumann)
         dirichlet_bc = mesh.read_boundary_condition(
             path_to_boundary=path_to_dirichlet)
-        boundary_conditions = [dirichlet_bc, neumann_bc]
+        boundary_conditions = [dirichlet_bc.boundary, neumann_bc.boundary]
 
         n_refinements = 2
         for _ in range(n_refinements):
@@ -34,6 +35,9 @@ class IndicatorTest(unittest.TestCase):
                                marked_elements=marked_elements,
                                boundary_conditions=boundary_conditions)
 
+        boundary_conditions = [
+            BoundaryCondition(
+                name='', boundary=bc) for bc in boundary_conditions]
         x, energy = solvers.solve_laplace(
             coordinates=coordinates, elements=elements,
             dirichlet=boundary_conditions[0],

@@ -244,19 +244,22 @@ def refineRGB(coordinates: np.ndarray,
             coordinates, elements,
             marked_elements, boundary_conditions)
     """
-    return refineNVB(coordinates,
-                     elements,
-                     marked_elements,
-                     boundary_conditions,
-                     sort_for_longest_egde=True)
+    new_coordinates, new_elements, new_boundaries = refineNVB(
+        coordinates,
+        elements,
+        marked_elements,
+        boundary_conditions=[bc.boundary for bc in boundary_conditions],
+        sort_for_longest_egde=True)
+    return new_coordinates, new_elements, [
+        BoundaryCondition(name='', boundary=bc) for bc in new_boundaries]
 
 
 def refineNVB(coordinates: np.ndarray,
               elements: np.ndarray,
               marked_elements: np.ndarray,
-              boundary_conditions: list[BoundaryCondition],
+              boundary_conditions: list[np.ndarray],
               sort_for_longest_egde: bool = False
-              ) -> tuple[np.ndarray, np.ndarray, list[BoundaryCondition]]:
+              ) -> tuple[np.ndarray, np.ndarray, list[np.ndarray]]:
     """
     Refines the mesh based on newest vertex bisection (NVB).
 
@@ -266,7 +269,7 @@ def refineNVB(coordinates: np.ndarray,
     elements: np.ndarray
     marked_elements: np.ndarray
         Indices of the elements to be refined.
-    boundary_conditions: list[BoundaryCondition]
+    boundary_conditions: list[np.ndarray]
         List of boundary conditions to update.
 
     Returns
@@ -275,14 +278,14 @@ def refineNVB(coordinates: np.ndarray,
         the coordinates of the refined mesh
     new_elements: np.ndarray
         the elements of the refined mesh
-    new_boundaries: list[BoundaryCondition]
+    new_boundaries: list[np.ndarray]
         The refined boundary conditions
 
     Example
     -------
     >>> coordinates, elements = Mesh(...)  # Initialize a mesh
     >>> marked_elements = np.array([0, 2, 3, 4])
-    >>> boundary_conditions = [BC1, BC2, BC3]  # instances of BoundaryCondition
+    >>> boundary_conditions = [BC1, BC2, BC3]  # BC's as np.ndarray
     >>> new_coordinates, new_elements, new_boundary_conditions = refineNVB(
             mesh.coordinates, mesh.elements,
             marked_elements, boundary_conditions)
@@ -304,10 +307,9 @@ def refineNVB(coordinates: np.ndarray,
         elements[idx, :] = elements[idx][:, [2, 0, 1]]
 
     # obtain geometric information on edges
-    boundaries = [bc.boundary for bc in boundary_conditions]
     element2edges, edge2nodes, boundaries_to_edges = provide_geometric_data(
         elements=elements,
-        boundaries=boundaries)
+        boundaries=boundary_conditions)
 
     # mark all edges of marked elements for refinement
     edge2newNode = np.zeros(edge2nodes.shape[0], dtype=int)
@@ -342,8 +344,7 @@ def refineNVB(coordinates: np.ndarray,
 
     # refine boundary conditions
     new_boundaries = []
-    for k, boundary_condition in enumerate(boundary_conditions):
-        boundary = boundary_condition.boundary
+    for k, boundary in enumerate(boundary_conditions):
         if boundary.size:
             new_nodes_on_boundary = edge2newNode[boundaries_to_edges[k]]
             marked_edges = np.nonzero(new_nodes_on_boundary)[0]
@@ -354,8 +355,7 @@ def refineNVB(coordinates: np.ndarray,
                                       new_nodes_on_boundary[marked_edges]]),
                      np.column_stack([new_nodes_on_boundary[marked_edges],
                                       boundary[marked_edges, 1]])])
-        new_boundaries.append(
-            BoundaryCondition(name=boundary_condition.name, boundary=boundary))
+        new_boundaries.append(boundary)
 
     # provide new nodes for refinement of elements
     new_nodes = edge2newNode[element2edges]
