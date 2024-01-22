@@ -38,26 +38,6 @@ def get_directional_vectors(coordinates: np.ndarray,
     return d21, d31
 
 
-class BoundaryCondition:
-    """
-    A boundary condition.
-
-    instance variables
-    ------------------
-    name: str
-        The name of the boundary condition
-    boundary: np.ndarray
-        boundary[k] holds the indices (i, j) of the vertices making up the
-        k-th edge of the boundary.
-    """
-    name: str
-    boundary: np.ndarray
-
-    def __init__(self, name: str, boundary: np.ndarray) -> None:
-        self.name = name
-        self.boundary = boundary
-
-
 def plot_mesh(coordinates: np.ndarray,
               elements: np.ndarray) -> None:
     for element in elements:
