@@ -33,7 +33,8 @@ class MeshTest(unittest.TestCase):
             Path('tests/data/simple_square_mesh/square_boundary_0.dat'))
         boundary_condition_1 = mesh.read_boundary_condition(
             Path('tests/data/simple_square_mesh/square_boundary_1.dat'))
-        boundary_conditions = [boundary_condition_0, boundary_condition_1]
+        boundary_conditions = [boundary_condition_0.boundary,
+                               boundary_condition_1.boundary]
 
         _, elements = MeshTest.get_simple_square_mesh()
         element2edges, edge2nodes, boundaries_to_edges = \
@@ -61,9 +62,9 @@ class MeshTest(unittest.TestCase):
             Path('tests/data/l_shape_mesh/l_shape_bc_1.dat'))
         boundary_condition_2 = mesh.read_boundary_condition(
             Path('tests/data/l_shape_mesh/l_shape_bc_2.dat'))
-        boundary_conditions = [boundary_condition_0,
-                               boundary_condition_1,
-                               boundary_condition_2]
+        boundary_conditions = [boundary_condition_0.boundary,
+                               boundary_condition_1.boundary,
+                               boundary_condition_2.boundary]
         path_to_coordinates = Path(
             'tests/data/l_shape_mesh/l_shape_coordinates.dat')
         path_to_elements = Path(

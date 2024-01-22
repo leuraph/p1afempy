@@ -38,7 +38,7 @@ def compute_eta_r(x: np.ndarray,
     etaR: np.ndarray
         the residual-based error estimator
     """
-    boundary_conditions = [dirichlet, neumann]
+    boundary_conditions = [dirichlet.boundary, neumann.boundary]
     element2edges, edge2nodes, boundaries_to_edges = \
         provide_geometric_data(elements=elements,
                                boundaries=boundary_conditions)

@@ -138,7 +138,7 @@ def read_mesh(path_to_coordinates: Path, path_to_elements: Path,
 
 
 def provide_geometric_data(elements: np.ndarray,
-                           boundaries: list[BoundaryCondition]):
+                           boundaries: list[np.ndarray]):
     """
     Provides geometric data about the mesh at hand.
 
@@ -174,8 +174,7 @@ def provide_geometric_data(elements: np.ndarray,
     # Symmetrize I and J (so far boundary edges appear only once)
     pointer = np.concatenate(([0, 3*n_elements-1],
                               np.zeros(n_boundaries, dtype=int)), dtype=int)
-    for k, boundary_condition in enumerate(boundaries):
-        boundary = boundary_condition.boundary
+    for k, boundary in enumerate(boundaries):
         if boundary.size:
             I = np.concatenate((I, boundary[:, 1]), dtype=int)
             J = np.concatenate((J, boundary[:, 0]), dtype=int)
@@ -305,9 +304,10 @@ def refineNVB(coordinates: np.ndarray,
         elements[idx, :] = elements[idx][:, [2, 0, 1]]
 
     # obtain geometric information on edges
+    boundaries = [bc.boundary for bc in boundary_conditions]
     element2edges, edge2nodes, boundaries_to_edges = provide_geometric_data(
         elements=elements,
-        boundaries=boundary_conditions)
+        boundaries=boundaries)
 
     # mark all edges of marked elements for refinement
     edge2newNode = np.zeros(edge2nodes.shape[0], dtype=int)
