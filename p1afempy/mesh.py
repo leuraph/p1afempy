@@ -99,7 +99,7 @@ def read_mesh(path_to_coordinates: Path,
         Path to the file containing mesh elements data.
     shift_indices: bool (default=False)
         If true, shifts the elements' indices according to i':=i-1.
-        This can come in handy, if, e.g., one wants to read data
+        This can come in handy if, e.g., one wants to read data
         that is compatible with Matlab/Fortran/Julia indexing
         (starting at 1, instead of 0).
 
