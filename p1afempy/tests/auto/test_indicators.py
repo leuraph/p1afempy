@@ -1,6 +1,5 @@
 import unittest
 from p1afempy import mesh, solvers, indicators
-from mesh import BoundaryCondition
 from pathlib import Path
 import numpy as np
 import example_setup

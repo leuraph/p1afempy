@@ -1,5 +1,5 @@
 import numpy as np
-from p1afempy.mesh import provide_geometric_data, BoundaryCondition, get_directional_vectors, get_area
+from p1afempy.mesh import provide_geometric_data, get_directional_vectors, get_area
 from typing import Callable
 
 

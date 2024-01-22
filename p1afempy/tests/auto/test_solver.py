@@ -1,7 +1,6 @@
 import unittest
 import numpy as np
 import p1afempy.mesh as mesh
-from mesh import BoundaryCondition
 from p1afempy.solvers import solve_laplace, get_mass_matrix_elements
 from pathlib import Path
 from p1afempy.tests.auto import example_setup
