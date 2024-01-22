@@ -115,7 +115,7 @@ def get_right_hand_side(coordinates: np.ndarray,
     return b
 
 
-def apply_neumann(neumann_bc: mesh.BoundaryCondition,
+def apply_neumann(neumann_bc: np.ndarray,
                   coordinates: np.ndarray,
                   g: Callable[[np.ndarray], float],
                   b: np.ndarray):
@@ -124,11 +124,11 @@ def apply_neumann(neumann_bc: mesh.BoundaryCondition,
     """
     # TODO channge b in place, do not return it or
     # at least check if this version generates computational overhead
-    cn1 = coordinates[neumann_bc.boundary[:, 0], :]
-    cn2 = coordinates[neumann_bc.boundary[:, 1], :]
+    cn1 = coordinates[neumann_bc[:, 0], :]
+    cn2 = coordinates[neumann_bc[:, 1], :]
     gmE = g((cn1+cn2)/2)
     b = b + np.bincount(
-        neumann_bc.boundary.flatten(order='F'),
+        neumann_bc.flatten(order='F'),
         weights=np.tile(
             np.sqrt(np.sum(np.square(cn2-cn1), axis=1))*gmE/2.,
             (2, 1)).flatten(), minlength=b.size)
@@ -195,7 +195,7 @@ def solve_laplace(coordinates: np.ndarray,
     b = get_right_hand_side(coordinates=coordinates,
                             elements=elements, f=f) - A.dot(x)
     if neumann.boundary.size > 0:
-        b = apply_neumann(neumann_bc=neumann,
+        b = apply_neumann(neumann_bc=neumann.boundary,
                           coordinates=coordinates,
                           g=g, b=b)
 
