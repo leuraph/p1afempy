@@ -213,8 +213,8 @@ def provide_geometric_data(elements: np.ndarray,
 def refineRGB(coordinates: np.ndarray,
               elements: np.ndarray,
               marked_elements: np.ndarray,
-              boundary_conditions: list[BoundaryCondition]
-              ) -> tuple[np.ndarray, np.ndarray, list[BoundaryCondition]]:
+              boundary_conditions: list[np.ndarray]
+              ) -> tuple[np.ndarray, np.ndarray, list[np.ndarray]]:
     """
     Refines the mesh and boundary conditions based on the
     red-green-blue (RGB) refinement strategy.
@@ -225,7 +225,7 @@ def refineRGB(coordinates: np.ndarray,
     elements: np.ndarray
     marked_elements: np.ndarray
         Indices of the elements to be refined.
-    boundary_conditions: list[BoundaryCondition]
+    boundary_conditions: list[np.ndarray]
         List of boundary conditions to update.
 
     Returns
@@ -234,14 +234,14 @@ def refineRGB(coordinates: np.ndarray,
         the coordinates of the refined mesh
     new_elements: np.ndarray
         the elements of the refined mesh
-    new_boundaries: list[BoundaryCondition]
+    new_boundaries: list[np.ndarray]
         The refined boundary conditions
 
     Example
     -------
     >>> coordinates, elements = ...  # Initialize a mesh
     >>> marked_elements = np.array([0, 2, 3, 4])
-    >>> boundary_conditions = [BC1, BC2, BC3]  # instances of BoundaryCondition
+    >>> boundary_conditions = [BC1, BC2, BC3]  # BCs as `np.ndarray`s
     >>> new_coordinates, new_elements, new_boundary_conditions = refineRGB(
             coordinates, elements,
             marked_elements, boundary_conditions)
@@ -250,10 +250,9 @@ def refineRGB(coordinates: np.ndarray,
         coordinates,
         elements,
         marked_elements,
-        boundary_conditions=[bc.boundary for bc in boundary_conditions],
+        boundary_conditions=boundary_conditions,
         sort_for_longest_egde=True)
-    return new_coordinates, new_elements, [
-        BoundaryCondition(name='', boundary=bc) for bc in new_boundaries]
+    return new_coordinates, new_elements, new_boundaries
 
 
 def refineNVB(coordinates: np.ndarray,

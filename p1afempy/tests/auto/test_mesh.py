@@ -215,13 +215,14 @@ class MeshTest(unittest.TestCase):
             path_to_elements=path_to_elements)
         marked_elements = np.array([0, 1, 3, 5])
         refined_coordinates, refined_elements, new_boundaries = \
-            mesh.refineRGB(coordinates=coordinates,
-                           elements=elements,
-                           marked_elements=marked_elements,
-                           boundary_conditions=[
-                               mesh.read_boundary_condition(path_to_bc_0),
-                               mesh.read_boundary_condition(path_to_bc_1),
-                               mesh.read_boundary_condition(path_to_bc_2)])
+            mesh.refineRGB(
+                coordinates=coordinates,
+                elements=elements,
+                marked_elements=marked_elements,
+                boundary_conditions=[
+                    mesh.read_boundary_condition(path_to_bc_0).boundary,
+                    mesh.read_boundary_condition(path_to_bc_1).boundary,
+                    mesh.read_boundary_condition(path_to_bc_2).boundary])
 
         path_to_refined_coordinates = Path(
             'tests/data/refined_rgb/l_shape_coordinates_refined.dat')
@@ -242,11 +243,11 @@ class MeshTest(unittest.TestCase):
         self.assertTrue(np.all(
             refined_elements == expected_elements - 1))
         self.assertTrue(np.all(
-            new_boundaries[0].boundary == refined_bc_0.boundary - 1))
+            new_boundaries[0] == refined_bc_0.boundary - 1))
         self.assertTrue(np.all(
-            new_boundaries[1].boundary == refined_bc_1.boundary - 1))
+            new_boundaries[1] == refined_bc_1.boundary - 1))
         self.assertTrue(np.all(
-            new_boundaries[2].boundary == refined_bc_2.boundary - 1))
+            new_boundaries[2] == refined_bc_2.boundary - 1))
 
     def test_get_area(self) -> None:
         path_to_coordinates = Path(
