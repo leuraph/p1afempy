@@ -100,7 +100,8 @@ def read_boundary_condition(
     return BoundaryCondition(name=name, boundary=data)
 
 
-def read_mesh(path_to_coordinates: Path, path_to_elements: Path,
+def read_mesh(path_to_coordinates: Path,
+              path_to_elements: Path,
               shift_indices: bool = False) -> tuple[np.ndarray, np.ndarray]:
     """
     Reads vertices and elements from files and
