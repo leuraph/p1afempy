@@ -147,7 +147,7 @@ def provide_geometric_data(elements: np.ndarray,
     elements: np.ndarray
         the elements of the mesh, i.e.
         an Mx3 array where each row represents an element
-    boundaries: list[BoundaryCondition]
+    boundaries: list[np.ndarray]
         boundary conditions defined on the mesh
 
     Returns
