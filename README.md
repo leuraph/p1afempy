@@ -6,6 +6,14 @@ whose code can be found
 and whose details are described in the paper (open access)
 [Computational Methods in Applied Mathematics, 11 (2011)](http://dx.doi.org/10.2478/cmam-2011-0026).
 
+## Data structures
+
+Regarding the underlying data structures used, we follow the original code as closely as possible, i.e.
+elements, coordinates, and boundary conditions are all handled as simple `numpy` arrays.
+We explicitly neglect from implementing any additional data strictures,
+e.g. classes like `Mesh` or `BoundaryCondition`, in order to remain the original "low-level" usability of the code.
+In this way, any user can decide whether to implement additional data structures and, possibly, wrappers thereof.
+
 ## Performance tests
 
 In order to perform a profiled performance test, you can use the existing scripts in
