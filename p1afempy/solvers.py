@@ -137,8 +137,8 @@ def apply_neumann(neumann_bc: np.ndarray,
 
 def solve_laplace(coordinates: np.ndarray,
                   elements: np.ndarray,
-                  dirichlet: mesh.BoundaryCondition,
-                  neumann: mesh.BoundaryCondition,
+                  dirichlet: np.ndarray,
+                  neumann: np.ndarray,
                   f: Callable[[np.ndarray], float],
                   g: Callable[[np.ndarray], float],
                   uD: Callable[[np.ndarray], float]
@@ -156,9 +156,9 @@ def solve_laplace(coordinates: np.ndarray,
     ----------
     coordinates: np.ndarray
     elements: np.ndarray
-    dirichlet: mesh.BoundaryCondition
+    dirichlet: np.ndarray
         the dirichlet boundary of the problem
-    neumann: mesh.BoundaryCondition
+    neumann: np.ndarray
         the neumann boundary of the problem
     f: Callable[[np.ndarray], float]
         the right-hand-side function (volume force) of the problem
@@ -189,13 +189,13 @@ def solve_laplace(coordinates: np.ndarray,
                              elements=elements)
 
     # prescribe values at dirichlet nodes
-    unique_dirichlet = np.unique(dirichlet.boundary)
+    unique_dirichlet = np.unique(dirichlet)
     x[unique_dirichlet] = uD((coordinates[unique_dirichlet, :]))
 
     b = get_right_hand_side(coordinates=coordinates,
                             elements=elements, f=f) - A.dot(x)
-    if neumann.boundary.size > 0:
-        b = apply_neumann(neumann_bc=neumann.boundary,
+    if neumann.size > 0:
+        b = apply_neumann(neumann_bc=neumann,
                           coordinates=coordinates,
                           g=g, b=b)
 
