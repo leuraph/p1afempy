@@ -46,7 +46,7 @@ def get_directional_vectors(coordinates: np.ndarray,
     return d21, d31
 
 
-def plot_mesh(coordinates: np.ndarray,
+def show_mesh(coordinates: np.ndarray,
               elements: np.ndarray) -> None:
     for element in elements:
         r0, r1, r2 = coordinates[element, :]
