@@ -3,8 +3,7 @@
 This package is the pythonic adaption of the p1afem Matlab package,
 whose code can be found
 [here (ZIP)](https://www.tuwien.at/index.php?eID=dumpFile&t=f&f=180536&token=1b5f89369acab20d59455e42569bf1e0b2db8b41)
-and whose details are described in the paper (open access)
-[Computational Methods in Applied Mathematics, 11 (2011)](http://dx.doi.org/10.2478/cmam-2011-0026).
+and whose details are described in the paper (open access) [[1]](#1).
 
 ## Data structures
 
@@ -13,6 +12,12 @@ elements, coordinates, and boundary conditions are all handled as simple `numpy`
 We explicitly neglect from implementing any additional data strictures,
 e.g. classes like `Mesh` or `BoundaryCondition`, in order to remain the original "low-level" usability of the code.
 In this way, any user can decide whether to implement additional data structures and, possibly, wrappers thereof.
+
+As a quick reference, we refer to figure 3.1 below (copied from [[1]](#1))
+For more details about the expected format of the data structures,
+we refer to chapter 3.1 of [[1]](#1).
+
+<img alt="Figure 3.1 from ref. [1]" src="figures/fig_3-1.jpeg">
 
 ## Performance tests
 
@@ -95,3 +100,10 @@ Note that this repo includes some functionalities that were not provided in the 
 P1AFEM Matlab package.
 The following provides a complete list of added functionalities.
 - Calculation of mass matrices.
+
+## References
+
+<a id="1">[1]</a> 
+S. Funken, D. Praetorius, and P. Wissgott.
+[Efficient Implementation of Adaptive P1-FEM in Matlab](http://dx.doi.org/10.2478/cmam-2011-0026).
+Computational Methods in Applied Mathematics, Vol. 11 (2011), No. 4, pp. 460–490.
