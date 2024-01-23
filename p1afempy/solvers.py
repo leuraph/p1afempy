@@ -1,5 +1,5 @@
-from p1afempy.mesh import get_directional_vectors, get_area
 import numpy as np
+from p1afempy.mesh import get_directional_vectors, get_area
 from scipy.sparse import coo_matrix, csc_matrix
 from scipy.sparse.linalg import spsolve
 from typing import Callable
