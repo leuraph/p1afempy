@@ -1,4 +1,3 @@
-import p1afempy.mesh as mesh
 from p1afempy.mesh import get_directional_vectors, get_area
 import numpy as np
 from scipy.sparse import coo_matrix, csc_matrix
