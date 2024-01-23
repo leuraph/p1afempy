@@ -6,6 +6,7 @@ from p1afempy import io_helpers
 from p1afempy import solvers
 from p1afempy import refinement
 from pathlib import Path
+from scipy.stats import linregress
 
 
 class TestResult:
@@ -44,7 +45,7 @@ def main() -> None:
     boundaries = [boundary_0, boundary_1]
 
     # specifying statistics
-    n_refinements =11
+    n_refinements = 11
     n_repetetitions_each = 20
 
     test_results: list[TestResult] = []
@@ -74,6 +75,9 @@ def main() -> None:
     means = np.array([np.mean(result.times) for result in test_results])
     stdvs = np.array([np.std(result.times) for result in test_results])
 
+    # Fit a straight line (y = mx + q) using linregress
+    res = linregress(n_elements[-4:], means[-4:])
+
     # read matlab results
     path_to_matlab_means = Path(
         'tests/data/matlab_performance/'
@@ -99,6 +103,10 @@ def main() -> None:
     ax.errorbar(n_elements[cut_at:], means[cut_at:], stdvs[cut_at:],
                 fmt='x', label='Python', color='green',
                 capsize=2, capthick=1, elinewidth=1, markersize=4)
+    ax.loglog(n_elements[cut_at:],
+              res.slope * n_elements[cut_at:],
+              linestyle='--', color='black', linewidth=0.5,
+              label=r'$\propto M$')
 
     # plot matlab results
     ax.errorbar(matlab_n_elements[cut_at:],
@@ -112,6 +120,8 @@ def main() -> None:
     # Set the axis to log-log scale
     ax.set_xscale('log')
     ax.set_yscale('log')
+
+    ax.set_xlim(left=1e2)
 
     ax.grid()
     ax.legend(loc='best')
