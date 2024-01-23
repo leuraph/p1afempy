@@ -2,6 +2,7 @@ import unittest
 import numpy as np
 import p1afempy.mesh as mesh
 from p1afempy.solvers import solve_laplace, get_mass_matrix_elements
+import p1afempy.refinement as refinement
 from pathlib import Path
 from p1afempy.tests.auto import example_setup
 
@@ -29,7 +30,7 @@ class SolverTest(unittest.TestCase):
         n_refinements = 3
         for _ in range(n_refinements):
             marked_elements = np.arange(elements.shape[0])
-            coordinates, elements, boundary_conditions = mesh.refineNVB(
+            coordinates, elements, boundary_conditions = refinement.refineNVB(
                 coordinates=coordinates,
                 elements=elements,
                 marked_elements=marked_elements,

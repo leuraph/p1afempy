@@ -1,5 +1,6 @@
 import unittest
 from p1afempy import mesh, solvers, indicators
+import p1afempy.refinement as refinement
 from pathlib import Path
 import numpy as np
 import example_setup
@@ -29,10 +30,10 @@ class IndicatorTest(unittest.TestCase):
         for _ in range(n_refinements):
             marked_elements = np.arange(elements.shape[0])
             coordinates, elements, boundary_conditions = \
-                mesh.refineNVB(coordinates=coordinates,
-                               elements=elements,
-                               marked_elements=marked_elements,
-                               boundary_conditions=boundary_conditions)
+                refinement.refineNVB(coordinates=coordinates,
+                                     elements=elements,
+                                     marked_elements=marked_elements,
+                                     boundary_conditions=boundary_conditions)
 
         x, energy = solvers.solve_laplace(
             coordinates=coordinates, elements=elements,

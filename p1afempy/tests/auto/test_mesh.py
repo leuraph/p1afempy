@@ -1,5 +1,6 @@
 import unittest
 import p1afempy.mesh as mesh
+import p1afempy.refinement as refinement
 from pathlib import Path
 import numpy as np
 
@@ -114,11 +115,11 @@ class MeshTest(unittest.TestCase):
                                boundary_condition_1]
         coordinates, elements = MeshTest.get_simple_square_mesh()
 
-        refined_coordinates, refined_elements, new_boundaries = mesh.refineNVB(
-            coordinates=coordinates,
-            elements=elements,
-            marked_elements=np.array([0, 1]),
-            boundary_conditions=boundary_conditions)
+        refined_coordinates, refined_elements, new_boundaries = \
+            refinement.refineNVB(coordinates=coordinates,
+                                 elements=elements,
+                                 marked_elements=np.array([0, 1]),
+                                 boundary_conditions=boundary_conditions)
 
         expected_refined_coordinates = np.array([[0., 0.],
                                                  [1., 0.],
@@ -167,7 +168,7 @@ class MeshTest(unittest.TestCase):
             path_to_elements=path_to_elements)
         marked_elements = np.array([0, 1, 3, 5])
         refined_coordinates, refined_elements, new_boundaries = \
-            mesh.refineNVB(
+            refinement.refineNVB(
                 coordinates=coordinates,
                 elements=elements,
                 marked_elements=marked_elements,
@@ -215,7 +216,7 @@ class MeshTest(unittest.TestCase):
             path_to_elements=path_to_elements)
         marked_elements = np.array([0, 1, 3, 5])
         refined_coordinates, refined_elements, new_boundaries = \
-            mesh.refineRGB(
+            refinement.refineRGB(
                 coordinates=coordinates,
                 elements=elements,
                 marked_elements=marked_elements,
