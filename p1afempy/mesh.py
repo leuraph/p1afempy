@@ -91,38 +91,44 @@ def provide_geometric_data(
 
     # Extracting all directed edges E_l:=(I[l], J[l])
     # (interior edges appear twice)
-    I = elements.flatten(order='F')
-    J = elements[:, [1, 2, 0]].flatten(order='F')
+    element_indices_i = elements.flatten(order='F')
+    element_indices_j = elements[:, [1, 2, 0]].flatten(order='F')
 
     # Symmetrize I and J (so far boundary edges appear only once)
     pointer = np.concatenate(([0, 3*n_elements-1],
                               np.zeros(n_boundaries, dtype=int)), dtype=int)
     for k, boundary in enumerate(boundaries):
         if boundary.size:
-            I = np.concatenate((I, boundary[:, 1]), dtype=int)
-            J = np.concatenate((J, boundary[:, 0]), dtype=int)
+            element_indices_i = np.concatenate(
+                (element_indices_i, boundary[:, 1]), dtype=int)
+            element_indices_j = np.concatenate(
+                (element_indices_j, boundary[:, 0]), dtype=int)
         pointer[k+2] = pointer[k+1] + boundary.shape[0]
 
     # Fixing an edge number for all edges, where i<j
-    idx_IJ = np.where(I < J)[0]
+    idx_IJ = np.where(element_indices_i < element_indices_j)[0]
     n_unique_edges = idx_IJ.size
-    edge_number = np.zeros(I.size, dtype=int)
+    edge_number = np.zeros(element_indices_i.size, dtype=int)
     edge_number[idx_IJ] = np.arange(n_unique_edges)
 
     # Ensuring the same numbering for all edges, where j<i
-    idx_JI = np.where(J < I)[0]
+    idx_JI = np.where(element_indices_j < element_indices_i)[0]
     number_to_edges = coo_matrix(
-        (np.arange(n_unique_edges) + 1, (I[idx_IJ], J[idx_IJ])))
+        (np.arange(n_unique_edges) + 1, (element_indices_i[idx_IJ],
+                                         element_indices_j[idx_IJ])))
     # NOTE In Matlab, the returned order is different
     _, _, numbering_IJ = find(number_to_edges)
     # NOTE In Matlab, the returned order is different
-    _, _, idx_JI2IJ = find(coo_matrix((idx_JI + 1, (J[idx_JI], I[idx_JI]))))
+    _, _, idx_JI2IJ = find(
+        coo_matrix((idx_JI + 1, (element_indices_j[idx_JI],
+                                 element_indices_i[idx_JI]))))
     # NOTE Here, it coincides with Matlab again, though.
     edge_number[idx_JI2IJ - 1] = numbering_IJ - 1
 
     element_to_edges = edge_number[0:3*n_elements].reshape(n_elements, 3,
-                                                        order='F')
-    edge_to_nodes = np.column_stack((I[idx_IJ], J[idx_IJ]))
+                                                           order='F')
+    edge_to_nodes = np.column_stack((element_indices_i[idx_IJ],
+                                     element_indices_j[idx_IJ]))
     # Provide boundary2edges
     boundaries_to_edges = []
     for j in np.arange(n_boundaries):
