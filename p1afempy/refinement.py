@@ -2,6 +2,7 @@ import numpy as np
 from p1afempy.mesh import provide_geometric_data
 
 
+# TODO refactor s.t. boundary_conditions is optional
 def refineRGB(coordinates: np.ndarray,
               elements: np.ndarray,
               marked_elements: np.ndarray,
@@ -47,6 +48,8 @@ def refineRGB(coordinates: np.ndarray,
     return new_coordinates, new_elements, new_boundaries
 
 
+# TODO refactor s.t. sort_for_longest_egde vanishes, this is an ugly solution
+# TODO refactor s.t. boundary_conditions is optional
 def refineNVB(coordinates: np.ndarray,
               elements: np.ndarray,
               marked_elements: np.ndarray,
