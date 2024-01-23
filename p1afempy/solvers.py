@@ -24,8 +24,10 @@ def get_stiffness_matrix(coordinates: np.ndarray,
     area4 = 4. * get_area(coordinates=coordinates,
                           elements=elements)
 
-    I = (elements[:, [0, 1, 2, 0, 1, 2, 0, 1, 2]].T).flatten(order='F')
-    J = (elements[:, [0, 0, 0, 1, 1, 1, 2, 2, 2]].T).flatten(order='F')
+    indices_i = (elements[:, [0, 1, 2, 0, 1, 2, 0, 1, 2]].T).flatten(
+        order='F')
+    indices_j = (elements[:, [0, 0, 0, 1, 1, 1, 2, 2, 2]].T).flatten(
+        order='F')
 
     d21, d31 = get_directional_vectors(coordinates=coordinates,
                                        elements=elements)
@@ -34,7 +36,8 @@ def get_stiffness_matrix(coordinates: np.ndarray,
     c = (np.sum(d21*d21, axis=1)/area4)
 
     A = np.vstack([-2.*a+b+c, a-b, a-c, a-b, b, -a, a-c, -a, c])
-    return coo_matrix((A.flatten(order='F'), (I, J)))
+    return coo_matrix((A.flatten(order='F'),
+                       (indices_i, indices_j)))
 
 
 def get_mass_matrix(coordinates: np.ndarray,
@@ -57,14 +60,16 @@ def get_mass_matrix_elements(
 
     returns
     -------
-    I: np.ndarray
-    J: np.ndarray
+    indices_i: np.ndarray
+    indices_j: np.ndarray
     D: np.ndarray
         D[m] represents a mass matrix contribution
-        belonging to its (I[m], J[m]) coordinate
+        belonging to its (indices_i[m], indices_j[m]) coordinate
     """
-    I = (elements[:, [0, 1, 2, 0, 1, 2, 0, 1, 2]].T).flatten(order='F')
-    J = (elements[:, [0, 0, 0, 1, 1, 1, 2, 2, 2]].T).flatten(order='F')
+    indices_i = (elements[:, [0, 1, 2, 0, 1, 2, 0, 1, 2]].T).flatten(
+        order='F')
+    indices_j = (elements[:, [0, 0, 0, 1, 1, 1, 2, 2, 2]].T).flatten(
+        order='F')
 
     area = get_area(coordinates=coordinates,
                     elements=elements)
@@ -72,7 +77,7 @@ def get_mass_matrix_elements(
         [area/6., area/12., area/12.,
          area/12., area/6., area/12.,
          area/12., area/12., area/6.]).flatten(order='F')
-    return I, J, D
+    return indices_i, indices_j, D
 
 
 def get_right_hand_side(coordinates: np.ndarray,
