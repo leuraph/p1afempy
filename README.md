@@ -30,6 +30,21 @@ cd p1afempy
 python -m cProfile -s time -m tests.manual.<script> > benchmark.out
 ```
 
+### Stiffness Matrix Assembly
+
+In order to perform a stiffness matrix assembly performance comparison between
+Python and Matlab, you can use the existing script
+`p1afempy/tests/manual/performance_test_stiffnes_matrix.py`.
+Note that this script performs the assembly in Python and assumes existing Matlab results
+found in the corresponding directory (see the source code for the specific directory).
+Below, you can find results found on a reference machine [[2]](#2).
+The error bars in the plot represent the standard deviation of measured CPU time.
+On each mesh, we performed $20$ measurements.
+For more information, see
+`p1afempy/tests/data/matlab_performance/stiffness_matrix_assembly/readme.md`.
+
+<img src="figures/stiffness_matrix_assembly.png">
+
 ## Performance upgrade
 
 In the following, we describe how to get more (the most) performance out of `solve_laplace`.
@@ -107,3 +122,14 @@ The following provides a complete list of added functionalities.
 S. Funken, D. Praetorius, and P. Wissgott.
 [Efficient Implementation of Adaptive P1-FEM in Matlab](http://dx.doi.org/10.2478/cmam-2011-0026).
 Computational Methods in Applied Mathematics, Vol. 11 (2011), No. 4, pp. 460–490.
+
+<a id="2">[2]</a>
+Reference Machine:
+| **Device**       | MacBook Pro 15-inch, 2018       |
+|-------------------|---------------------------------|
+| **Processor**    | 2.6 GHz 6-Core Intel Core i7    |
+| **Graphics**     | Radeon Pro 560X 4 GB            |
+|                  | Intel UHD Graphics 630 1536 MB |
+| **Memory**       | 16 GB 2400 MHz DDR4             |
+| **Operating System** | MacOS 13.6.3 (22G436)         |
+| **Matlab Version**   | R2023b                          |
