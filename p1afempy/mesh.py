@@ -1,5 +1,4 @@
 import numpy as np
-from pathlib import Path
 from scipy.sparse import coo_matrix, find
 from matplotlib import pyplot as plt
 
