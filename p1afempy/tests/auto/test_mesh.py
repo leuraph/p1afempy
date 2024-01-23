@@ -1,6 +1,7 @@
 import unittest
 import p1afempy.mesh as mesh
 import p1afempy.refinement as refinement
+import p1afempy.io_helpers as io_helpers
 from pathlib import Path
 import numpy as np
 
@@ -14,8 +15,8 @@ class MeshTest(unittest.TestCase):
             'tests/data/simple_square_mesh/coordinates.dat')
         path_to_elements = Path(
             'tests/data/simple_square_mesh/elements.dat')
-        return mesh.read_mesh(path_to_coordinates=path_to_coordinates,
-                              path_to_elements=path_to_elements)
+        return io_helpers.read_mesh(path_to_coordinates=path_to_coordinates,
+                                    path_to_elements=path_to_elements)
 
     def test_read_mesh(self):
         z0, z1, z2, z3 = [0., 0.], [1., 0.], [1., 1.], [0., 1.]
@@ -30,9 +31,9 @@ class MeshTest(unittest.TestCase):
 
     def test_provide_geometric_data(self):
         # square-shaped testing domain
-        boundary_condition_0 = mesh.read_boundary_condition(
+        boundary_condition_0 = io_helpers.read_boundary_condition(
             Path('tests/data/simple_square_mesh/square_boundary_0.dat'))
-        boundary_condition_1 = mesh.read_boundary_condition(
+        boundary_condition_1 = io_helpers.read_boundary_condition(
             Path('tests/data/simple_square_mesh/square_boundary_1.dat'))
         boundary_conditions = [boundary_condition_0,
                                boundary_condition_1]
@@ -57,11 +58,11 @@ class MeshTest(unittest.TestCase):
         self.assertTrue(np.all(boundaries_to_edges[1] == [3, 4]))
 
         # L-shaped testing domain
-        boundary_condition_0 = mesh.read_boundary_condition(
+        boundary_condition_0 = io_helpers.read_boundary_condition(
             Path('tests/data/l_shape_mesh/l_shape_bc_0.dat'))
-        boundary_condition_1 = mesh.read_boundary_condition(
+        boundary_condition_1 = io_helpers.read_boundary_condition(
             Path('tests/data/l_shape_mesh/l_shape_bc_1.dat'))
-        boundary_condition_2 = mesh.read_boundary_condition(
+        boundary_condition_2 = io_helpers.read_boundary_condition(
             Path('tests/data/l_shape_mesh/l_shape_bc_2.dat'))
         boundary_conditions = [boundary_condition_0,
                                boundary_condition_1,
@@ -70,7 +71,7 @@ class MeshTest(unittest.TestCase):
             'tests/data/l_shape_mesh/l_shape_coordinates.dat')
         path_to_elements = Path(
             'tests/data/l_shape_mesh/l_shape_elements.dat')
-        _, l_shape_elements = mesh.read_mesh(
+        _, l_shape_elements = io_helpers.read_mesh(
             path_to_coordinates=path_to_coordinates,
             path_to_elements=path_to_elements)
         element2edges, edge2nodes, boundaries_to_edges = \
@@ -107,9 +108,9 @@ class MeshTest(unittest.TestCase):
 
     def test_refineNVB(self) -> None:
         # Square Domain
-        boundary_condition_0 = mesh.read_boundary_condition(
+        boundary_condition_0 = io_helpers.read_boundary_condition(
             Path('tests/data/simple_square_mesh/square_boundary_0.dat'))
-        boundary_condition_1 = mesh.read_boundary_condition(
+        boundary_condition_1 = io_helpers.read_boundary_condition(
             Path('tests/data/simple_square_mesh/square_boundary_1.dat'))
         boundary_conditions = [boundary_condition_0,
                                boundary_condition_1]
@@ -163,7 +164,7 @@ class MeshTest(unittest.TestCase):
         path_to_bc_0 = Path('tests/data/l_shape_mesh/l_shape_bc_0.dat')
         path_to_bc_1 = Path('tests/data/l_shape_mesh/l_shape_bc_1.dat')
         path_to_bc_2 = Path('tests/data/l_shape_mesh/l_shape_bc_2.dat')
-        coordinates, elements = mesh.read_mesh(
+        coordinates, elements = io_helpers.read_mesh(
             path_to_coordinates=path_to_coordinates,
             path_to_elements=path_to_elements)
         marked_elements = np.array([0, 1, 3, 5])
@@ -173,22 +174,22 @@ class MeshTest(unittest.TestCase):
                 elements=elements,
                 marked_elements=marked_elements,
                 boundary_conditions=[
-                    mesh.read_boundary_condition(path_to_bc_0),
-                    mesh.read_boundary_condition(path_to_bc_1),
-                    mesh.read_boundary_condition(path_to_bc_2)])
+                    io_helpers.read_boundary_condition(path_to_bc_0),
+                    io_helpers.read_boundary_condition(path_to_bc_1),
+                    io_helpers.read_boundary_condition(path_to_bc_2)])
 
         path_to_refined_coordinates = Path(
             'tests/data/refined_nvb/l_shape_coordinates_refined.dat')
         path_to_refined_elements = Path(
             'tests/data/refined_nvb/l_shape_elements_refined.dat')
-        expected_coordinates, expected_elements = mesh.read_mesh(
+        expected_coordinates, expected_elements = io_helpers.read_mesh(
             path_to_coordinates=path_to_refined_coordinates,
             path_to_elements=path_to_refined_elements)
-        refined_bc_0 = mesh.read_boundary_condition(
+        refined_bc_0 = io_helpers.read_boundary_condition(
             Path('tests/data/refined_nvb/l_shape_boundary_0_refined.dat'))
-        refined_bc_1 = mesh.read_boundary_condition(
+        refined_bc_1 = io_helpers.read_boundary_condition(
             Path('tests/data/refined_nvb/l_shape_boundary_1_refined.dat'))
-        refined_bc_2 = mesh.read_boundary_condition(
+        refined_bc_2 = io_helpers.read_boundary_condition(
             Path('tests/data/refined_nvb/l_shape_boundary_2_refined.dat'))
 
         self.assertTrue(np.all(
@@ -211,7 +212,7 @@ class MeshTest(unittest.TestCase):
         path_to_bc_0 = Path('tests/data/l_shape_mesh/l_shape_bc_0.dat')
         path_to_bc_1 = Path('tests/data/l_shape_mesh/l_shape_bc_1.dat')
         path_to_bc_2 = Path('tests/data/l_shape_mesh/l_shape_bc_2.dat')
-        coordinates, elements = mesh.read_mesh(
+        coordinates, elements = io_helpers.read_mesh(
             path_to_coordinates=path_to_coordinates,
             path_to_elements=path_to_elements)
         marked_elements = np.array([0, 1, 3, 5])
@@ -221,22 +222,22 @@ class MeshTest(unittest.TestCase):
                 elements=elements,
                 marked_elements=marked_elements,
                 boundary_conditions=[
-                    mesh.read_boundary_condition(path_to_bc_0),
-                    mesh.read_boundary_condition(path_to_bc_1),
-                    mesh.read_boundary_condition(path_to_bc_2)])
+                    io_helpers.read_boundary_condition(path_to_bc_0),
+                    io_helpers.read_boundary_condition(path_to_bc_1),
+                    io_helpers.read_boundary_condition(path_to_bc_2)])
 
         path_to_refined_coordinates = Path(
             'tests/data/refined_rgb/l_shape_coordinates_refined.dat')
         path_to_refined_elements = Path(
             'tests/data/refined_rgb/l_shape_elements_refined.dat')
-        expected_coordinates, expected_elements = mesh.read_mesh(
+        expected_coordinates, expected_elements = io_helpers.read_mesh(
             path_to_coordinates=path_to_refined_coordinates,
             path_to_elements=path_to_refined_elements)
-        refined_bc_0 = mesh.read_boundary_condition(
+        refined_bc_0 = io_helpers.read_boundary_condition(
             Path('tests/data/refined_rgb/l_shape_boundary_0_refined.dat'))
-        refined_bc_1 = mesh.read_boundary_condition(
+        refined_bc_1 = io_helpers.read_boundary_condition(
             Path('tests/data/refined_rgb/l_shape_boundary_1_refined.dat'))
-        refined_bc_2 = mesh.read_boundary_condition(
+        refined_bc_2 = io_helpers.read_boundary_condition(
             Path('tests/data/refined_rgb/l_shape_boundary_2_refined.dat'))
 
         self.assertTrue(np.all(
@@ -255,7 +256,7 @@ class MeshTest(unittest.TestCase):
             'tests/data/ahw_codes_example_mesh/coordinates.dat')
         path_to_elements = Path(
             'tests/data/ahw_codes_example_mesh/elements.dat')
-        ahw_coordinates, ahw_elements = mesh.read_mesh(
+        ahw_coordinates, ahw_elements = io_helpers.read_mesh(
             path_to_coordinates=path_to_coordinates,
             path_to_elements=path_to_elements,
             shift_indices=True)

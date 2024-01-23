@@ -1,6 +1,7 @@
 import unittest
 import numpy as np
 import p1afempy.mesh as mesh
+import p1afempy.io_helpers as io_helpers
 from p1afempy.solvers import solve_laplace, get_mass_matrix_elements
 import p1afempy.refinement as refinement
 from pathlib import Path
@@ -18,12 +19,12 @@ class SolverTest(unittest.TestCase):
         path_to_matlab_x = Path('tests/data/laplace_example/x.dat')
         path_to_matlab_energy = Path('tests/data/laplace_example/energy.dat')
 
-        coordinates, elements = mesh.read_mesh(
+        coordinates, elements = io_helpers.read_mesh(
             path_to_coordinates=path_to_coordinates,
             path_to_elements=path_to_elements)
-        neumann_bc = mesh.read_boundary_condition(
+        neumann_bc = io_helpers.read_boundary_condition(
             path_to_boundary=path_to_neumann)
-        dirichlet_bc = mesh.read_boundary_condition(
+        dirichlet_bc = io_helpers.read_boundary_condition(
             path_to_boundary=path_to_dirichlet)
         boundary_conditions = [dirichlet_bc, neumann_bc]
 
@@ -53,7 +54,7 @@ class SolverTest(unittest.TestCase):
             'tests/data/ahw_codes_example_mesh/coordinates.dat')
         path_to_elements = Path(
             'tests/data/ahw_codes_example_mesh/elements.dat')
-        mesh_ahw_coordinates, mesh_ahw_elements = mesh.read_mesh(
+        mesh_ahw_coordinates, mesh_ahw_elements = io_helpers.read_mesh(
             path_to_coordinates=path_to_coordinates,
             path_to_elements=path_to_elements,
             shift_indices=True)

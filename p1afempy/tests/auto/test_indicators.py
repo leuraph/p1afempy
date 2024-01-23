@@ -1,6 +1,7 @@
 import unittest
 from p1afempy import mesh, solvers, indicators
 import p1afempy.refinement as refinement
+import p1afempy.io_helpers as io_helpers
 from pathlib import Path
 import numpy as np
 import example_setup
@@ -17,12 +18,12 @@ class IndicatorTest(unittest.TestCase):
         path_to_matlab_indicators = Path(
             'tests/data/laplace_example/indicators.dat')
 
-        coordinates, elements = mesh.read_mesh(
+        coordinates, elements = io_helpers.read_mesh(
             path_to_coordinates=path_to_coordinates,
             path_to_elements=path_to_elements)
-        neumann_bc = mesh.read_boundary_condition(
+        neumann_bc = io_helpers.read_boundary_condition(
             path_to_boundary=path_to_neumann)
-        dirichlet_bc = mesh.read_boundary_condition(
+        dirichlet_bc = io_helpers.read_boundary_condition(
             path_to_boundary=path_to_dirichlet)
         boundary_conditions = [dirichlet_bc, neumann_bc]
 
