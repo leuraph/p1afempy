@@ -167,3 +167,5 @@ labbook.md
 jupyter_notebooks/
 .DS_Store
 AHW_Codes/
+*.png
+!figures/*
