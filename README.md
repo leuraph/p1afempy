@@ -30,20 +30,29 @@ cd p1afempy
 python -m cProfile -s time -m tests.manual.<script> > benchmark.out
 ```
 
+Below, you can find some performance test results found on a reference machine [[2]](#2).
+The error bars in the plots represent the standard deviation of measured CPU time.
+
 ### Stiffness Matrix Assembly
 
-In order to perform a stiffness matrix assembly performance comparison between
-Python and Matlab, you can use the existing script
+The script used to measure and compare python performance is located at
 `p1afempy/tests/manual/performance_test_stiffnes_matrix.py`.
-Note that this script performs the assembly in Python and assumes existing Matlab results
-found in the corresponding directory (see the source code for the specific directory).
-Below, you can find results found on a reference machine [[2]](#2).
-The error bars in the plot represent the standard deviation of measured CPU time.
 On each mesh, we performed $20$ measurements.
 For more information, see
 `p1afempy/tests/data/matlab_performance/stiffness_matrix_assembly/readme.md`.
 
 <img src="figures/stiffness_matrix_assembly.png">
+
+### Newest Vertex Bisection
+
+The script used to measure and compare python performance is located at
+`p1afempy/tests/manual/performance_test_refineNVB.py`.
+In every iteration, we marked all elements for refinement and measured the CPU time needed
+for the refinement $10$ times.
+For more information, see
+`p1afempy/tests/data/matlab_performance/newest_vertex_bisection/readme.md`.
+
+<img src="figures/newest_vertex_bisection.png">
 
 ## Performance upgrade
 
