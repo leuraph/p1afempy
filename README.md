@@ -5,7 +5,7 @@ whose code can be found
 [here (ZIP)](https://www.tuwien.at/index.php?eID=dumpFile&t=f&f=180536&token=1b5f89369acab20d59455e42569bf1e0b2db8b41)
 and whose details are described in the paper (open access) [[1]](#1).
 
-## What to find where
+## What is (not) provided
 
 In the following, we provide a list indicating which functions from P1AFEM
 are implemented in this repo as well (ticked boxes) and which are not (yet) (unticked boxes).
