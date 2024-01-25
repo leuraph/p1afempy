@@ -1,33 +1,37 @@
 import numpy as np
 from p1afempy.mesh import provide_geometric_data
+from p1afempy.data_structures import \
+    CoordinatesType, ElementsType, BoundaryType
 
 
 # TODO refactor s.t. boundary_conditions is optional
-def refineRGB(coordinates: np.ndarray,
-              elements: np.ndarray,
+def refineRGB(coordinates: CoordinatesType,
+              elements: ElementsType,
               marked_elements: np.ndarray,
-              boundary_conditions: list[np.ndarray]
-              ) -> tuple[np.ndarray, np.ndarray, list[np.ndarray]]:
+              boundary_conditions: list[BoundaryType]
+              ) -> tuple[CoordinatesType,
+                         ElementsType,
+                         list[BoundaryType]]:
     """
     Refines the mesh and boundary conditions based on the
     red-green-blue (RGB) refinement strategy.
 
     Parameters
     ----------
-    coordinates: np.ndarray
-    elements: np.ndarray
+    coordinates: CoordinatesType
+    elements: ElementsType
     marked_elements: np.ndarray
         Indices of the elements to be refined.
-    boundary_conditions: list[np.ndarray]
+    boundary_conditions: list[BoundaryType]
         List of boundary conditions to update.
 
     Returns
     -------
-    new_coordinates: np.ndarray
+    new_coordinates: CoordinatesType
         the coordinates of the refined mesh
-    new_elements: np.ndarray
+    new_elements: ElementsType
         the elements of the refined mesh
-    new_boundaries: list[np.ndarray]
+    new_boundaries: list[BoundaryType]
         The refined boundary conditions
 
     Example
