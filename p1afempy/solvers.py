@@ -2,19 +2,21 @@ import numpy as np
 from p1afempy.mesh import get_directional_vectors, get_area
 from scipy.sparse import coo_matrix, csc_matrix
 from scipy.sparse.linalg import spsolve
+from p1afempy.data_structures import \
+    CoordinatesType, ElementsType, BoundaryConditionType, BoundaryType
 from typing import Callable
 
 
-def get_stiffness_matrix(coordinates: np.ndarray,
-                         elements: np.ndarray) -> coo_matrix:
+def get_stiffness_matrix(coordinates: CoordinatesType,
+                         elements: ElementsType) -> coo_matrix:
     """
     returns the stiffness matrix for the P1 FEM
     with Legendre basis
 
     parameters
     ----------
-    coordinates: np.ndarray
-    elements: np.ndarray
+    coordinates: CoordinatesType
+    elements: ElementsType
 
     returns
     -------
@@ -40,8 +42,8 @@ def get_stiffness_matrix(coordinates: np.ndarray,
                        (indices_i, indices_j)))
 
 
-def get_mass_matrix(coordinates: np.ndarray,
-                    elements: np.ndarray) -> coo_matrix:
+def get_mass_matrix(coordinates: CoordinatesType,
+                    elements: ElementsType) -> coo_matrix:
     """
     returns the mass matrix of the mesh provided
     for the P1 FEM with Legendre basis
@@ -52,8 +54,8 @@ def get_mass_matrix(coordinates: np.ndarray,
 
 
 def get_mass_matrix_elements(
-        coordinates: np.ndarray,
-        elements: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+        coordinates: CoordinatesType,
+        elements: ElementsType) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
     """
     returns the mass matrix of the mesh provided
     for the P1 FEM with Legendre basis
@@ -80,17 +82,17 @@ def get_mass_matrix_elements(
     return indices_i, indices_j, D
 
 
-def get_right_hand_side(coordinates: np.ndarray,
-                        elements: np.ndarray,
-                        f: Callable[[np.ndarray], float]):
+def get_right_hand_side(coordinates: CoordinatesType,
+                        elements: ElementsType,
+                        f: BoundaryConditionType):
     """
     returns the load vector for the P1 FEM with Legendre basis
 
     parameters
     ----------
-    coordinates: np.ndarray
-    elements: np.ndarray
-    f: Callable[[np.ndarray], float]
+    coordinates: CoordinatesType
+    elements: ElementsType
+    f: BoundaryConditionType
         the function for which to evaluate the load vector
 
     returns
@@ -119,9 +121,9 @@ def get_right_hand_side(coordinates: np.ndarray,
     return b
 
 
-def apply_neumann(neumann_bc: np.ndarray,
-                  coordinates: np.ndarray,
-                  g: Callable[[np.ndarray], float],
+def apply_neumann(neumann_bc: BoundaryType,
+                  coordinates: CoordinatesType,
+                  g: BoundaryConditionType,
                   b: np.ndarray):
     """
     applies neuman boundary conditions to b and returns new b
@@ -139,13 +141,13 @@ def apply_neumann(neumann_bc: np.ndarray,
     return b
 
 
-def solve_laplace(coordinates: np.ndarray,
-                  elements: np.ndarray,
-                  dirichlet: np.ndarray,
-                  neumann: np.ndarray,
-                  f: Callable[[np.ndarray], float],
-                  g: Callable[[np.ndarray], float],
-                  uD: Callable[[np.ndarray], float]
+def solve_laplace(coordinates: CoordinatesType,
+                  elements: ElementsType,
+                  dirichlet: BoundaryType,
+                  neumann: BoundaryType,
+                  f: BoundaryConditionType,
+                  g: BoundaryConditionType,
+                  uD: BoundaryConditionType
                   ) -> tuple[np.ndarray, float]:
     """
     solves the laplace equation, i.e.
@@ -158,26 +160,26 @@ def solve_laplace(coordinates: np.ndarray,
 
     parameters
     ----------
-    coordinates: np.ndarray
-    elements: np.ndarray
-    dirichlet: np.ndarray
+    coordinates: CoordinatesType
+    elements: ElementsType
+    dirichlet: BoundaryType
         the dirichlet boundary of the problem
-    neumann: np.ndarray
+    neumann: BoundaryType
         the neumann boundary of the problem
-    f: Callable[[np.ndarray], float]
+    f: BoundaryConditionType
         the right-hand-side function (volume force) of the problem
-    g: Callable[[np.ndarray], float]
+    g: BoundaryConditionType
         the neumann boundary function, i.e.
         u(x) = g(x) on Gamma_N
-    uD: Callable[[np.ndarray], float]
+    uD: BoundaryConditionType
         the dirichlet boundary function, i.e.
         du/dn(x) = uD(x) on Gamma_D
 
     returns
     -------
     x: np.ndarray
-        the solution of the given laplace problem
-        on the mesh provided
+        Nx2 array representing the solution of the
+        given laplace problem on the mesh provided
     energy: float
         the energy (A-norm: x.T*A*x) of the solution found
 

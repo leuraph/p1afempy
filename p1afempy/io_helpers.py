@@ -39,7 +39,7 @@ def read_coordinates(path_to_coordinates: Path) -> np.ndarray:
 
     Returns
     -------
-    coordinates: np.ndarray
+    coordinates: CoordinatesType
         coordinates of the mesh's vertices
 
     Example
@@ -68,7 +68,7 @@ def read_elements(path_to_elements: Path,
 
     Returns
     -------
-    elements: np.ndarray
+    elements: ElementsType
         elements of the mesh
 
     Example
@@ -103,9 +103,9 @@ def read_mesh(path_to_coordinates: Path,
 
     Returns
     -------
-    coordinates: np.ndarray
+    coordinates: CoordinatesType
         coordinates of the mesh's vertices
-    elements: np.ndarray
+    elements: ElementsType
         elements of the mesh
 
     Example
