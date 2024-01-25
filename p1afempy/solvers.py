@@ -4,7 +4,6 @@ from scipy.sparse import coo_matrix, csc_matrix
 from scipy.sparse.linalg import spsolve
 from p1afempy.data_structures import \
     CoordinatesType, ElementsType, BoundaryConditionType, BoundaryType
-from typing import Callable
 
 
 def get_stiffness_matrix(coordinates: CoordinatesType,
