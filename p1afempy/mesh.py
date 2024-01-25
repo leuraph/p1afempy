@@ -1,42 +1,45 @@
 import numpy as np
+from p1afempy import data_structures
 from scipy.sparse import coo_matrix, find
 from matplotlib import pyplot as plt
 
 
-def get_area(coordinates: np.ndarray,
-             elements: np.ndarray) -> np.ndarray:
+def get_area(coordinates: data_structures.CoordinatesType,
+             elements: data_structures.ElementsType) -> np.ndarray:
     """
     calculates and returns the area of each element as numpy array
 
     parameters
     ----------
-    coordinates: np.ndarray
-        vertices of the mesh
-    elements: np.ndarray
-        triangular elements of the mesh
+    coordinates: data_structures.CoordinatesType
+    elements: data_structures.ElementsType
 
     returns
     -------
-    np.ndarray: the area of each element as Mx1 array
+    np.ndarray:
+        area of each element as Mx1 array,
+        where M represents the number ot elements.
     """
     d21, d31 = get_directional_vectors(coordinates=coordinates,
                                        elements=elements)
     return 0.5 * (d21[:, 0]*d31[:, 1] - d21[:, 1] * d31[:, 0])
 
 
-def get_directional_vectors(coordinates: np.ndarray,
-                            elements: np.ndarray) -> tuple[np.ndarray,
-                                                           np.ndarray]:
+def get_directional_vectors(coordinates: data_structures.CoordinatesType,
+                            elements: data_structures.ElementsType
+                            ) -> tuple[np.ndarray, np.ndarray]:
     """
     returns the vectors pointing from vertex[0] to vertex[1]
     and vertex[2], respectively, for each element
 
     Returns
     -------
-    d21: np.ndarray (M x 2)
-        d21[k, :] points from vertex 0 to vertex 1 in the k-th element
-    d31: np.ndarray (M x 2)
-        d31[k, :] points from vertex 0 to vertex 2 in the k-th element
+    d21: np.ndarray
+        Mx2 array, where d21[k, :] points from vertex 0 to vertex 1
+        in the k-th element and M represents the number of elements
+    d31: np.ndarray
+        Mx2 array, where d31[k, :] points from vertex 0 to vertex 2
+        in the k-th element and M represents the number of elements
     """
     c1 = coordinates[elements[:, 0], :]
     d21 = coordinates[elements[:, 1], :] - c1
@@ -45,8 +48,8 @@ def get_directional_vectors(coordinates: np.ndarray,
     return d21, d31
 
 
-def show_mesh(coordinates: np.ndarray,
-              elements: np.ndarray) -> None:
+def show_mesh(coordinates: data_structures.CoordinatesType,
+              elements: data_structures.ElementsType) -> None:
     """displays the mesh at hand"""
     for element in elements:
         r0, r1, r2 = coordinates[element, :]
@@ -57,21 +60,18 @@ def show_mesh(coordinates: np.ndarray,
     plt.show()
 
 
-def provide_geometric_data(
-        elements: np.ndarray,
-        boundaries: list[np.ndarray]) -> tuple[np.ndarray,
-                                               np.ndarray,
-                                               list[np.ndarray]]:
+def provide_geometric_data(elements: data_structures.ElementsType,
+                           boundaries: list[data_structures.BoundaryType]
+                           ) -> tuple[np.ndarray,
+                                      np.ndarray,
+                                      list[np.ndarray]]:
     """
     provides geometric data about the mesh (elements and boundaries) at hand
 
     Parameters
     ----------
-    elements: np.ndarray
-        the elements of the mesh, i.e.
-        an Mx3 array where each row represents an element
-    boundaries: list[np.ndarray]
-        boundary conditions defined on the mesh
+    elements: data_structures.ElementsType
+    boundaries: list[data_structures.BoundaryType
 
     Returns
     -------
