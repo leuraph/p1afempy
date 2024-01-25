@@ -54,32 +54,34 @@ def refineRGB(coordinates: CoordinatesType,
 
 # TODO refactor s.t. sort_for_longest_egde vanishes, this is an ugly solution
 # TODO refactor s.t. boundary_conditions is optional
-def refineNVB(coordinates: np.ndarray,
-              elements: np.ndarray,
+def refineNVB(coordinates: CoordinatesType,
+              elements: ElementsType,
               marked_elements: np.ndarray,
-              boundary_conditions: list[np.ndarray],
+              boundary_conditions: list[BoundaryType],
               sort_for_longest_egde: bool = False
-              ) -> tuple[np.ndarray, np.ndarray, list[np.ndarray]]:
+              ) -> tuple[CoordinatesType,
+                         ElementsType,
+                         list[BoundaryType]]:
     """
-    Refines the mesh based on newest vertex bisection (NVB).
+    refines the mesh based on newest vertex bisection (NVB)
 
     Parameters
     ----------
-    coordinates: np.ndarray
-    elements: np.ndarray
+    coordinates: CoordinatesType
+    elements: ElementsType
     marked_elements: np.ndarray
-        Indices of the elements to be refined.
-    boundary_conditions: list[np.ndarray]
-        List of boundary conditions to update.
+        indices of the elements to be refined
+    boundary_conditions: list[BoundaryType]
+        list of boundaries to be refined
 
     Returns
     -------
-    new_coordinates: np.ndarray
+    new_coordinates: CoordinatesType
         the coordinates of the refined mesh
-    new_elements: np.ndarray
+    new_elements: ElementsType
         the elements of the refined mesh
-    new_boundaries: list[np.ndarray]
-        The refined boundary conditions
+    new_boundaries: list[BoundaryType]
+        the refined boundary conditions
 
     Example
     -------
