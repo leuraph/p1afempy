@@ -1,42 +1,41 @@
 import numpy as np
+from p1afempy import data_structures
 from p1afempy import mesh
-from typing import Callable
 
 
 def compute_eta_r(x: np.ndarray,
-                  coordinates: np.ndarray,
-                  elements: np.ndarray,
-                  dirichlet: np.ndarray,
-                  neumann: np.ndarray,
-                  f: Callable[[np.ndarray], float],
-                  g: Callable[[np.ndarray], float]) -> np.ndarray:
+                  coordinates: data_structures.CoordinatesType,
+                  elements: data_structures.ElementsType,
+                  dirichlet: data_structures.BoundaryType,
+                  neumann: data_structures.BoundaryType,
+                  f: data_structures.BoundaryConditionType,
+                  g: data_structures.BoundaryConditionType) -> np.ndarray:
     """
     computes residual-based error estimator for finite element
     solution of Laplace problem with mixed Dirichlet-Neumann
     boundary conditions.
+    For details, see chapter 6.2 in the original paper.
 
     parameters
     ----------
     x: np.ndarray
         the current solution iterate
-    coordinates: np.ndarray
+    coordinates: data_structures.CoordinatesType
         coordinates of the mesh
-    elements: np.ndarray
+    elements: elements: data_structures.ElementsType
         elements of the mesh
-    dirichlet: np.ndarray
-    neumann: np.ndarray
-    f: Callable[[np.ndarray], float]
-        Function correspnding to Dirichlet BC.
-        Expected to be callable like
-        f(np.array([[x1, y1], [x2, y2], [x3, y3]])).
-    g: Callable[[np.ndarray], float]
-        Function correspnding to Neumann BC.
-        Expected to be callable like
-        g(np.array([[x1, y1], [x2, y2], [x3, y3]])).
+    dirichlet: data_structures.BoundaryType
+    neumann: data_structures.BoundaryType
+    f: data_structures.BoundaryConditionType
+        function representing Dirichlet BC.
+    g: data_structures.BoundaryConditionType
+        function representing Neumann BC.
+
     returns
     -------
     etaR: np.ndarray
-        the residual-based error estimator
+        the Mx1 array of squared refinement indicators,
+        where M denotes the number of elements.
     """
     boundary_conditions = [dirichlet, neumann]
     element2edges, edge2nodes, boundaries_to_edges = \
