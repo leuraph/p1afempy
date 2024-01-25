@@ -12,7 +12,7 @@ are implemented in this repo as well (ticked boxes) and which are not (yet) (unt
 
 - [ ] `adaptiveAlgorithm.m`
 - [x] `coarsenNVB.m`
-- [x] `computeEtaH.m`
+- [ ] `computeEtaH.m`
 - [x] `computeEtaR.m`
 - [ ] `computeEtaZ.m`
 - [ ] `example1/`
