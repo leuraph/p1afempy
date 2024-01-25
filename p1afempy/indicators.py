@@ -3,6 +3,7 @@ from p1afempy import data_structures
 from p1afempy import mesh
 
 
+# TODO refactor: make boundary(conidtions) optional
 def compute_eta_r(x: np.ndarray,
                   coordinates: data_structures.CoordinatesType,
                   elements: data_structures.ElementsType,
