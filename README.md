@@ -27,6 +27,10 @@ are implemented in this repo as well (ticked boxes) and which are not (yet) (unt
 - [ ] `solveLaplace0.m`
 - [ ] `solveLaplace1.m`
 
+Also, this repo includes some functionalities that were not provided in the original MATLAB code.
+The most important of which is the assembly of the mass matrix,
+which is implemented along the same lines as the assembly of the stiffness matrix.
+
 ## Data structures
 
 Regarding the underlying data structures used, we follow the original code as closely as possible, i.e.
@@ -149,13 +153,6 @@ The `nativefile.ini` should look like this:
 umfpack-libdir = 'path/to/suite-sparse/lib'
 umfpack-includedir = 'path/to/suite-sparse/include'
 ```
-
-## Notes
-
-Note that this repo includes some functionalities that were not provided in the original
-P1AFEM Matlab package.
-The following provides a complete list of added functionalities.
-- Calculation of mass matrices.
 
 ## References
 
