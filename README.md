@@ -54,6 +54,16 @@ For more information, see
 
 <img src="figures/newest_vertex_bisection.png">
 
+### Solve Laplace
+
+The script used to measure and compare python performance is located at
+`p1afempy/tests/manual/performance_test_solve_laplace.py`.
+In every iteration, i.e. on each mesh, we measured the CPU time needed for solving $4$ times.
+For more information, see
+`p1afempy/tests/data/matlab_performance/solve_laplace/readme.md`.
+
+<img src="figures/solve_laplace.png">
+
 ## Performance upgrade
 
 In the following, we describe how to get more (the most) performance out of `solve_laplace`.
