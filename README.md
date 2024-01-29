@@ -43,7 +43,7 @@ As a quick reference, we refer to figure 3.1 below (copied from [[1]](#1)).
 For more details about the expected format of the data structures
 we refer to chapter 3.1 of [[1]](#1).
 
-<img alt="Figure 3.1 from ref. [1]" src="figures/fig_3-1.jpeg">
+![](https://raw.githubusercontent.com/leuraph/p1afempy/main/figures/newest_vertex_bisection.png "Figure 3.1 from ref. [1]")
 
 ## Performance tests
 
@@ -67,7 +67,7 @@ On each mesh, we performed $20$ measurements.
 For more information, see
 `p1afempy/tests/data/matlab_performance/stiffness_matrix_assembly/readme.md`.
 
-<img src="figures/stiffness_matrix_assembly.png">
+![](https://raw.githubusercontent.com/leuraph/p1afempy/main/figures/stiffness_matrix_assembly.png "Stiffness Matrix Assembly Performance Comparison")
 
 ### Newest Vertex Bisection
 
@@ -78,7 +78,8 @@ for the refinement $10$ times.
 For more information, see
 `p1afempy/tests/data/matlab_performance/newest_vertex_bisection/readme.md`.
 
-<img src="figures/newest_vertex_bisection.png">
+![](https://raw.githubusercontent.com/leuraph/p1afempy/main/figures/newest_vertex_bisection.png "Newest Vertex Bisection refinement performance comparison")
+
 
 ### Solve Laplace
 
@@ -88,7 +89,7 @@ In every iteration, i.e. on each mesh, we measured the CPU time needed for solvi
 For more information, see
 `p1afempy/tests/data/matlab_performance/solve_laplace/readme.md`.
 
-<img src="figures/solve_laplace.png">
+![](https://raw.githubusercontent.com/leuraph/p1afempy/main/figures/solve_laplace.png "solve laplace performance comparison")
 
 ## Performance upgrade
 
