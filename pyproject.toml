@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "p1afempy"
+version = "0.1.0"
+authors = [
+  { name="Raphael Leu", email="raphaelleu95@gmail.com" },
+]
+description = "Adaptive P1 FEM algorithms"
+readme = "README.md"
+requires-python = ">=3.9.18"
+dependencies = [
+  "numpy",
+  "scipy",
+  "pathlib",
+  "matplotlib"
+]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+
+[project.urls]
+Homepage = "https://github.com/leuraph/p1afempy"
+Issues = "https://github.com/leuraph/p1afempy/issues"
+
+[tool.setuptools.packages.find]
+exclude = ["p1afempy.tests*"]  # exclude packages matching these glob patterns (empty by default)
