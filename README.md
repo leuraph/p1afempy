@@ -104,7 +104,7 @@ For more information, see
 
 ## Example
 
-In the following we give an example on how to use this code.
+In the following, we give an example on how to use this code.
 
 ### Problem
 Consider the domain (unit square) $\Omega := \{ (x,y) \in \mathbb{R}^2 | 0 < x,y < 1 \}$
@@ -115,9 +115,9 @@ Then, we aim to solve the weak form of the following BVP:
 
 $$
 \begin{align*}
--\Delta u &= f(x,y) \, , \quad (x,y) \in \Omega \\
-u(x,y) &= u_{\text{D}}(x,y) \, , \quad (x, y) \in \Gamma_{\text{D}} \\
-\nabla u (x, y) \cdot \vec{n} & = g(x,y) \, , \quad (x, y) \in \Gamma_{\text{N}}
+-\Delta u &= f(x,y) , \quad (x,y) \in \Omega \\
+u(x,y) &= u_{\text{D}}(x,y) , \quad (x, y) \in \Gamma_{\text{D}} \\
+\nabla u (x, y) \cdot \vec{n} & = g(x,y) , \quad (x, y) \in \Gamma_{\text{N}}
 \end{align*}
 $$
 
