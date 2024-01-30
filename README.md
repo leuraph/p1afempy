@@ -4,6 +4,17 @@ This package is the pythonic adaption of the p1afem Matlab package,
 whose code can be found
 [here (ZIP)](https://www.tuwien.at/index.php?eID=dumpFile&t=f&f=180536&token=1b5f89369acab20d59455e42569bf1e0b2db8b41)
 and whose details are described in the paper (open access) [[1]](#1).
+An example use case can be found further below,
+
+## Installation
+
+This package can be installed using `pip`, i.e.
+
+```sh
+pip install p1afempy
+```
+
+The Python Package Index entry can be found [here](https://pypi.org/project/p1afempy/)
 
 ## What is (not) provided
 
@@ -43,7 +54,7 @@ As a quick reference, we refer to figure 3.1 below (copied from [[1]](#1)).
 For more details about the expected format of the data structures
 we refer to chapter 3.1 of [[1]](#1).
 
-![](https://raw.githubusercontent.com/leuraph/p1afempy/main/figures/newest_vertex_bisection.png "Figure 3.1 from ref. [1]")
+![](https://raw.githubusercontent.com/leuraph/p1afempy/main/figures/fig_3-1.jpeg "Figure 3.1 from ref. [1]")
 
 ## Performance tests
 
@@ -90,6 +101,146 @@ For more information, see
 `p1afempy/tests/data/matlab_performance/solve_laplace/readme.md`.
 
 ![](https://raw.githubusercontent.com/leuraph/p1afempy/main/figures/solve_laplace.png "solve laplace performance comparison")
+
+## Example
+
+In the following we give an example on how to use this code.
+
+### Problem
+Consider the domain (unit square) $\Omega := \{ (x,y) \in \mathbb{R}^2 | 0 < x,y < 1 \}$
+and a function $u : \Omega \to \mathbb{R}$.
+Moreover, we split the boundary in a Neumann and Dirichlet part, i.e. $\partial \Omega = \Gamma_{\text{N}} \cup \Gamma_{\text{D}}$.
+
+Then, we aim to solve the weak form of the following BVP:
+
+$$
+\begin{align*}
+-\Delta u &= f(x,y) \, , \quad (x,y) \in \Omega \\
+u(x,y) &= u_{\text{D}}(x,y) \, , \quad (x, y) \in \Gamma_{\text{D}} \\
+\nabla u (x, y) \cdot \vec{n} & = g(x,y) \, , \quad (x, y) \in \Gamma_{\text{N}}
+\end{align*}
+$$
+
+### Input Data
+
+As input data, we need a specification of the mesh (coordinates and elements)
+and its boundary (Neumann and  Dirichlet).
+
+- `coordinates.dat`
+    ```txt
+    0 0
+    1 0
+    1 1
+    0 1
+    ```
+- `elements.dat`
+    ```
+    0 1 2
+    0 2 3
+    ```
+- `dirichlet.dat`
+    ```txt
+    0 1
+    1 2
+    ```
+- `neumann.dat`
+    ```txt
+    2 3
+    3 0
+    ```
+
+### Solve Script
+
+We proceed as follows.
+
+1. Define the BVP by defining the corresponding functions.
+2. Read the initial mesh (unit square).
+3. Refine it a few times to get a reasonable mesh (`refine_nvb`).
+4. Solve the problem on this mesh (`solve_laplace`).
+
+The script to do so may look like this.
+
+```python
+import p1afempy
+import numpy as np
+from pathlib import Path
+
+
+OMEGA = 7./4. * np.pi
+
+
+def u(r: np.ndarray) -> float:
+    """analytical solution"""
+    return np.sin(OMEGA*2.*r[:, 0])*np.sin(OMEGA*r[:, 1])
+
+
+def f(r: np.ndarray) -> float:
+    """volume force corresponding to analytical solution"""
+    return 5. * OMEGA**2 * np.sin(OMEGA*2.*r[:, 0]) * np.sin(OMEGA*r[:, 1])
+
+
+def uD(r: np.ndarray) -> float:
+    """solution value on the Dirichlet boundary"""
+    return u(r)
+
+
+def g_right(r: np.ndarray) -> float:
+    return -2.*OMEGA*np.sin(OMEGA*r[:, 1])*np.cos(OMEGA*2.*r[:, 0])
+
+
+def g_upper(r: np.ndarray) -> float:
+    return OMEGA*np.sin(OMEGA*2.*r[:, 0]) * np.cos(OMEGA*r[:, 1])
+
+
+def g(r: np.ndarray) -> float:
+    out = np.zeros(r.shape[0])
+    right_indices = r[:, 0] == 1
+    upper_indices = r[:, 1] == 1
+    out[right_indices] = g_right(r[right_indices])
+    out[upper_indices] = g_upper(r[upper_indices])
+    return out
+
+
+def main() -> None:
+    path_to_coordinates = Path('coordinates.dat')
+    path_to_elements = Path('elements.dat')
+    path_to_neumann = Path('neumann.dat')
+    path_to_dirichlet = Path('dirichlet.dat')
+
+    coordinates, elements = p1afempy.io_helpers.read_mesh(
+        path_to_coordinates=path_to_coordinates,
+        path_to_elements=path_to_elements)
+    neumann_bc = p1afempy.io_helpers.read_boundary_condition(
+        path_to_boundary=path_to_neumann)
+    dirichlet_bc = p1afempy.io_helpers.read_boundary_condition(
+        path_to_boundary=path_to_dirichlet)
+    boundary_conditions = [dirichlet_bc, neumann_bc]
+
+    n_refinements = 3
+    for _ in range(n_refinements):
+        # mark all elements for refinement
+        marked_elements = np.arange(elements.shape[0])
+
+        # refine the mesh and boundary conditions
+        coordinates, elements, boundary_conditions = \
+            p1afempy.refinement.refineNVB(
+                coordinates=coordinates,
+                elements=elements,
+                marked_elements=marked_elements,
+                boundary_conditions=boundary_conditions)
+
+    # solve the example
+    x, energy = p1afempy.solvers.solve_laplace(
+        coordinates=coordinates, elements=elements,
+        dirichlet=boundary_conditions[0],
+        neumann=boundary_conditions[1],
+        f=f, g=g, uD=uD)
+
+
+if __name__ == '__main__':
+    main()
+
+```
 
 ## Performance upgrade
 
