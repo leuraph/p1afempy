@@ -4,6 +4,20 @@ from p1afempy.data_structures import \
     CoordinatesType, ElementsType, BoundaryType
 
 
+def refineRG(coordinates: CoordinatesType,
+             elements: ElementsType,
+             marked_elements: np.ndarray,
+             interpolant: np.ndarray) -> tuple[CoordinatesType,
+                                               ElementsType,
+                                               np.ndarray]:
+    """
+    refines the mesh according to red-green refinement
+    and interpolates a current solutionn onto the new nodes
+    """
+    # TODO implement
+    return coordinates, elements, interpolant
+
+
 # TODO refactor s.t. boundary_conditions is optional
 def refineRGB(coordinates: CoordinatesType,
               elements: ElementsType,
