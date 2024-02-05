@@ -27,42 +27,21 @@ def refineRG(coordinates: CoordinatesType,
     # nR = nE-nG;
 
     # Mark edges for refinement
-    edge2newNode = zeros(1,size(edge2nodes,1))
-    marked = markedElements(markedElements<=nR);
-    edge2newNode(element2edges(marked,:)) = 1;
-    marked = ceil((markedElements(markedElements>nR)-nR)/2);
-    edge2newNode(element2edges(nR+[2*marked-1,nE+2*marked])) = 1;
-    hashR = logical([1,1,1;1,0,0;0,1,0;0,0,1]);
-    [mapR,valueR] = hash2map((0:7)',hashR); 
-    hashG = logical([1,0,0,1;1,1,0,1;1,0,1,1;1,1,1,1]);
-    [mapG,valueG] = hash2map((0:15)',hashG); 
-    swap = 1;
-    while ~isempty(swap) || any(flags(:))
-        markedEdge = edge2newNode(element2edges);
-        %*** Change flags for red elements
-        bit = markedEdge(1:nR,:);
-        dec = sum(bit.*(ones(nR,1)*2.^(0:2)),2);
-        valR = valueR(dec+1);
-        [idx,jdx] = find(~bit & mapR(dec+1,:));
-        swap = idx +(jdx-1)*nE;
-        edge2newNode(element2edges(swap)) = 1;
-        %*** Change flags for green elements
-        bit = [markedEdge(nR+1:2:end,1:2), markedEdge(nR+2:2:end,1:2)];
-        dec = sum(bit.*(ones(nG/2,1)*2.^(0:3)),2);
-        valG = valueG(dec+1);
-        gdx = find(valG)';
-        flags = ~bit & mapG(dec+1,:);
-        edge2newNode(element2edges(nR+2*gdx(flags(gdx,1))-1,1)) = 1;
-        edge2newNode(element2edges(nR+2*gdx(flags(gdx,2))-1,2)) = 1;
-        edge2newNode(element2edges(nR+2*gdx(flags(gdx,3)),1)) = 1;
-        edge2newNode(element2edges(nR+2*gdx(flags(gdx,4)),2)) = 1;
-    end
-    %*** Generate new nodes
-    edge2newNode(edge2newNode~=0) = size(coordinates,1) ...
-                                        + (1:nnz(edge2newNode));
-    idx = find(edge2newNode);
-    coordinates(edge2newNode(idx),:) = (coordinates(edge2nodes(idx,1),:)...
-                                +coordinates(edge2nodes(idx,2),:))/2;
+    edge2newNode = np.zeros(edge2nodes.shape[0], dtype=int)
+    edge2newNode[element2edges[marked_element].flatten()] = 1
+
+    # generate new nodes
+    n_new_nodes = np.count_nonzero(edge2newNode)  # number of new nodes
+    # assigning indices to new nodes
+    edge2newNode[edge2newNode != 0] = np.arange(
+        coordinates.shape[0],
+        coordinates.shape[0] + n_new_nodes)
+    idx = np.nonzero(edge2newNode)[0]
+    new_node_coordinates = (
+        coordinates[edge2nodes[idx, 0], :] +
+        coordinates[edge2nodes[idx, 1], :]) / 2.
+    new_coordinates = np.vstack([coordinates, new_node_coordinates])
+
     %*** Refine boundary conditions
     varargout = cell(nargout-2,1);
     for j = 1:nargout-2
