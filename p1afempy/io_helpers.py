@@ -2,7 +2,8 @@ import numpy as np
 from pathlib import Path
 
 
-def read_boundary_condition(path_to_boundary: Path) -> np.ndarray:
+def read_boundary_condition(path_to_boundary: Path,
+                            shift_indices: bool = False) -> np.ndarray:
     """
     Reads boundary condition data from a file.
 
@@ -10,6 +11,11 @@ def read_boundary_condition(path_to_boundary: Path) -> np.ndarray:
     ----------
     path_to_boundary: pathlib.Path
         Path to the file containing boundary condition data.
+    shift_indices: bool (default=False)
+        If true, shifts the elements' indices according to i':=i-1.
+        This can come in handy if, e.g., one wants to read data
+        that is compatible with Matlab/Fortran/Julia indexing
+        (starting at 1, instead of 0).
 
     Returns
     -------
@@ -24,6 +30,8 @@ def read_boundary_condition(path_to_boundary: Path) -> np.ndarray:
     >>> boundary_condition = read_boundary_condition(file_path)
     """
     boundary_indices = np.loadtxt(path_to_boundary).astype(np.uint32)
+    if shift_indices:
+        boundary_indices = boundary_indices - 1
     return boundary_indices
 
 
