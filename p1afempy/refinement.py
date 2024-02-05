@@ -60,20 +60,23 @@ def refineRG(coordinates: CoordinatesType,
 
     # Provide new nodes for refinement of elements
     newNodes = edge2newNode[element2edges]
-    
-    # Determine type of refinement for each red element
-    none = find(valR == 0);
-    r2red = find(valR == 1);
-    r2green1 = find(valR == 2);
-    r2green2 = find(valR == 3);
-    r2green3 = find(valR == 4);
-    
-    # Determine type of refinement for each green element
-    g2green = nR + find(valG == 0);
-    g2red = nR + find(valG == 1);
-    g2red1 = nR + find(valG == 2);
-    g2red2 = nR + find(valG == 3);
-    g2red12 = nR + find(valG == 4);
+
+    # Determine type of refinement for each element
+    marked_edges = newNodes != 0
+
+    first_marked = marked_edges[:, 0]
+    second_marked = marked_edges[:, 1]
+    third_marked = marked_edges[:, 2]
+
+    not_first = np.logical_not(first_marked)
+    not_second = np.logical_not(second_marked)
+    not_third = np.logical_not(third_marked)
+
+    none = not_first & not_second & not_third
+    green1 = first_marked & not_first & not_second
+    green2 = not_first & second_marked & not_third
+    green3 = not_first & not_second & third_marked
+    red = first_marked & second_marked & third_marked
     
     # Generate element numbering for refined mesh
     rdx = zeros(nR+nG/2,1);
