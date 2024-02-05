@@ -29,13 +29,13 @@ class RefinementTest(unittest.TestCase):
         # ----------------
         # case no_boundary
         # ----------------
-        marked_elements = np.array([3])
+        marked_element = 3
 
         new_coordinates, new_elements, new_boundaries = \
             refinement.refineRG(
                 coordinates=coordinates,
                 elements=elements,
-                marked_elements=marked_elements,
+                marked_element=marked_element,
                 boundaries=boundaries)
 
         path_to_refined_coordinates = Path(

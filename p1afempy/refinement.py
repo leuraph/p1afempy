@@ -6,13 +6,12 @@ from p1afempy.data_structures import \
 
 def refineRG(coordinates: CoordinatesType,
              elements: ElementsType,
-             marked_elements: np.ndarray,
+             marked_element: int,
              boundaries: list[BoundaryType] = []) -> tuple[CoordinatesType,
                                                            ElementsType,
                                                            np.ndarray]:
     """
-    refines the mesh according to red-green refinement
-    and interpolates a current solutionn onto the new nodes
+    refines the mesh according to red-green refinement of one single element
     """
     # TODO implement
     return coordinates, elements, boundaries
