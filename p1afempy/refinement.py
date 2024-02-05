@@ -80,11 +80,11 @@ def refineRG(coordinates: CoordinatesType,
 
     # generate element numbering for refined mesh
     idx = np.ones(nE, dtype=int)
-    idx[green1] = 2  # bisec(1): newest vertex bisection of 1st edge
-    idx[green2] = 2  # bisec(2): newest vertex bisection of 1st and 2nd edge
-    idx[green3] = 2  # bisec(2): newest vertex bisection of 1st and 3rd edge
-    idx[red] = 4  # bisec(3): newest vertex bisection of all edges
-    idx = np.hstack([0, np.cumsum(idx)])  # TODO maybe bug source
+    idx[green1] = 2  # green(1): green refinement of 1st edge
+    idx[green2] = 2  # green(2): green refinement of 2nd edge
+    idx[green3] = 2  # green(3): green refinement of 3rd edge
+    idx[red] = 4  # red: red refinement
+    idx = np.hstack([0, np.cumsum(idx)])
     
     # Generate new red elements
     newElements = 1+zeros(gdx(end)-1,3);
