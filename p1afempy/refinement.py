@@ -14,17 +14,10 @@ def refineRG(coordinates: CoordinatesType,
     refines the mesh according to red-green refinement of one single element
     """
     nE = elements.shape[0]
-    markedElements = marked_element
 
     # Obtain geometric information on edges
     element2edges, edge2nodes, boundary2edges = \
         provide_geometric_data(elements=elements, boundaries=boundaries)
-
-    # Count number of green sibling elements;
-    # if isempty(nG)
-    #     nG = 0;
-    # end
-    # nR = nE-nG;
 
     # Mark edges for refinement
     edge2newNode = np.zeros(edge2nodes.shape[0], dtype=int)
