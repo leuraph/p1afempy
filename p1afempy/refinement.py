@@ -58,21 +58,24 @@ def refineRG(coordinates: CoordinatesType,
                                       boundary[marked_edges, 1]])])
         new_boundaries.append(boundary)
 
-    %*** Provide new nodes for refinement of elements
+    # Provide new nodes for refinement of elements
     newNodes = edge2newNode(element2edges);
-    %*** Determine type of refinement for each red element
+    
+    # Determine type of refinement for each red element
     none = find(valR == 0);
     r2red = find(valR == 1);
     r2green1 = find(valR == 2);
     r2green2 = find(valR == 3);
     r2green3 = find(valR == 4);
-    %*** Determine type of refinement for each green element
+    
+    # Determine type of refinement for each green element
     g2green = nR + find(valG == 0);
     g2red = nR + find(valG == 1);
     g2red1 = nR + find(valG == 2);
     g2red2 = nR + find(valG == 3);
     g2red12 = nR + find(valG == 4);
-    %*** Generate element numbering for refined mesh
+    
+    # Generate element numbering for refined mesh
     rdx = zeros(nR+nG/2,1);
     rdx(none)    = 1;
     rdx([r2red,g2red])   = 4;
@@ -83,7 +86,8 @@ def refineRG(coordinates: CoordinatesType,
     gdx([r2green1, r2green2, r2green3, g2green, g2red1, g2red2]) = 2;
     gdx(g2red12) = 4;
     gdx = rdx(end)+[0;0+cumsum(gdx)];
-    %*** Generate new red elements
+    
+    # Generate new red elements
     newElements = 1+zeros(gdx(end)-1,3);
     newElements(rdx(none),:) = elements(none,:);
     tmp = [elements(1:nR,:),newNodes(1:nR,:),zeros(nR,2);...
@@ -102,7 +106,8 @@ def refineRG(coordinates: CoordinatesType,
         = [tmp(g2red2,[4,5,6]);tmp(g2red2,[1,4,6]);tmp(g2red2,[3,6,5])];
     newElements([rdx(g2red12),1+rdx(g2red12)],:) ...
         = [tmp(g2red12,[4,5,6]);tmp(g2red12,[3,6,5])];
-    %*** New green elements
+    
+    # New green elements
     newElements([gdx(r2green1),1+gdx(r2green1)],:) ...
         = [tmp(r2green1,[3,1,4]);tmp(r2green1,[4,2,3])];
     newElements([gdx(r2green2),1+gdx(r2green2)],:) ...
