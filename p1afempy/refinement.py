@@ -310,9 +310,10 @@ def refineNVB(coordinates: CoordinatesType,
 
     # generate new elements
     new_elements = np.zeros((idx[-1], 3), dtype=int)
-    new_elements[idx[np.hstack((none, False))], :] = elements[none, :]
-    new_elements[np.hstack([idx[np.hstack((bisec1, False))],
-                           1+idx[np.hstack((bisec1, False))]]), :] \
+    idx = idx[:-1]
+    new_elements[idx[none], :] = elements[none, :]
+    new_elements[np.hstack([idx[bisec1],
+                           1+idx[bisec1]]), :] \
         = np.vstack(
             [np.column_stack([
                 elements[bisec1, 2],
@@ -322,9 +323,9 @@ def refineNVB(coordinates: CoordinatesType,
                  elements[bisec1, 1],
                  elements[bisec1, 2],
                  new_nodes[bisec1, 0]])])
-    new_elements[np.hstack([idx[np.hstack((bisec12, False))],
-                           1+idx[np.hstack((bisec12, False))],
-                           2+idx[np.hstack((bisec12, False))]]), :] \
+    new_elements[np.hstack([idx[bisec12],
+                           1+idx[bisec12],
+                           2+idx[bisec12]]), :] \
         = np.vstack(
             [np.column_stack([elements[bisec12, 2],
                               elements[bisec12, 0],
@@ -335,9 +336,9 @@ def refineNVB(coordinates: CoordinatesType,
              np.column_stack([elements[bisec12, 2],
                               new_nodes[bisec12, 0],
                               new_nodes[bisec12, 1]])])
-    new_elements[np.hstack([idx[np.hstack((bisec13, False))],
-                           1+idx[np.hstack((bisec13, False))],
-                           2+idx[np.hstack((bisec13, False))]]), :] \
+    new_elements[np.hstack([idx[bisec13],
+                           1+idx[bisec13],
+                           2+idx[bisec13]]), :] \
         = np.vstack(
             [np.column_stack([new_nodes[bisec13, 0],
                               elements[bisec13, 2],
@@ -349,10 +350,10 @@ def refineNVB(coordinates: CoordinatesType,
                               elements[bisec13, 2],
                               new_nodes[bisec13, 0]])])
     if sort_for_longest_egde:
-        new_elements[np.hstack([idx[np.hstack([bisec123, False])],
-                               1+idx[np.hstack([bisec123, False])],
-                               2+idx[np.hstack([bisec123, False])],
-                               3+idx[np.hstack([bisec123, False])]]), :] \
+        new_elements[np.hstack([idx[bisec123],
+                               1+idx[bisec123],
+                               2+idx[bisec123],
+                               3+idx[bisec123]]), :] \
             = np.vstack([
                 np.column_stack([elements[bisec123, 0],
                                  new_nodes[bisec123, 0],
@@ -367,10 +368,10 @@ def refineNVB(coordinates: CoordinatesType,
                                  new_nodes[bisec123, 2],
                                  new_nodes[bisec123, 0]])])
     else:
-        new_elements[np.hstack([idx[np.hstack((bisec123, False))],
-                               1+idx[np.hstack((bisec123, False))],
-                               2+idx[np.hstack((bisec123, False))],
-                               3+idx[np.hstack((bisec123, False))]]), :] \
+        new_elements[np.hstack([idx[bisec123],
+                               1+idx[bisec123],
+                               2+idx[bisec123],
+                               3+idx[bisec123]]), :] \
             = np.vstack([
                 np.column_stack([new_nodes[bisec123, 0],
                                 elements[bisec123, 2],
