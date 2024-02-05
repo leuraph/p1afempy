@@ -72,7 +72,7 @@ def refineRG(coordinates: CoordinatesType,
     not_third = np.logical_not(third_marked)
 
     none = not_first & not_second & not_third
-    green1 = first_marked & not_first & not_second
+    green1 = first_marked & not_second & not_third
     green2 = not_first & second_marked & not_third
     green3 = not_first & not_second & third_marked
     red = first_marked & second_marked & third_marked
