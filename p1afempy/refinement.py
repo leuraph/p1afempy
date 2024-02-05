@@ -42,21 +42,22 @@ def refineRG(coordinates: CoordinatesType,
         coordinates[edge2nodes[idx, 1], :]) / 2.
     new_coordinates = np.vstack([coordinates, new_node_coordinates])
 
-    %*** Refine boundary conditions
-    varargout = cell(nargout-2,1);
-    for j = 1:nargout-2
-        boundary = varargin{j};
-        if ~isempty(boundary)
-            newNodes = edge2newNode(boundary2edges{j})';
-            markedEdges = find(newNodes);
-            if ~isempty(markedEdges)
-                boundary = [boundary(~newNodes,:); ...
-                    boundary(markedEdges,1),newNodes(markedEdges); ...
-                    newNodes(markedEdges),boundary(markedEdges,2)];
-            end
-        end
-        varargout{j} = boundary;
-    end
+
+    # refine boundary conditions
+    new_boundaries = []
+    for k, boundary in enumerate(boundaries):
+        if boundary.size:
+            new_nodes_on_boundary = edge2newNode[boundaries[k]]
+            marked_edges = np.nonzero(new_nodes_on_boundary)[0]
+            if marked_edges.size:
+                boundary = np.vstack(
+                    [boundary[np.logical_not(new_nodes_on_boundary), :],
+                     np.column_stack([boundary[marked_edges, 0],
+                                      new_nodes_on_boundary[marked_edges]]),
+                     np.column_stack([new_nodes_on_boundary[marked_edges],
+                                      boundary[marked_edges, 1]])])
+        new_boundaries.append(boundary)
+
     %*** Provide new nodes for refinement of elements
     newNodes = edge2newNode(element2edges);
     %*** Determine type of refinement for each red element
