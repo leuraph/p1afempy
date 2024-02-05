@@ -42,12 +42,11 @@ def refineRG(coordinates: CoordinatesType,
         coordinates[edge2nodes[idx, 1], :]) / 2.
     new_coordinates = np.vstack([coordinates, new_node_coordinates])
 
-
     # refine boundary conditions
     new_boundaries = []
     for k, boundary in enumerate(boundaries):
         if boundary.size:
-            new_nodes_on_boundary = edge2newNode[boundaries[k]]
+            new_nodes_on_boundary = edge2newNode[boundary2edges[k]]
             marked_edges = np.nonzero(new_nodes_on_boundary)[0]
             if marked_edges.size:
                 boundary = np.vstack(
@@ -85,46 +84,69 @@ def refineRG(coordinates: CoordinatesType,
     idx[green3] = 2  # green(3): green refinement of 3rd edge
     idx[red] = 4  # red: red refinement
     idx = np.hstack([0, np.cumsum(idx)])
-    
-    # Generate new red elements
-    newElements = 1+zeros(gdx(end)-1,3);
-    newElements(rdx(none),:) = elements(none,:);
-    tmp = [elements(1:nR,:),newNodes(1:nR,:),zeros(nR,2);...
-        elements(nR+1:2:end,2),elements(nR+2:2:end,[2,3,1])...
-        newNodes(nR+2:2:end,2), newNodes(nR+1:2:end,1:2),...
-        newNodes(nR+2:2:end,1)];
-    newElements([rdx(r2red),1+rdx(r2red),2+rdx(r2red),3+rdx(r2red)],:) ...
-        = [tmp(r2red,[4,5,6]);tmp(r2red,[1,4,6]);tmp(r2red,[2,5,4]);...
-        tmp(r2red,[3,6,5])];
-    newElements([rdx(g2red),1+rdx(g2red),2+rdx(g2red),3+rdx(g2red)],:) ...
-        = [tmp(g2red,[4,5,6]);tmp(g2red,[1,4,6]);...
-        tmp(g2red,[4,2,5]);tmp(g2red,[3,6,5])];
-    newElements([rdx(g2red1),1+rdx(g2red1),2+rdx(g2red1)],:) ...
-        = [tmp(g2red1,[4,5,6]);tmp(g2red1,[4,2,5]);tmp(g2red1,[3,6,5])];
-    newElements([rdx(g2red2),1+rdx(g2red2),2+rdx(g2red2)],:) ...
-        = [tmp(g2red2,[4,5,6]);tmp(g2red2,[1,4,6]);tmp(g2red2,[3,6,5])];
-    newElements([rdx(g2red12),1+rdx(g2red12)],:) ...
-        = [tmp(g2red12,[4,5,6]);tmp(g2red12,[3,6,5])];
-    
-    # New green elements
-    newElements([gdx(r2green1),1+gdx(r2green1)],:) ...
-        = [tmp(r2green1,[3,1,4]);tmp(r2green1,[4,2,3])];
-    newElements([gdx(r2green2),1+gdx(r2green2)],:) ...
-        = [tmp(r2green2,[1,2,5]);tmp(r2green2,[5,3,1])];
-    newElements([gdx(r2green3),1+gdx(r2green3)],:) ...
-        = [tmp(r2green3,[2,3,6]);tmp(r2green3,[6,1,2])];
-    newElements([gdx(g2green),1+gdx(g2green)],:) ...
-        = [tmp(g2green,[3,1,4]);tmp(g2green,[4,2,3]);];
-    newElements([gdx(g2red1),1+gdx(g2red1)],:) ...
-        = [tmp(g2red1,[6,1,7]);tmp(g2red1,[7,4,6])];
-    newElements([gdx(g2red2),1+gdx(g2red2)],:) ...
-        = [tmp(g2red2,[5,4,8]);tmp(g2red2,[8,2,5])];
-    newElements([gdx(g2red12),1+gdx(g2red12),2+gdx(g2red12),...
-        3+gdx(g2red12)],:) = [tmp(g2red12,[6,1,7]);tmp(g2red12,[7,4,6]);...
-        tmp(g2red12,[5,4,8]);tmp(g2red12,[8,2,5])];
-    nG = size(newElements,1)-rdx(end)+1;
 
-    return coordinates, elements, boundaries
+    # generate new elements
+    # ---------------------
+    new_elements = np.zeros((idx[-1], 3), dtype=int)
+    idx = idx[:-1]
+
+    # no refinement
+    new_elements[idx[none], :] = elements[none, :]
+
+    # green refinement (1)
+    new_elements[np.hstack([idx[green1], 1+idx[green1]]), :] \
+        = np.vstack(
+            [np.column_stack([
+                elements[green1, 0],
+                newNodes[green1, 0],
+                elements[green1, 2]]),
+             np.column_stack([
+                 newNodes[green1, 0],
+                 elements[green1, 1],
+                 elements[green1, 2]])])
+
+    # green refinement (2)
+    new_elements[np.hstack([idx[green2], 1+idx[green2]]), :] \
+        = np.vstack(
+            [np.column_stack([
+                elements[green2, 1],
+                newNodes[green2, 1],
+                elements[green2, 0]]),
+             np.column_stack([
+                 newNodes[green2, 1],
+                 elements[green2, 2],
+                 elements[green2, 0]])])
+
+    # green refinement (3)
+    new_elements[np.hstack([idx[green3], 1+idx[green3]]), :] \
+        = np.vstack(
+            [np.column_stack([
+                elements[green3, 2],
+                newNodes[green3, 2],
+                elements[green3, 1]]),
+             np.column_stack([
+                 newNodes[green3, 2],
+                 elements[green3, 0],
+                 elements[green3, 1]])])
+
+    # red refinement HERE
+    new_elements[np.hstack([idx[red], 1+idx[red],
+                            2+idx[red], 3+idx[red]]), :] \
+        = np.vstack([
+            np.column_stack([elements[red, 0],
+                             newNodes[red, 0],
+                             newNodes[red, 2]]),
+            np.column_stack([newNodes[red, 0],
+                             elements[red, 1],
+                             newNodes[red, 1]]),
+            np.column_stack([newNodes[red, 2],
+                             newNodes[red, 1],
+                             elements[red, 2]]),
+            np.column_stack([newNodes[red, 0],
+                             newNodes[red, 1],
+                             newNodes[red, 2]])])
+
+    return new_coordinates, new_elements, new_boundaries
 
 
 # TODO refactor s.t. boundary_conditions is optional
