@@ -59,7 +59,7 @@ def refineRG(coordinates: CoordinatesType,
         new_boundaries.append(boundary)
 
     # Provide new nodes for refinement of elements
-    newNodes = edge2newNode(element2edges);
+    newNodes = edge2newNode[element2edges]
     
     # Determine type of refinement for each red element
     none = find(valR == 0);
