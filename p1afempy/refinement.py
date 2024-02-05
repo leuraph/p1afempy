@@ -77,18 +77,14 @@ def refineRG(coordinates: CoordinatesType,
     green2 = not_first & second_marked & not_third
     green3 = not_first & not_second & third_marked
     red = first_marked & second_marked & third_marked
-    
-    # Generate element numbering for refined mesh
-    rdx = zeros(nR+nG/2,1);
-    rdx(none)    = 1;
-    rdx([r2red,g2red])   = 4;
-    rdx([g2red1,g2red2])  = 3;
-    rdx(g2red12) = 2;
-    rdx = [1;1+cumsum(rdx)];
-    gdx = zeros(size(rdx));
-    gdx([r2green1, r2green2, r2green3, g2green, g2red1, g2red2]) = 2;
-    gdx(g2red12) = 4;
-    gdx = rdx(end)+[0;0+cumsum(gdx)];
+
+    # generate element numbering for refined mesh
+    idx = np.ones(nE, dtype=int)
+    idx[green1] = 2  # bisec(1): newest vertex bisection of 1st edge
+    idx[green1] = 2  # bisec(2): newest vertex bisection of 1st and 2nd edge
+    idx[green2] = 2  # bisec(2): newest vertex bisection of 1st and 3rd edge
+    idx[red] = 4  # bisec(3): newest vertex bisection of all edges
+    idx = np.hstack([0, np.cumsum(idx)])  # TODO maybe bug source
     
     # Generate new red elements
     newElements = 1+zeros(gdx(end)-1,3);
