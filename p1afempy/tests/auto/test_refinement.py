@@ -65,7 +65,41 @@ class RefinementTest(unittest.TestCase):
         self.assertTrue(np.all(
             new_boundaries[1] == expected_neumann))
 
-        # TODO add case dirichlet
+        # --------------
+        # case dirichlet
+        # --------------
+        marked_element = 0
+
+        new_coordinates, new_elements, new_boundaries = \
+            refinement.refineRG(
+                coordinates=coordinates,
+                elements=elements,
+                marked_element=marked_element,
+                boundaries=boundaries)
+
+        path_to_refined_coordinates = Path(
+            'tests/data/trefined_rg/case_dirichlet/new_coordinates.dat')
+        path_to_refined_elements = Path(
+            'tests/data/trefined_rg/case_dirichlet/new_elements.dat')
+        expected_coordinates, expected_elements = io_helpers.read_mesh(
+            path_to_coordinates=path_to_refined_coordinates,
+            path_to_elements=path_to_refined_elements,
+            shift_indices=False)
+        expected_dirichlet = io_helpers.read_boundary_condition(
+            Path('tests/data/trefined_rg/case_dirichlet/new_dirichlet.dat'),
+            shift_indices=False)
+        expected_neumann = io_helpers.read_boundary_condition(
+            Path('tests/data/trefined_rg/case_dirichlet/new_neumann.dat'),
+            shift_indices=False)
+
+        self.assertTrue(np.all(
+            new_coordinates == expected_coordinates))
+        self.assertTrue(np.all(
+            new_elements == expected_elements))
+        self.assertTrue(np.all(
+            new_boundaries[0] == expected_dirichlet))
+        self.assertTrue(np.all(
+            new_boundaries[1] == expected_neumann))
         # TODO add case neumann
 
         # TODO add case with many more elements exploting possible edge-cases
