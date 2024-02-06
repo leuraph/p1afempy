@@ -11,7 +11,38 @@ def refineRG(coordinates: CoordinatesType,
                                                       ElementsType,
                                                       np.ndarray]:
     """
-    refines the mesh according to red-green refinement of one single element
+    refines the mesh according to
+    red-green refinement of one single element
+
+    parameters
+    ----------
+    coordinates: CoordinatesType
+    elements: ElementsType
+    marked_element: int
+        the index of the element to be red refined
+    boundaries: list[BoundaryType]
+
+    returns
+    -------
+    new_coordinates: CoordinatesType
+        coordinates of the refined mesh
+    new_elements: ElementsType
+        elements of the refined mesh
+    new_boundaries: list[BoundaryType]
+        boundaries of the refines mesh
+
+    notes
+    -----
+    this method does the following
+    - given an element k=marked_element marked for
+      refinement
+    - red refine element k
+    - green refine all neighbouring elements (at most three),
+      meaning that the new vertex on the edge shared by k
+      and its neighbour k' gets connected to the vertex
+      in k' opposite to the shared edge
+    - if any new vertex lies on a boundary,
+      refine the boundary accordingly
     """
     nE = elements.shape[0]
 
