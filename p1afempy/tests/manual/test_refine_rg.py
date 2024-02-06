@@ -15,13 +15,13 @@ def main() -> None:
     coordinates, elements = io_helpers.read_mesh(
         path_to_coordinates=path_to_coordinates,
         path_to_elements=path_to_elements,
-        shift_indices=True)
+        shift_indices=False)
     dirichlet = io_helpers.read_boundary_condition(
         path_to_boundary=path_to_dirichlet,
-        shift_indices=True)
+        shift_indices=False)
     neumann = io_helpers.read_boundary_condition(
         path_to_boundary=path_to_neumann,
-        shift_indices=True)
+        shift_indices=False)
     boundaries = [dirichlet, neumann]
 
     # ----------------
