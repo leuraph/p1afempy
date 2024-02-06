@@ -7,9 +7,9 @@ from p1afempy.data_structures import \
 def refineRG(coordinates: CoordinatesType,
              elements: ElementsType,
              marked_element: int,
-             boundaries: list[BoundaryType] = []) -> tuple[CoordinatesType,
-                                                           ElementsType,
-                                                           np.ndarray]:
+             boundaries: list[BoundaryType]) -> tuple[CoordinatesType,
+                                                      ElementsType,
+                                                      np.ndarray]:
     """
     refines the mesh according to red-green refinement of one single element
     """
