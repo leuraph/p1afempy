@@ -1,7 +1,6 @@
-Here, we generate the data used to test our python
-implementation of the reg-green refinement strategy
-against the MATLAB function `TrefineRG` found in this repo:
-https://github.com/aschmidtuulm/ameshref
+Here, we hardcoded the input and expected output data
+for our implementation of the red-green refinement of a sinngle
+element.
 
 ## Test Cases
 
