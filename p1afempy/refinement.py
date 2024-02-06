@@ -122,7 +122,7 @@ def refineRG(coordinates: CoordinatesType,
                  elements[green3, 0],
                  elements[green3, 1]])])
 
-    # red refinement HERE
+    # red refinement
     new_elements[np.hstack([idx[red], 1+idx[red],
                             2+idx[red], 3+idx[red]]), :] \
         = np.vstack([
