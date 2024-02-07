@@ -21,14 +21,13 @@ def generate_new_nodes(edge2newNode: np.ndarray,
         coordinates[edge2nodes[idx, 1], :]) / 2.
 
     # interpolate values, if given
-    # ----------------------------
-    # TODO implement
-    embedded_values = np.array([])
     if to_embed.size:
-        pass
-    # ----------------------------
+        new_embedded_values = (
+            to_embed[edge2nodes[idx, 0], :] +
+            to_embed[edge2nodes[idx, 1], :]) / 2.
+        to_embed = np.vstack([to_embed, new_embedded_values])
 
-    return np.vstack([coordinates, new_node_coordinates]), embedded_values
+    return np.vstack([coordinates, new_node_coordinates]), to_embed
 
 
 def refineRG(coordinates: CoordinatesType,
