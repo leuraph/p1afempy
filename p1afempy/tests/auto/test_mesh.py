@@ -116,7 +116,7 @@ class MeshTest(unittest.TestCase):
                                boundary_condition_1]
         coordinates, elements = MeshTest.get_simple_square_mesh()
 
-        refined_coordinates, refined_elements, new_boundaries = \
+        refined_coordinates, refined_elements, new_boundaries, _ = \
             refinement.refineNVB(coordinates=coordinates,
                                  elements=elements,
                                  marked_elements=np.array([0, 1]),
@@ -168,7 +168,7 @@ class MeshTest(unittest.TestCase):
             path_to_coordinates=path_to_coordinates,
             path_to_elements=path_to_elements)
         marked_elements = np.array([0, 1, 3, 5])
-        refined_coordinates, refined_elements, new_boundaries = \
+        refined_coordinates, refined_elements, new_boundaries, _ = \
             refinement.refineNVB(
                 coordinates=coordinates,
                 elements=elements,
@@ -216,7 +216,7 @@ class MeshTest(unittest.TestCase):
             path_to_coordinates=path_to_coordinates,
             path_to_elements=path_to_elements)
         marked_elements = np.array([0, 1, 3, 5])
-        refined_coordinates, refined_elements, new_boundaries = \
+        refined_coordinates, refined_elements, new_boundaries, _ = \
             refinement.refineRGB(
                 coordinates=coordinates,
                 elements=elements,

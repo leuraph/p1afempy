@@ -40,17 +40,17 @@ def main() -> None:
         for _ in range(n_repetetitions_each):
             start_time = time.process_time_ns()
             # refine and throw away the result
-            _, _, _ = refinement.refineNVB(coordinates=coordinates,
-                                           elements=elements,
-                                           marked_elements=marked_elements,
-                                           boundary_conditions=boundaries)
+            _, _, _, _ = refinement.refineNVB(coordinates=coordinates,
+                                              elements=elements,
+                                              marked_elements=marked_elements,
+                                              boundary_conditions=boundaries)
             end_time = time.process_time_ns()
             test_result.add_time(time=(end_time - start_time)*1e-9)
 
         test_results.append(copy.deepcopy(test_result))
 
         # actually keep refinement's result to get next iteration step
-        coordinates, elements, boundaries = refinement.refineNVB(
+        coordinates, elements, boundaries, _ = refinement.refineNVB(
             coordinates=coordinates,
             elements=elements,
             marked_elements=marked_elements,

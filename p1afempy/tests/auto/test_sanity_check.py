@@ -93,7 +93,7 @@ class SanityChecks(unittest.TestCase):
             marked_elements = np.arange(elements.shape[0])
 
             # perform refinement
-            coordinates, elements, boundaries = refinement.refineNVB(
+            coordinates, elements, boundaries, _ = refinement.refineNVB(
                 coordinates=coordinates,
                 elements=elements,
                 marked_elements=marked_elements,
@@ -116,7 +116,7 @@ class SanityChecks(unittest.TestCase):
             marked_elements = np.arange(elements.shape[0])
 
             # perform refinement
-            coordinates, elements, boundaries = refinement.refineRGB(
+            coordinates, elements, boundaries, _ = refinement.refineRGB(
                 coordinates=coordinates,
                 elements=elements,
                 marked_elements=marked_elements,

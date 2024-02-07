@@ -31,7 +31,7 @@ class SolverTest(unittest.TestCase):
         n_refinements = 3
         for _ in range(n_refinements):
             marked_elements = np.arange(elements.shape[0])
-            coordinates, elements, boundary_conditions = refinement.refineNVB(
+            coordinates, elements, boundary_conditions, _ = refinement.refineNVB(
                 coordinates=coordinates,
                 elements=elements,
                 marked_elements=marked_elements,
