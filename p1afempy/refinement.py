@@ -15,16 +15,16 @@ def generate_new_nodes(edge2newNode: np.ndarray,
     edge2newNode[edge2newNode != 0] = np.arange(
         coordinates.shape[0],
         coordinates.shape[0] + n_new_nodes)
-    idx = np.nonzero(edge2newNode)[0]
+    edges_with_new_nodes_indices = np.nonzero(edge2newNode)[0]
     new_node_coordinates = (
-        coordinates[edge2nodes[idx, 0], :] +
-        coordinates[edge2nodes[idx, 1], :]) / 2.
+        coordinates[edge2nodes[edges_with_new_nodes_indices, 0], :] +
+        coordinates[edge2nodes[edges_with_new_nodes_indices, 1], :]) / 2.
 
     # interpolate values, if given
     if to_embed.size:
         new_embedded_values = (
-            to_embed[edge2nodes[idx, 0], :] +
-            to_embed[edge2nodes[idx, 1], :]) / 2.
+            to_embed[edge2nodes[edges_with_new_nodes_indices, 0], :] +
+            to_embed[edge2nodes[edges_with_new_nodes_indices, 1], :]) / 2.
         to_embed = np.vstack([to_embed, new_embedded_values])
 
     return np.vstack([coordinates, new_node_coordinates]), to_embed
