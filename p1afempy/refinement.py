@@ -4,12 +4,39 @@ from p1afempy.data_structures import \
     CoordinatesType, ElementsType, BoundaryType
 
 
+def generate_new_nodes(edge2newNode: np.ndarray,
+                       edge2nodes: np.ndarray,
+                       coordinates: CoordinatesType,
+                       to_embed: np.ndarray = np.array([])) -> tuple[
+                           np.ndarray,
+                           np.ndarray]:
+    n_new_nodes = np.count_nonzero(edge2newNode)  # number of new nodes
+    # assigning indices to new nodes
+    edge2newNode[edge2newNode != 0] = np.arange(
+        coordinates.shape[0],
+        coordinates.shape[0] + n_new_nodes)
+    edges_with_new_nodes_indices = np.nonzero(edge2newNode)[0]
+    new_node_coordinates = (
+        coordinates[edge2nodes[edges_with_new_nodes_indices, 0], :] +
+        coordinates[edge2nodes[edges_with_new_nodes_indices, 1], :]) / 2.
+
+    # interpolate values, if given
+    if to_embed.size:
+        new_embedded_values = (
+            to_embed[edge2nodes[edges_with_new_nodes_indices, 0]] +
+            to_embed[edge2nodes[edges_with_new_nodes_indices, 1]]) / 2.
+        to_embed = np.hstack([to_embed, new_embedded_values])
+
+    return np.vstack([coordinates, new_node_coordinates]), to_embed
+
+
 def refineRG(coordinates: CoordinatesType,
              elements: ElementsType,
              marked_element: int,
-             boundaries: list[BoundaryType]) -> tuple[CoordinatesType,
-                                                      ElementsType,
-                                                      list[BoundaryType]]:
+             boundaries: list[BoundaryType],
+             to_embed: np.ndarray = np.array([])) -> tuple[CoordinatesType,
+                                                           ElementsType,
+                                                           list[BoundaryType]]:
     """
     refines the mesh according to
     red-green refinement of one single element
@@ -21,6 +48,9 @@ def refineRG(coordinates: CoordinatesType,
     marked_element: int
         the index of the element to be red refined
     boundaries: list[BoundaryType]
+    to_embed: np.ndarray = np.array([])
+        vector of values on coordinates to be interpolated
+        (canonically embedded) onto the refined mesh
 
     returns
     -------
@@ -30,6 +60,8 @@ def refineRG(coordinates: CoordinatesType,
         elements of the refined mesh
     new_boundaries: list[BoundaryType]
         boundaries of the refines mesh
+    embedded_values: np.ndarray
+        to_embed interpolated onto the refined mesh
 
     notes
     -----
@@ -54,17 +86,11 @@ def refineRG(coordinates: CoordinatesType,
     edge2newNode = np.zeros(edge2nodes.shape[0], dtype=int)
     edge2newNode[element2edges[marked_element].flatten()] = 1
 
-    # generate new nodes
-    n_new_nodes = np.count_nonzero(edge2newNode)  # number of new nodes
-    # assigning indices to new nodes
-    edge2newNode[edge2newNode != 0] = np.arange(
-        coordinates.shape[0],
-        coordinates.shape[0] + n_new_nodes)
-    idx = np.nonzero(edge2newNode)[0]
-    new_node_coordinates = (
-        coordinates[edge2nodes[idx, 0], :] +
-        coordinates[edge2nodes[idx, 1], :]) / 2.
-    new_coordinates = np.vstack([coordinates, new_node_coordinates])
+    new_coordinates, embedded_values = generate_new_nodes(
+        edge2newNode=edge2newNode,
+        edge2nodes=edge2nodes,
+        coordinates=coordinates,
+        to_embed=to_embed)
 
     # refine boundary conditions
     new_boundaries = []
@@ -170,14 +196,15 @@ def refineRG(coordinates: CoordinatesType,
                              newNodes[red, 1],
                              newNodes[red, 2]])])
 
-    return new_coordinates, new_elements, new_boundaries
+    return new_coordinates, new_elements, new_boundaries, embedded_values
 
 
 # TODO refactor s.t. boundary_conditions is optional
 def refineRGB(coordinates: CoordinatesType,
               elements: ElementsType,
               marked_elements: np.ndarray,
-              boundary_conditions: list[BoundaryType]
+              boundary_conditions: list[BoundaryType],
+              to_embed: np.ndarray = np.array([])
               ) -> tuple[CoordinatesType,
                          ElementsType,
                          list[BoundaryType]]:
@@ -193,6 +220,9 @@ def refineRGB(coordinates: CoordinatesType,
         Indices of the elements to be refined.
     boundary_conditions: list[BoundaryType]
         List of boundary conditions to update.
+    to_embed: np.ndarray = np.array([])
+        vector of values on coordinates to be interpolated
+        (canonically embedded) onto the refined mesh
 
     Returns
     -------
@@ -202,23 +232,26 @@ def refineRGB(coordinates: CoordinatesType,
         the elements of the refined mesh
     new_boundaries: list[BoundaryType]
         The refined boundary conditions
+    embedded_values: np.ndarray
+        to_embed interpolated onto the refined mesh
 
     Example
     -------
     >>> coordinates, elements = ...  # Initialize a mesh
     >>> marked_elements = np.array([0, 2, 3, 4])
     >>> boundary_conditions = [BC1, BC2, BC3]  # BCs as `np.ndarray`s
-    >>> new_coordinates, new_elements, new_boundary_conditions = refineRGB(
+    >>> new_coordinates, new_elements, new_boundary_conditions, _ = refineRGB(
             coordinates, elements,
             marked_elements, boundary_conditions)
     """
-    new_coordinates, new_elements, new_boundaries = refineNVB(
+    new_coordinates, new_elements, new_boundaries, embedded_values = refineNVB(
         coordinates,
         elements,
         marked_elements,
         boundary_conditions=boundary_conditions,
-        sort_for_longest_egde=True)
-    return new_coordinates, new_elements, new_boundaries
+        sort_for_longest_egde=True,
+        to_embed=to_embed)
+    return new_coordinates, new_elements, new_boundaries, embedded_values
 
 
 # TODO refactor s.t. sort_for_longest_egde vanishes, this is an ugly solution
@@ -227,10 +260,12 @@ def refineNVB(coordinates: CoordinatesType,
               elements: ElementsType,
               marked_elements: np.ndarray,
               boundary_conditions: list[BoundaryType],
+              to_embed: np.ndarray = np.array([]),
               sort_for_longest_egde: bool = False
               ) -> tuple[CoordinatesType,
                          ElementsType,
-                         list[BoundaryType]]:
+                         list[BoundaryType],
+                         np.ndarray]:
     """
     refines the mesh based on newest vertex bisection (NVB)
 
@@ -242,6 +277,9 @@ def refineNVB(coordinates: CoordinatesType,
         indices of the elements to be refined
     boundary_conditions: list[BoundaryType]
         list of boundaries to be refined
+    to_embed: np.ndarray = np.array([])
+        vector of values on coordinates to be interpolated
+        (canonically embedded) onto the refined mesh
 
     Returns
     -------
@@ -251,13 +289,15 @@ def refineNVB(coordinates: CoordinatesType,
         the elements of the refined mesh
     new_boundaries: list[BoundaryType]
         the refined boundary conditions
+    embedded_values: np.ndarray
+        to_embed interpolated onto the refined mesh
 
     Example
     -------
     >>> coordinates, elements = Mesh(...)  # Initialize a mesh
     >>> marked_elements = np.array([0, 2, 3, 4])
     >>> boundary_conditions = [BC1, BC2, BC3]  # BC's as np.ndarray
-    >>> new_coordinates, new_elements, new_boundary_conditions = refineNVB(
+    >>> new_coordinates, new_elements, new_boundary_conditions, _ = refineNVB(
             mesh.coordinates, mesh.elements,
             marked_elements, boundary_conditions)
     """
@@ -301,17 +341,11 @@ def refineNVB(coordinates: CoordinatesType,
                               element2marked_edges[:, 2])))[0]
         edge2newNode[element2edges[swap, 0]] = 1
 
-    # generate new nodes
-    n_new_nodes = np.count_nonzero(edge2newNode)  # number of new nodes
-    # assigning indices to new nodes
-    edge2newNode[edge2newNode != 0] = np.arange(
-        coordinates.shape[0],
-        coordinates.shape[0] + n_new_nodes)
-    idx = np.nonzero(edge2newNode)[0]
-    new_node_coordinates = (
-        coordinates[edge_to_nodes[idx, 0], :] +
-        coordinates[edge_to_nodes[idx, 1], :]) / 2.
-    new_coordinates = np.vstack([coordinates, new_node_coordinates])
+    new_coordinates, embedded_values = generate_new_nodes(
+        edge2newNode=edge2newNode,
+        edge2nodes=edge_to_nodes,
+        coordinates=coordinates,
+        to_embed=to_embed)
 
     # refine boundary conditions
     new_boundaries = []
@@ -432,4 +466,4 @@ def refineNVB(coordinates: CoordinatesType,
                                 new_nodes[bisec123, 0],
                                 new_nodes[bisec123, 1]])])
 
-    return new_coordinates, new_elements, new_boundaries
+    return new_coordinates, new_elements, new_boundaries, embedded_values

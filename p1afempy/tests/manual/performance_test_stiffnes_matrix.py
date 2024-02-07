@@ -45,7 +45,7 @@ def main() -> None:
 
         test_results.append(copy.deepcopy(test_result))
         marked_elements = np.arange(n_elements)  # refine all elements
-        coordinates, elements, boundaries = refinement.refineNVB(
+        coordinates, elements, boundaries, _ = refinement.refineNVB(
             coordinates=coordinates,
             elements=elements,
             marked_elements=marked_elements,

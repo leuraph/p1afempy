@@ -34,7 +34,7 @@ class RefinementTest(unittest.TestCase):
         # ----------------
         marked_element = 3
 
-        new_coordinates, new_elements, new_boundaries = \
+        new_coordinates, new_elements, new_boundaries, _ = \
             refinement.refineRG(
                 coordinates=coordinates,
                 elements=elements,
@@ -70,7 +70,7 @@ class RefinementTest(unittest.TestCase):
         # --------------
         marked_element = 0
 
-        new_coordinates, new_elements, new_boundaries = \
+        new_coordinates, new_elements, new_boundaries, _ = \
             refinement.refineRG(
                 coordinates=coordinates,
                 elements=elements,
@@ -106,7 +106,7 @@ class RefinementTest(unittest.TestCase):
         # ------------
         marked_element = 5
 
-        new_coordinates, new_elements, new_boundaries = \
+        new_coordinates, new_elements, new_boundaries, _ = \
             refinement.refineRG(
                 coordinates=coordinates,
                 elements=elements,

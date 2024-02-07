@@ -37,7 +37,7 @@ def main() -> None:
     for _ in range(n_refinements):
         # refine all elements
         marked_elements = np.arange(elements.shape[0])
-        coordinates, elements, boundaries = refinement.refineNVB(
+        coordinates, elements, boundaries, _ = refinement.refineNVB(
             coordinates=coordinates,
             elements=elements,
             marked_elements=marked_elements,
