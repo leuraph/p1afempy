@@ -86,6 +86,9 @@ class SanityChecks(unittest.TestCase):
     def test_refine_nvb(self) -> None:
         coordinates, elements, dirichlet = SanityChecks.get_initial_mesh()
 
+        # initial vector of values to be interpolated on refined meshes
+        to_embed = np.array([test_function(x, y) for (x, y) in coordinates])
+
         boundaries = [dirichlet]
         n_refinements = 5
         for _ in range(n_refinements):
@@ -93,22 +96,31 @@ class SanityChecks(unittest.TestCase):
             marked_elements = np.arange(elements.shape[0])
 
             # perform refinement
-            coordinates, elements, boundaries, _ = refinement.refineNVB(
+            coordinates, elements, boundaries, to_embed = refinement.refineNVB(
                 coordinates=coordinates,
                 elements=elements,
                 marked_elements=marked_elements,
-                boundary_conditions=boundaries)
+                boundary_conditions=boundaries,
+                to_embed=to_embed)
 
             # in each step, compare the computed vs. expected eenergy
             expected_energy = 4.
+
             computed_energy = evaluate_energy_on_mesh(
                 coordinates=coordinates, elements=elements)
-
             self.assertEqual(expected_energy, computed_energy)
+
+            computed_interpolated_energy = evaluate_energy_on_mesh(
+                coordinates=coordinates, elements=elements,
+                test_function_vector=to_embed)
+            self.assertEqual(expected_energy, computed_interpolated_energy)
 
     def test_refine_rgb(self) -> None:
         coordinates, elements, dirichlet = SanityChecks.get_initial_mesh()
 
+        # initial vector of values to be interpolated on refined meshes
+        to_embed = np.array([test_function(x, y) for (x, y) in coordinates])
+
         boundaries = [dirichlet]
         n_refinements = 5
         for _ in range(n_refinements):
@@ -116,18 +128,24 @@ class SanityChecks(unittest.TestCase):
             marked_elements = np.arange(elements.shape[0])
 
             # perform refinement
-            coordinates, elements, boundaries, _ = refinement.refineRGB(
+            coordinates, elements, boundaries, to_embed = refinement.refineRGB(
                 coordinates=coordinates,
                 elements=elements,
                 marked_elements=marked_elements,
-                boundary_conditions=boundaries)
+                boundary_conditions=boundaries,
+                to_embed=to_embed)
 
             # in each step, compare the computed vs. expected eenergy
             expected_energy = 4.
+
             computed_energy = evaluate_energy_on_mesh(
                 coordinates=coordinates, elements=elements)
-
             self.assertEqual(expected_energy, computed_energy)
+
+            computed_interpolated_energy = evaluate_energy_on_mesh(
+                coordinates=coordinates, elements=elements,
+                test_function_vector=to_embed)
+            self.assertEqual(expected_energy, computed_interpolated_energy)
 
     def test_refine_rg(self) -> None:
         random.seed(42)
