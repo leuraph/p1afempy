@@ -12,11 +12,11 @@ class RefinementTest(unittest.TestCase):
         # reading the initial mesh
         # ------------------------
         path_to_coordinates = Path(
-            'tests/data/trefined_rg/coordinates.dat')
+            'tests/data/refine_rg/coordinates.dat')
         path_to_elements = Path(
-            'tests/data/trefined_rg/elements.dat')
-        path_to_dirichlet = Path('tests/data/trefined_rg/dirichlet.dat')
-        path_to_neumann = Path('tests/data/trefined_rg/neumann.dat')
+            'tests/data/refine_rg/elements.dat')
+        path_to_dirichlet = Path('tests/data/refine_rg/dirichlet.dat')
+        path_to_neumann = Path('tests/data/refine_rg/neumann.dat')
         coordinates, elements = io_helpers.read_mesh(
             path_to_coordinates=path_to_coordinates,
             path_to_elements=path_to_elements,
@@ -42,18 +42,18 @@ class RefinementTest(unittest.TestCase):
                 boundaries=boundaries)
 
         path_to_refined_coordinates = Path(
-            'tests/data/trefined_rg/case_no_boundary/new_coordinates.dat')
+            'tests/data/refine_rg/case_no_boundary/new_coordinates.dat')
         path_to_refined_elements = Path(
-            'tests/data/trefined_rg/case_no_boundary/new_elements.dat')
+            'tests/data/refine_rg/case_no_boundary/new_elements.dat')
         expected_coordinates, expected_elements = io_helpers.read_mesh(
             path_to_coordinates=path_to_refined_coordinates,
             path_to_elements=path_to_refined_elements,
             shift_indices=False)
         expected_dirichlet = io_helpers.read_boundary_condition(
-            Path('tests/data/trefined_rg/case_no_boundary/new_dirichlet.dat'),
+            Path('tests/data/refine_rg/case_no_boundary/new_dirichlet.dat'),
             shift_indices=False)
         expected_neumann = io_helpers.read_boundary_condition(
-            Path('tests/data/trefined_rg/case_no_boundary/new_neumann.dat'),
+            Path('tests/data/refine_rg/case_no_boundary/new_neumann.dat'),
             shift_indices=False)
 
         self.assertTrue(np.all(
@@ -78,18 +78,18 @@ class RefinementTest(unittest.TestCase):
                 boundaries=boundaries)
 
         path_to_refined_coordinates = Path(
-            'tests/data/trefined_rg/case_dirichlet/new_coordinates.dat')
+            'tests/data/refine_rg/case_dirichlet/new_coordinates.dat')
         path_to_refined_elements = Path(
-            'tests/data/trefined_rg/case_dirichlet/new_elements.dat')
+            'tests/data/refine_rg/case_dirichlet/new_elements.dat')
         expected_coordinates, expected_elements = io_helpers.read_mesh(
             path_to_coordinates=path_to_refined_coordinates,
             path_to_elements=path_to_refined_elements,
             shift_indices=False)
         expected_dirichlet = io_helpers.read_boundary_condition(
-            Path('tests/data/trefined_rg/case_dirichlet/new_dirichlet.dat'),
+            Path('tests/data/refine_rg/case_dirichlet/new_dirichlet.dat'),
             shift_indices=False)
         expected_neumann = io_helpers.read_boundary_condition(
-            Path('tests/data/trefined_rg/case_dirichlet/new_neumann.dat'),
+            Path('tests/data/refine_rg/case_dirichlet/new_neumann.dat'),
             shift_indices=False)
 
         self.assertTrue(np.all(
@@ -114,18 +114,18 @@ class RefinementTest(unittest.TestCase):
                 boundaries=boundaries)
 
         path_to_refined_coordinates = Path(
-            'tests/data/trefined_rg/case_neumann/new_coordinates.dat')
+            'tests/data/refine_rg/case_neumann/new_coordinates.dat')
         path_to_refined_elements = Path(
-            'tests/data/trefined_rg/case_neumann/new_elements.dat')
+            'tests/data/refine_rg/case_neumann/new_elements.dat')
         expected_coordinates, expected_elements = io_helpers.read_mesh(
             path_to_coordinates=path_to_refined_coordinates,
             path_to_elements=path_to_refined_elements,
             shift_indices=False)
         expected_dirichlet = io_helpers.read_boundary_condition(
-            Path('tests/data/trefined_rg/case_neumann/new_dirichlet.dat'),
+            Path('tests/data/refine_rg/case_neumann/new_dirichlet.dat'),
             shift_indices=False)
         expected_neumann = io_helpers.read_boundary_condition(
-            Path('tests/data/trefined_rg/case_neumann/new_neumann.dat'),
+            Path('tests/data/refine_rg/case_neumann/new_neumann.dat'),
             shift_indices=False)
 
         self.assertTrue(np.all(
