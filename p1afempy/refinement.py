@@ -23,9 +23,9 @@ def generate_new_nodes(edge2newNode: np.ndarray,
     # interpolate values, if given
     if to_embed.size:
         new_embedded_values = (
-            to_embed[edge2nodes[edges_with_new_nodes_indices, 0], :] +
-            to_embed[edge2nodes[edges_with_new_nodes_indices, 1], :]) / 2.
-        to_embed = np.vstack([to_embed, new_embedded_values])
+            to_embed[edge2nodes[edges_with_new_nodes_indices, 0]] +
+            to_embed[edge2nodes[edges_with_new_nodes_indices, 1]]) / 2.
+        to_embed = np.hstack([to_embed, new_embedded_values])
 
     return np.vstack([coordinates, new_node_coordinates]), to_embed
 
