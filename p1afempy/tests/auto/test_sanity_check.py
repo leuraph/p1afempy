@@ -2,7 +2,9 @@ import numpy as np
 import unittest
 from pathlib import Path
 from p1afempy import io_helpers, solvers
-from p1afempy.data_structures import CoordinatesType, ElementsType, BoundaryType
+from p1afempy.data_structures import \
+    CoordinatesType, ElementsType, BoundaryType
+from p1afempy import refinement
 
 
 def test_function(x: float, y: float) -> float:
@@ -49,6 +51,29 @@ class SanityChecks(unittest.TestCase):
             coordinates=coordinates, elements=elements)
 
         self.assertEqual(expected_energy, computed_energy)
+
+    def test_refine_nvb(self) -> None:
+        coordinates, elements, dirichlet = SanityChecks.get_initial_mesh()
+
+        boundaries = [dirichlet]
+        n_refinements = 5
+        for _ in range(n_refinements):
+            # mark all elements for refinement
+            marked_elements = np.arange(elements.shape[0])
+
+            # perform refinement
+            coordinates, elements, boundaries = refinement.refineNVB(
+                coordinates=coordinates,
+                elements=elements,
+                marked_elements=marked_elements,
+                boundary_conditions=boundaries)
+
+            # in each step, compare the computed vs. expected eenergy
+            expected_energy = 4.
+            computed_energy = evaluate_energy_on_mesh(
+                coordinates=coordinates, elements=elements)
+
+            self.assertEqual(expected_energy, computed_energy)
 
 
 if __name__ == '__main__':
