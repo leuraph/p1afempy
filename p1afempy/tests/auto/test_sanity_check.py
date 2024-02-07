@@ -16,14 +16,19 @@ def test_function(x: float, y: float) -> float:
     return min(1. - abs(x), 1. - abs(y))
 
 
-def evaluate_energy_on_mesh(coordinates: CoordinatesType,
-                            elements: ElementsType) -> float:
+def evaluate_energy_on_mesh(
+        coordinates: CoordinatesType,
+        elements: ElementsType,
+        test_function_vector: np.ndarray = np.array([])) -> float:
 
     stiffness_matrix = solvers.get_stiffness_matrix(
         coordinates=coordinates,
         elements=elements)
-    test_function_vector = np.array([
-        test_function(x, y) for (x, y) in coordinates])
+
+    # if test function vector was not passed, calculate the exact value
+    if not test_function_vector.size:
+        test_function_vector = np.array([
+            test_function(x, y) for (x, y) in coordinates])
 
     return test_function_vector.dot(stiffness_matrix.dot(test_function_vector))
 
@@ -146,6 +151,35 @@ class SanityChecks(unittest.TestCase):
             expected_energy = 4.
             computed_energy = evaluate_energy_on_mesh(
                 coordinates=coordinates, elements=elements)
+
+            self.assertEqual(expected_energy, computed_energy)
+
+    def test_refine_rg_with_solution_interpolation(self) -> None:
+        random.seed(42)
+        coordinates, elements, dirichlet = SanityChecks.get_initial_mesh()
+
+        to_embed = np.array([test_function(x, y) for (x, y) in coordinates])
+
+        boundaries = [dirichlet]
+        n_refinements = 100
+        for _ in range(n_refinements):
+            # mark a random element for refinement
+            n_elements = elements.shape[0]
+            marked_element = random.randrange(n_elements)
+
+            # perform refinement
+            coordinates, elements, boundaries, to_embed = refinement.refineRG(
+                coordinates=coordinates,
+                elements=elements,
+                marked_element=marked_element,
+                boundaries=boundaries,
+                to_embed=to_embed)
+
+            # in each step, compare the computed vs. expected eenergy
+            expected_energy = 4.
+            computed_energy = evaluate_energy_on_mesh(
+                coordinates=coordinates, elements=elements,
+                test_function_vector=to_embed)
 
             self.assertEqual(expected_energy, computed_energy)
 
