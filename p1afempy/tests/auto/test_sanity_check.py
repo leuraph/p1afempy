@@ -29,6 +29,31 @@ def evaluate_energy_on_mesh(coordinates: CoordinatesType,
 
 
 class SanityChecks(unittest.TestCase):
+    """
+    These tests constitute some sort of sanity checks to check
+    - stiffness matrix assembly
+    - mesh refinement strategies
+
+    idea
+    ----
+    The ides is to compute the discrete version of the energy
+    E(u) := a(u, u)
+    of a function u(x, y) that is exactly represented already
+    on the initial mesh. In this way, we can check the interplay
+    of stiffness matrix assembly and mesh refinement by checking
+    the computed energy E:= x.T * A * x with the exact value for
+    the initial mesh and all subsequent refined meshes therof.
+
+    implementation
+    --------------
+    we choose
+    - Omega := {(x, y) | -1 < x, y < 1}
+    - u(x, y) := min{1-|x|, 1-|y|}
+    - an initial mesh that already allows for exact approximation
+      of u on Omega
+      (for details, see the input data in `tests/data/sanity_check`).
+    - the expected energy of u is then given by E(u) = 4.
+    """
 
     @staticmethod
     def get_initial_mesh() -> tuple[CoordinatesType,
