@@ -38,9 +38,10 @@ are implemented in this repo as well (ticked boxes) and which are not (yet) (unt
 - [ ] `solveLaplace0.m`
 - [ ] `solveLaplace1.m`
 
-Also, this repo includes some functionalities that were not provided in the original MATLAB code.
-The most important of which is the assembly of the mass matrix,
-which is implemented along the same lines as the assembly of the stiffness matrix.
+Also, this repo includes some functionalities that were not provided in the original MATLAB code:
+- Assembly of Mass Matrix along the same lines as assembly of stiffness matrix.
+- Linear Interpolation of values on coordinates onto new nodes after refinement.
+- Red refinement algorithm, where (yet) only a single element can be marked.
 
 ## Data structures
 
