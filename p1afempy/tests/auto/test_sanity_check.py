@@ -136,7 +136,7 @@ class SanityChecks(unittest.TestCase):
             marked_element = random.randrange(n_elements)
 
             # perform refinement
-            coordinates, elements, boundaries = refinement.refineRG(
+            coordinates, elements, boundaries, _ = refinement.refineRG(
                 coordinates=coordinates,
                 elements=elements,
                 marked_element=marked_element,

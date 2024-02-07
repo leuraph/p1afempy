@@ -4,12 +4,40 @@ from p1afempy.data_structures import \
     CoordinatesType, ElementsType, BoundaryType
 
 
+def generate_new_nodes(edge2newNode: np.ndarray,
+                       edge2nodes: np.ndarray,
+                       coordinates: CoordinatesType,
+                       to_embed: np.ndarray = np.array([])) -> tuple[
+                           np.ndarray,
+                           np.ndarray]:
+    n_new_nodes = np.count_nonzero(edge2newNode)  # number of new nodes
+    # assigning indices to new nodes
+    edge2newNode[edge2newNode != 0] = np.arange(
+        coordinates.shape[0],
+        coordinates.shape[0] + n_new_nodes)
+    idx = np.nonzero(edge2newNode)[0]
+    new_node_coordinates = (
+        coordinates[edge2nodes[idx, 0], :] +
+        coordinates[edge2nodes[idx, 1], :]) / 2.
+
+    # interpolate values, if given
+    # ----------------------------
+    # TODO implement
+    embedded_values = np.array([])
+    if to_embed.size:
+        pass
+    # ----------------------------
+
+    return np.vstack([coordinates, new_node_coordinates]), embedded_values
+
+
 def refineRG(coordinates: CoordinatesType,
              elements: ElementsType,
              marked_element: int,
-             boundaries: list[BoundaryType]) -> tuple[CoordinatesType,
-                                                      ElementsType,
-                                                      list[BoundaryType]]:
+             boundaries: list[BoundaryType],
+             to_embed: np.ndarray = np.array([])) -> tuple[CoordinatesType,
+                                                           ElementsType,
+                                                           list[BoundaryType]]:
     """
     refines the mesh according to
     red-green refinement of one single element
@@ -21,6 +49,9 @@ def refineRG(coordinates: CoordinatesType,
     marked_element: int
         the index of the element to be red refined
     boundaries: list[BoundaryType]
+    to_embed: np.ndarray = np.array([])
+        vector of values on coordinates to be interpolated
+        (canonically embedded) onto the refined mesh
 
     returns
     -------
@@ -30,6 +61,8 @@ def refineRG(coordinates: CoordinatesType,
         elements of the refined mesh
     new_boundaries: list[BoundaryType]
         boundaries of the refines mesh
+    embedded_values: np.ndarray
+        to_embed interpolated onto the refined mesh
 
     notes
     -----
@@ -54,17 +87,11 @@ def refineRG(coordinates: CoordinatesType,
     edge2newNode = np.zeros(edge2nodes.shape[0], dtype=int)
     edge2newNode[element2edges[marked_element].flatten()] = 1
 
-    # generate new nodes
-    n_new_nodes = np.count_nonzero(edge2newNode)  # number of new nodes
-    # assigning indices to new nodes
-    edge2newNode[edge2newNode != 0] = np.arange(
-        coordinates.shape[0],
-        coordinates.shape[0] + n_new_nodes)
-    idx = np.nonzero(edge2newNode)[0]
-    new_node_coordinates = (
-        coordinates[edge2nodes[idx, 0], :] +
-        coordinates[edge2nodes[idx, 1], :]) / 2.
-    new_coordinates = np.vstack([coordinates, new_node_coordinates])
+    new_coordinates, embedded_values = generate_new_nodes(
+        edge2newNode=edge2newNode,
+        edge2nodes=edge2nodes,
+        coordinates=coordinates,
+        to_embed=to_embed)
 
     # refine boundary conditions
     new_boundaries = []
@@ -170,7 +197,7 @@ def refineRG(coordinates: CoordinatesType,
                              newNodes[red, 1],
                              newNodes[red, 2]])])
 
-    return new_coordinates, new_elements, new_boundaries
+    return new_coordinates, new_elements, new_boundaries, embedded_values
 
 
 # TODO refactor s.t. boundary_conditions is optional

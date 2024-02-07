@@ -29,7 +29,7 @@ def main() -> None:
     # ----------------
     marked_element = 3
 
-    new_coordinates, new_elements, new_boundaries = \
+    new_coordinates, new_elements, new_boundaries, _ = \
         refinement.refineRG(
             coordinates=coordinates,
             elements=elements,
