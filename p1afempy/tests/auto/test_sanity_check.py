@@ -2,7 +2,7 @@ import numpy as np
 import unittest
 from pathlib import Path
 from p1afempy import io_helpers, solvers
-from p1afempy.data_structures import CoordinatesType, ElementsType
+from p1afempy.data_structures import CoordinatesType, ElementsType, BoundaryType
 
 
 def test_function(x: float, y: float) -> float:
@@ -27,18 +27,28 @@ def evaluate_energy_on_mesh(coordinates: CoordinatesType,
 
 class SanityChecks(unittest.TestCase):
 
-    def test_stiffness_assembly(self) -> None:
+    @staticmethod
+    def get_initial_mesh() -> tuple[CoordinatesType,
+                                    ElementsType,
+                                    BoundaryType]:
         path_to_coordinates = Path('tests/data/sanity_check/coordinates.dat')
         path_to_elements = Path('tests/data/sanity_check/elements.dat')
+        path_to_dirichlet = Path('tests/data/sanity_check/dirichlet.dat')
         coordinates, elements = io_helpers.read_mesh(
             path_to_coordinates=path_to_coordinates,
             path_to_elements=path_to_elements)
+        dirichlet = io_helpers.read_boundary_condition(
+            path_to_boundary=path_to_dirichlet)
+        return coordinates, elements, dirichlet
+
+    def test_simple_stiffness_assembly(self) -> None:
+        coordinates, elements, _ = SanityChecks.get_initial_mesh()
 
         expected_energy = 4.
         computed_energy = evaluate_energy_on_mesh(
             coordinates=coordinates, elements=elements)
 
-        self.assertEquals(expected_energy, computed_energy)
+        self.assertEqual(expected_energy, computed_energy)
 
 
 if __name__ == '__main__':
