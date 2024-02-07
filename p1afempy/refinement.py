@@ -9,7 +9,7 @@ def refineRG(coordinates: CoordinatesType,
              marked_element: int,
              boundaries: list[BoundaryType]) -> tuple[CoordinatesType,
                                                       ElementsType,
-                                                      np.ndarray]:
+                                                      list[BoundaryType]]:
     """
     refines the mesh according to
     red-green refinement of one single element
