@@ -1,5 +1,6 @@
 import numpy as np
 import unittest
+import random
 from pathlib import Path
 from p1afempy import io_helpers, solvers
 from p1afempy.data_structures import \
@@ -90,6 +91,31 @@ class SanityChecks(unittest.TestCase):
                 elements=elements,
                 marked_elements=marked_elements,
                 boundary_conditions=boundaries)
+
+            # in each step, compare the computed vs. expected eenergy
+            expected_energy = 4.
+            computed_energy = evaluate_energy_on_mesh(
+                coordinates=coordinates, elements=elements)
+
+            self.assertEqual(expected_energy, computed_energy)
+
+    def test_refine_rg(self) -> None:
+        random.seed(42)
+        coordinates, elements, dirichlet = SanityChecks.get_initial_mesh()
+
+        boundaries = [dirichlet]
+        n_refinements = 100
+        for _ in range(n_refinements):
+            # mark a random element for refinement
+            n_elements = elements.shape[0]
+            marked_element = random.randrange(n_elements)
+
+            # perform refinement
+            coordinates, elements, boundaries = refinement.refineRG(
+                coordinates=coordinates,
+                elements=elements,
+                marked_element=marked_element,
+                boundaries=boundaries)
 
             # in each step, compare the computed vs. expected eenergy
             expected_energy = 4.
