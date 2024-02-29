@@ -282,10 +282,16 @@ class MeshTest(unittest.TestCase):
             [3, 1, 4],
             [5, 6, 7]
         ])
-        computed_local_indices = mesh.relabel_global_indices(global_indices)
+        expected_unique_sorted_global_idx = np.array(
+            [2, 3, 6, 12, 15, 66, 77, 88])
+        computed_local_indices, computed_unique_sorted_global_idx =\
+            mesh.relabel_global_indices(global_indices)
 
         self.assertTrue(
             np.all(expected_local_indices == computed_local_indices))
+        self.assertTrue(
+            np.all(expected_unique_sorted_global_idx ==
+                   computed_unique_sorted_global_idx))
 
     def test_get_local_patch(self) -> None:
         path_to_coordinates = Path(

@@ -143,24 +143,36 @@ def relabel_global_indices(global_indices: data_structures.ElementsType
     performs a order-preserving relabelling
     of global indices to local indices
 
+    returns
+    -------
+    relabelled_global_indices: ElementsType
+        an array of same shape as `global_indices` containing
+        at position `(i,j)` the transformed global indices of
+        position `(i,j)`
+    unique_sorted_global_indices: ElementsType
+        an array containing the the unique sorted global indices
+
     example
     -------
     >>> global_indices = np.array([[12, 3, 6],
     >>>                            [12, 2, 6],
     >>>                            [12, 3, 15],
     >>>                            [66, 77, 88]])
-    >>> local_indices = relabel_global_indices(global_indices)
+    >>> local_indices, unique_global_indices = \\
+    >>>     relabel_global_indices(global_indices)
     >>> local_indices
         array([[3, 1, 2],
                [3, 0, 2],
                [3, 1, 4],
                [5, 6, 7]])
+    >>> unique_global_indices
+        array([2, 3, 6, 12, 15, 66, 77, 88])
     """
     unique_idxs = np.unique(global_indices)  # np.unique returns sorted list
     local_idx = np.arange(unique_idxs.size)
     transform = dict(zip(unique_idxs, local_idx))
     perform_transform = np.vectorize(lambda old: transform[old])
-    return perform_transform(global_indices)
+    return perform_transform(global_indices), unique_idxs
 
 
 def get_local_patch(coordinates: data_structures.CoordinatesType,
