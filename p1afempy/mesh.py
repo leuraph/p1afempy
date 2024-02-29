@@ -135,3 +135,17 @@ def provide_geometric_data(elements: data_structures.ElementsType,
         boundaries_to_edges.append(
             edge_number[np.arange(pointer[j+1]+1, pointer[j+2]+1, dtype=int)])
     return element_to_edges, edge_to_nodes, boundaries_to_edges
+
+
+def get_local_patch(coordinates: data_structures.CoordinatesType,
+                    elements: data_structures.ElementsType,
+                    boundaries: list[data_structures.BoundaryType],
+                    which_for: int
+                    ) -> tuple[data_structures.CoordinatesType,
+                               data_structures.ElementsType,
+                               list[data_structures.BoundaryType]]:
+    """returns the local mesh corresponding to k-th element"""
+    local_coordinates = np.array([])
+    local_elements = np.array([])
+    local_boundaries = [np.array([])]
+    return local_coordinates, local_elements, local_boundaries
