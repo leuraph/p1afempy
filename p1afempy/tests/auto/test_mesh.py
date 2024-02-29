@@ -269,6 +269,55 @@ class MeshTest(unittest.TestCase):
             expected_area, mesh.get_area(coordinates=ahw_coordinates,
                                          elements=ahw_elements)))
 
+    def test_get_local_patch(self) -> None:
+        path_to_coordinates = Path(
+            'tests/data/get_local_patch/coordinates.dat')
+        path_to_elements = Path(
+            'tests/data/get_local_patch/elements.dat')
+        path_to_dirichlet = Path('tests/data/get_local_patch/dirichlet.dat')
+        path_to_neumann = Path('tests/data/get_local_patch/neumann.dat')
+
+        global_coordinates, global_elements = io_helpers.read_mesh(
+            path_to_coordinates=path_to_coordinates,
+            path_to_elements=path_to_elements)
+        global_dirichlet = io_helpers.read_boundary_condition(
+            path_to_boundary=path_to_dirichlet)
+        global_neumann = io_helpers.read_boundary_condition(
+            path_to_boundary=path_to_neumann)
+        global_boundaries = [global_dirichlet, global_neumann]
+
+        # local patch of element not touching any boundary
+        # ------------------------------------------------
+        local_coordinates, local_elements, local_boundaries = \
+            mesh.get_local_patch(coordinates=global_coordinates,
+                                 elements=global_elements,
+                                 boundaries=global_boundaries,
+                                 which_for=3)
+
+        # local patch of element touching dirichlet boundary
+        # --------------------------------------------------
+        local_coordinates, local_elements, local_boundaries = \
+            mesh.get_local_patch(coordinates=global_coordinates,
+                                 elements=global_elements,
+                                 boundaries=global_boundaries,
+                                 which_for=0)
+
+        # local patch of element touching neumann boundary
+        # ------------------------------------------------
+        local_coordinates, local_elements, local_boundaries = \
+            mesh.get_local_patch(coordinates=global_coordinates,
+                                 elements=global_elements,
+                                 boundaries=global_boundaries,
+                                 which_for=5)
+
+        # local patch of element touching both boundaries
+        # -----------------------------------------------
+        local_coordinates, local_elements, local_boundaries = \
+            mesh.get_local_patch(coordinates=global_coordinates,
+                                 elements=global_elements,
+                                 boundaries=global_boundaries,
+                                 which_for=1)
+
 
 if __name__ == '__main__':
     unittest.main()
