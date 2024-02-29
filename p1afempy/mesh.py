@@ -137,6 +137,32 @@ def provide_geometric_data(elements: data_structures.ElementsType,
     return element_to_edges, edge_to_nodes, boundaries_to_edges
 
 
+def relabel_global_indices(global_indices: data_structures.ElementsType
+                           ) -> data_structures.ElementsType:
+    """
+    performs a order-preserving relabelling
+    of global indices to local indices
+
+    example
+    -------
+    >>> global_indices = np.array([[12, 3, 6],
+    >>>                            [12, 2, 6],
+    >>>                            [12, 3, 15],
+    >>>                            [66, 77, 88]])
+    >>> local_indices = relabel_global_indices(global_indices)
+    >>> local_indices
+        array([[3, 1, 2],
+               [3, 0, 2],
+               [3, 1, 4],
+               [5, 6, 7]])
+    """
+    unique_idxs = np.unique(global_indices)  # np.unique returns sorted list
+    local_idx = np.arange(unique_idxs.size)
+    transform = dict(zip(unique_idxs, local_idx))
+    perform_transform = np.vectorize(lambda old: transform[old])
+    return perform_transform(global_indices)
+
+
 def get_local_patch(coordinates: data_structures.CoordinatesType,
                     elements: data_structures.ElementsType,
                     boundaries: list[data_structures.BoundaryType],
