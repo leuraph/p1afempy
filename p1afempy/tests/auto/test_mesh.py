@@ -269,6 +269,24 @@ class MeshTest(unittest.TestCase):
             expected_area, mesh.get_area(coordinates=ahw_coordinates,
                                          elements=ahw_elements)))
 
+    def test_relabel_global_indices(self):
+        global_indices = np.array([
+            [12, 3, 6],
+            [12, 2, 6],
+            [12, 3, 15],
+            [66, 77, 88],
+        ])
+        expected_local_indices = np.array([
+            [3, 1, 2],
+            [3, 0, 2],
+            [3, 1, 4],
+            [5, 6, 7]
+        ])
+        computed_local_indices = mesh.relabel_global_indices(global_indices)
+
+        self.assertTrue(
+            np.all(expected_local_indices == computed_local_indices))
+
     def test_get_local_patch(self) -> None:
         path_to_coordinates = Path(
             'tests/data/get_local_patch/coordinates.dat')
