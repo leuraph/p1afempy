@@ -185,7 +185,7 @@ def get_local_patch(coordinates: data_structures.CoordinatesType,
     """returns the local mesh corresponding to k-th element"""
     nodes = elements[which_for]
     neighbours = np.sum(np.isin(elements, nodes), axis=1) == 2
-    local_elements = np.vstack([nodes, elements[neighbours]])
+    local_elements = np.vstack([elements[neighbours], nodes])
     local_elements, unique_idx = relabel_global_indices(local_elements)
     local_coordinates = coordinates[unique_idx]
     local_boundary = np.array([])

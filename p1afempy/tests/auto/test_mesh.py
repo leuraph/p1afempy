@@ -326,10 +326,10 @@ class MeshTest(unittest.TestCase):
             [2., 2.]
         ])
         expected_local_elements = np.array([
-            [4, 3, 1],
             [0, 1, 3],
             [1, 2, 4],
-            [3, 4, 5]
+            [3, 4, 5],
+            [4, 3, 1]
         ])
         expected_local_boundaries = [
             np.array([
