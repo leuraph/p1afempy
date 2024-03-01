@@ -342,12 +342,12 @@ class MeshTest(unittest.TestCase):
             local_coordinates == expected_local_coordinates))
         self.assertTrue(np.all(
             local_elements == expected_local_elements))
-        # self.assertTrue(
-        #     len(expected_local_boundaries) == len(local_boundaries))
+        self.assertTrue(
+            len(expected_local_boundaries) == len(local_boundaries))
         for k in range(len(local_boundaries)):
             local_boundary = local_boundaries[k]
             expected_local_boundary = expected_local_boundaries[k]
-            # self.assertTrue(np.all(local_boundary == expected_local_boundary))
+            self.assertTrue(np.all(local_boundary == expected_local_boundary))
 
         # local patch of element touching dirichlet boundary
         # --------------------------------------------------
