@@ -172,12 +172,26 @@ def get_local_patch(coordinates: data_structures.CoordinatesType,
                                data_structures.ElementsType,
                                list[data_structures.BoundaryType]]:
     """returns the local mesh corresponding to k-th element"""
+    # global indices of the marked element's nodes
     nodes = elements[which_for]
+
+    # identifying the marked element's nieghbours
     neighbours = np.sum(np.isin(elements, nodes), axis=1) == 2
+
+    # global indices of the local patch's elements
     local_elements = np.vstack([elements[neighbours], nodes])
-    unique_idxs = np.unique(local_elements)  # np.unique returns sorted list
+
+    # unique sorted global indices of all nodes in global patch
+    unique_idxs = np.unique(local_elements)
+
+    # retreiving the transformation (global -> local indices)
     perform_transform = get_transform(unique_idxs)
+
+    # local patch's elements in local indices
     local_elements = perform_transform(local_elements)
+
+    # local patch's coordinates
     local_coordinates = coordinates[unique_idxs]
+
     local_boundary = np.array([])
     return local_coordinates, local_elements, local_boundary
