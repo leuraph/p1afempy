@@ -137,20 +137,11 @@ def provide_geometric_data(elements: data_structures.ElementsType,
     return element_to_edges, edge_to_nodes, boundaries_to_edges
 
 
-def relabel_global_indices(global_indices: data_structures.ElementsType
-                           ) -> data_structures.ElementsType:
+def get_transform(unique_idxs: np.ndarray):
     """
-    performs a order-preserving relabelling
-    of global indices to local indices
-
-    returns
-    -------
-    relabelled_global_indices: ElementsType
-        an array of same shape as `global_indices` containing
-        at position `(i,j)` the transformed global indices of
-        position `(i,j)`
-    unique_sorted_global_indices: ElementsType
-        an array containing the the unique sorted global indices
+    given a unique set of n non-negative integers I,
+    this function returns an order preserving mapping
+    perform_transform : I -> [0, 1, 2, ..., n-1] := I'
 
     example
     -------
@@ -158,21 +149,19 @@ def relabel_global_indices(global_indices: data_structures.ElementsType
     >>>                            [12, 2, 6],
     >>>                            [12, 3, 15],
     >>>                            [66, 77, 88]])
-    >>> local_indices, unique_global_indices = \\
-    >>>     relabel_global_indices(global_indices)
+    >>> unique_indices = np.unique(global_indices)
+    >>> perform_transform = get_transform(unique_indices)
+    >>> local_indices = perform_transform(global_indices)
     >>> local_indices
         array([[3, 1, 2],
                [3, 0, 2],
                [3, 1, 4],
                [5, 6, 7]])
-    >>> unique_global_indices
-        array([2, 3, 6, 12, 15, 66, 77, 88])
     """
-    unique_idxs = np.unique(global_indices)  # np.unique returns sorted list
     local_idx = np.arange(unique_idxs.size)
     transform = dict(zip(unique_idxs, local_idx))
     perform_transform = np.vectorize(lambda old: transform[old])
-    return perform_transform(global_indices), unique_idxs
+    return perform_transform
 
 
 def get_local_patch(coordinates: data_structures.CoordinatesType,
@@ -186,7 +175,9 @@ def get_local_patch(coordinates: data_structures.CoordinatesType,
     nodes = elements[which_for]
     neighbours = np.sum(np.isin(elements, nodes), axis=1) == 2
     local_elements = np.vstack([elements[neighbours], nodes])
-    local_elements, unique_idx = relabel_global_indices(local_elements)
-    local_coordinates = coordinates[unique_idx]
+    unique_idxs = np.unique(local_elements)  # np.unique returns sorted list
+    perform_transform = get_transform(unique_idxs)
+    local_elements = perform_transform(local_elements)
+    local_coordinates = coordinates[unique_idxs]
     local_boundary = np.array([])
     return local_coordinates, local_elements, local_boundary
