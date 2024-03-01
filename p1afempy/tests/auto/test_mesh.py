@@ -317,6 +317,24 @@ class MeshTest(unittest.TestCase):
                                  elements=global_elements,
                                  boundaries=global_boundaries,
                                  which_for=3)
+        expected_local_coordinates = np.array([
+            [0., 0.],
+            [1., 0.],
+            [2., 0.],
+            [1., 1.],
+            [2., 1.],
+            [2., 2.]
+        ])
+        expected_local_elements = np.array([
+            [4, 3, 1],
+            [0, 1, 3],
+            [1, 2, 4],
+            [3, 4, 5]
+        ])
+        self.assertTrue(np.all(
+            local_coordinates == expected_local_coordinates))
+        self.assertTrue(np.all(
+            local_elements == expected_local_elements))
 
         # local patch of element touching dirichlet boundary
         # --------------------------------------------------
@@ -325,14 +343,6 @@ class MeshTest(unittest.TestCase):
                                  elements=global_elements,
                                  boundaries=global_boundaries,
                                  which_for=0)
-
-        # local patch of element touching neumann boundary
-        # ------------------------------------------------
-        local_coordinates, local_elements, local_boundaries = \
-            mesh.get_local_patch(coordinates=global_coordinates,
-                                 elements=global_elements,
-                                 boundaries=global_boundaries,
-                                 which_for=5)
 
         # local patch of element touching both boundaries
         # -----------------------------------------------
