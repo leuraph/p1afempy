@@ -187,6 +187,14 @@ def get_local_patch(coordinates: data_structures.CoordinatesType,
     # retreiving the transformation (global -> local indices)
     perform_transform = get_transform(unique_idxs)
 
+    local_boundaries = []
+    for boundary in boundaries:
+        edge_in_local_patch = np.sum(
+            np.isin(boundary, local_elements), axis=1) == 2
+        local_boundary = boundary[edge_in_local_patch]
+        if local_boundary.size > 0:
+            local_boundaries.append(perform_transform(local_boundary))
+
     # local patch's elements in local indices
     local_elements = perform_transform(local_elements)
 
@@ -194,4 +202,4 @@ def get_local_patch(coordinates: data_structures.CoordinatesType,
     local_coordinates = coordinates[unique_idxs]
 
     local_boundary = np.array([])
-    return local_coordinates, local_elements, local_boundary
+    return local_coordinates, local_elements, local_boundaries
