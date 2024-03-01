@@ -331,10 +331,23 @@ class MeshTest(unittest.TestCase):
             [1, 2, 4],
             [3, 4, 5]
         ])
+        expected_local_boundaries = [
+            np.array([
+                [0, 1], [1, 2]
+            ]),
+            np.array([
+                [2, 4], [4, 5]
+            ])]
         self.assertTrue(np.all(
             local_coordinates == expected_local_coordinates))
         self.assertTrue(np.all(
             local_elements == expected_local_elements))
+        # self.assertTrue(
+        #     len(expected_local_boundaries) == len(local_boundaries))
+        for k in range(len(local_boundaries)):
+            local_boundary = local_boundaries[k]
+            expected_local_boundary = expected_local_boundaries[k]
+            # self.assertTrue(np.all(local_boundary == expected_local_boundary))
 
         # local patch of element touching dirichlet boundary
         # --------------------------------------------------
