@@ -345,21 +345,45 @@ class MeshTest(unittest.TestCase):
             expected_local_boundary = expected_local_boundaries[k]
             self.assertTrue(np.all(local_boundary == expected_local_boundary))
 
-        # local patch of element touching dirichlet boundary
+        # local patch of element touching both boundaries
         # --------------------------------------------------
         local_coordinates, local_elements, local_boundaries = \
             mesh.get_local_patch(coordinates=global_coordinates,
                                  elements=global_elements,
                                  boundaries=global_boundaries,
-                                 which_for=0)
+                                 which_for=1)
+        expected_local_elements = np.array([
+            [3, 2, 0],
+            [0, 1, 3],
+        ])
+        expected_local_coordinates = np.array([
+            [1, 0],
+            [2, 0],
+            [1, 1],
+            [2, 1]
+        ])
+        expected_local_boundaries = np.array([
+            [0, 1],
+            [1, 3]
+        ])
+        self.assertTrue(np.all(
+            local_coordinates == expected_local_coordinates))
+        self.assertTrue(np.all(
+            local_elements == expected_local_elements))
+        self.assertTrue(
+            len(expected_local_boundaries) == len(local_boundaries))
+        for k in range(len(local_boundaries)):
+            local_boundary = local_boundaries[k]
+            expected_local_boundary = expected_local_boundaries[k]
+            self.assertTrue(np.all(local_boundary == expected_local_boundary))
 
-        # local patch of element touching both boundaries
+        # local patch of element touching dirichlet boundaries
         # -----------------------------------------------
         local_coordinates, local_elements, local_boundaries = \
             mesh.get_local_patch(coordinates=global_coordinates,
                                  elements=global_elements,
                                  boundaries=global_boundaries,
-                                 which_for=1)
+                                 which_for=0)
 
 
 if __name__ == '__main__':
