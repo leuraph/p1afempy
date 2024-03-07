@@ -171,7 +171,36 @@ def get_local_patch(coordinates: data_structures.CoordinatesType,
                     ) -> tuple[data_structures.CoordinatesType,
                                data_structures.ElementsType,
                                list[data_structures.BoundaryType]]:
-    """returns the local mesh corresponding to k-th element"""
+    """
+    returns the local mesh corresponding to k-th element
+
+    parameters
+    ----------
+    coordinates: data_structures.CoordinatesType
+        coordinates of the mesh at hand
+    elements: data_structures.ElementsType
+        elements of the mesh at hand
+    boundaries: list[data_structures.BoundaryType]
+        boundaries of the mesh at hand
+    which_for: int
+        index of the element for which to extract the local patch
+
+    returns
+    -------
+    local_coordinates: data_structures.CoordinatesType
+        coordinates of the selected element and its neighbours,
+        where neighbours are elements that share an edge with
+        the selected element
+    local_elements: data_structures.ElementsType
+        neighbours of the selected element, i.e.
+        elements that share an edge with
+        the selected element
+    local_boundaries: list[data_structures.BoundaryType]
+        boundaries of the local patch inherited from
+        the given boundaries, i.e. if none of the elements
+        in the local patch touch the boundary at hand,
+        an empty list is returned
+    """
     # global indices of the marked element's nodes
     nodes = elements[which_for]
 
