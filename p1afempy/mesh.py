@@ -164,6 +164,31 @@ def get_transform(unique_idxs: np.ndarray):
     return perform_transform
 
 
+def complete_boundaries(elements: data_structures.ElementsType,
+                        boundaries: list[data_structures.BoundaryType]
+                        ) -> list[data_structures.BoundaryType]:
+    """
+    given a possibly incomplete list of boundaries,
+    returns a complete list of boundaries, i.e. adds
+    an artificial boundary where needed
+
+    parameters
+    ----------
+    elements: data_structures.ElementsType
+        elements of the mesh at hand
+    boundaries: list[data_structures.BoundaryType]
+        a possibly incomplete list of boundaries
+        of the elements given
+
+    returns
+    -------
+    completed_boundaries: list[data_structures.BoundaryType]
+        a coomplete list of boundaries of the elements given
+    """
+    # TODO implement, add unittest
+    return []
+
+
 def get_local_patch(coordinates: data_structures.CoordinatesType,
                     elements: data_structures.ElementsType,
                     boundaries: list[data_structures.BoundaryType],
