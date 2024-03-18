@@ -230,5 +230,4 @@ def get_local_patch(coordinates: data_structures.CoordinatesType,
     # local patch's coordinates
     local_coordinates = coordinates[unique_idxs]
 
-    local_boundary = np.array([])
     return local_coordinates, local_elements, local_boundaries
