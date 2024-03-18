@@ -195,7 +195,7 @@ def complete_boundaries(elements: data_structures.ElementsType,
         if not is_interior:
             exterior_edges.append(edge)
 
-    artificail_boundary = []
+    artificial_boundary = []
     for exterior_edge in exterior_edges:
         covered = False
         for boundary in boundaries:
@@ -203,10 +203,10 @@ def complete_boundaries(elements: data_structures.ElementsType,
                 covered = True
                 break
         if not covered:
-            artificail_boundary.append(exterior_edge)
+            artificial_boundary.append(exterior_edge)
 
-    if artificail_boundary:
-        boundaries.append(np.array(artificail_boundary))
+    if artificial_boundary:
+        boundaries.append(np.array(artificial_boundary))
 
     return boundaries
 
