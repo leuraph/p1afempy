@@ -185,8 +185,30 @@ def complete_boundaries(elements: data_structures.ElementsType,
     completed_boundaries: list[data_structures.BoundaryType]
         a coomplete list of boundaries of the elements given
     """
-    # TODO implement, add unittest
-    return []
+    element_indices_i = elements.flatten()
+    element_indices_j = elements[:, [1, 2, 0]].flatten()
+    all_edges = np.column_stack([element_indices_i, element_indices_j])
+
+    exterior_edges = []
+    for edge in all_edges:
+        is_interior = np.sum(np.sum(np.isin(edge, all_edges), axis=1)) == 4
+        if not is_interior:
+            exterior_edges.append(edge)
+
+    artificail_boundary = []
+    for exterior_edge in exterior_edges:
+        covered = False
+        for boundary in boundaries:
+            if np.any(np.sum(np.isin(exterior_edge, boundary), axis=1) == 2):
+                covered = True
+                break
+        if not covered:
+            artificail_boundary.append(exterior_edge)
+
+    if artificail_boundary:
+        boundaries.append(np.array(artificail_boundary))
+
+    return boundaries
 
 
 def get_local_patch(coordinates: data_structures.CoordinatesType,
