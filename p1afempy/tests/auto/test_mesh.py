@@ -341,7 +341,21 @@ class MeshTest(unittest.TestCase):
 
         # test with already complete edge
         # -------------------------------
-        # TODO
+        input_boundary = np.array([
+            [0, 1],
+            [1, 2],
+            [2, 3],
+            [3, 0]
+        ])
+
+        expected_boundaries = [input_boundary]
+        calculated_completed_boundaries = mesh.complete_boundaries(
+            elements=elements,
+            boundaries=[input_boundary])
+
+        for calc, exp in zip(calculated_completed_boundaries,
+                             expected_boundaries):
+            self.assertTrue(np.all(calc == exp))
 
     def test_get_local_patch(self) -> None:
         path_to_coordinates = Path(
