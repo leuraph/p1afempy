@@ -318,7 +318,26 @@ class MeshTest(unittest.TestCase):
 
         # test with two missing edges
         # ---------------------------
-        # TODO
+        input_boundary_0 = np.array([
+            [0, 1]
+        ])
+        input_boundary_1 = np.array([
+            [2, 3]
+        ])
+        expected_artificial_boundary = np.array([
+            [1, 2],
+            [3, 0]
+        ])
+
+        expected_boundaries = [input_boundary_0,
+                               input_boundary_1,
+                               expected_artificial_boundary]
+        calculated_completed_boundaries = mesh.complete_boundaries(
+            elements=elements,
+            boundaries=[input_boundary_0, input_boundary_1])
+        for calc, exp in zip(calculated_completed_boundaries,
+                             expected_boundaries):
+            self.assertTrue(np.all(calc == exp))
 
         # test with already complete edge
         # -------------------------------
