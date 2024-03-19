@@ -289,6 +289,41 @@ class MeshTest(unittest.TestCase):
         self.assertTrue(
             np.all(expected_local_indices == computed_local_indices))
 
+    def test_complete_boundaries(self) -> None:
+        path_to_elements = Path(
+            'tests/data/simple_square_mesh/elements.dat')
+        elements = io_helpers.read_elements(
+            path_to_elements=path_to_elements)
+
+        # test with one missing edge
+        # --------------------------
+        input_boundary = np.array([
+            [0, 1],
+            [1, 2],
+            [2, 3]
+        ])
+        expected_artificial_boundary = np.array([
+            [3, 0]
+        ])
+
+        expected_boundaries = [input_boundary,
+                               expected_artificial_boundary]
+        calculated_completed_boundaries = mesh.complete_boundaries(
+            elements=elements,
+            boundaries=[input_boundary])
+
+        for calc, exp in zip(calculated_completed_boundaries,
+                             expected_boundaries):
+            self.assertTrue(np.all(calc == exp))
+
+        # test with two missing edges
+        # ---------------------------
+        # TODO
+
+        # test with already complete edge
+        # -------------------------------
+        # TODO
+
     def test_get_local_patch(self) -> None:
         path_to_coordinates = Path(
             'tests/data/get_local_patch/coordinates.dat')
