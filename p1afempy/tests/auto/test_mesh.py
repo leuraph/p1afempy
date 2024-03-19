@@ -357,6 +357,24 @@ class MeshTest(unittest.TestCase):
                              expected_boundaries):
             self.assertTrue(np.all(calc == exp))
 
+        # test with all edges missing
+        # ---------------------------
+        expected_artificial_boundary = np.array([
+            [0, 1],
+            [1, 2],
+            [2, 3],
+            [3, 0]
+        ])
+
+        expected_boundaries = [expected_artificial_boundary]
+        calculated_completed_boundaries = mesh.complete_boundaries(
+            elements=elements,
+            boundaries=[])
+
+        for calc, exp in zip(calculated_completed_boundaries,
+                             expected_boundaries):
+            self.assertTrue(np.all(calc == exp))
+
     def test_get_local_patch(self) -> None:
         path_to_coordinates = Path(
             'tests/data/get_local_patch/coordinates.dat')
