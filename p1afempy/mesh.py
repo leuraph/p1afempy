@@ -191,7 +191,11 @@ def complete_boundaries(elements: data_structures.ElementsType,
 
     exterior_edges = []
     for edge in all_edges:
-        is_interior = np.sum(np.sum(np.isin(edge, all_edges), axis=1)) == 4
+        # mark all rows where edge appears
+        edge_is_here = np.sum(np.isin(all_edges, edge), axis=1) == 2
+        # if edge appears twice, it is shared by two elements and therefore
+        # must be interior
+        is_interior = np.sum(edge_is_here) == 2
         if not is_interior:
             exterior_edges.append(edge)
 
@@ -199,7 +203,7 @@ def complete_boundaries(elements: data_structures.ElementsType,
     for exterior_edge in exterior_edges:
         covered = False
         for boundary in boundaries:
-            if np.any(np.sum(np.isin(exterior_edge, boundary), axis=1) == 2):
+            if np.any(np.sum(np.isin(boundary, exterior_edge), axis=1) == 2):
                 covered = True
                 break
         if not covered:
@@ -207,7 +211,6 @@ def complete_boundaries(elements: data_structures.ElementsType,
 
     if artificial_boundary:
         boundaries.append(np.array(artificial_boundary))
-
     return boundaries
 
 
