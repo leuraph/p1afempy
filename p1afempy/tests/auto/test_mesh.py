@@ -498,6 +498,27 @@ class MeshTest(unittest.TestCase):
             expected_local_boundary = expected_local_boundaries[k]
             self.assertTrue(np.all(local_boundary == expected_local_boundary))
 
+        # local patch of element s.t. local patch inherits no boundary
+        # ------------------------------------------------------------
+        base_path = Path(
+            'tests/data/local_patch_touching_no_boundary')
+        path_to_coordinates = base_path / Path('coordinates.dat')
+        path_to_elements = base_path / Path('elements.dat')
+        path_to_boundary = base_path / Path('boundary.dat')
+        coordinates, elements = io_helpers.read_mesh(
+            path_to_coordinates=path_to_coordinates,
+            path_to_elements=path_to_elements)
+        boundary = io_helpers.read_boundary_condition(
+            path_to_boundary=path_to_boundary)
+
+        local_coordinates, local_elements, local_boundaries = \
+            mesh.get_local_patch(coordinates=coordinates,
+                                 elements=elements,
+                                 boundaries=[boundary],
+                                 which_for=6)
+
+        self.assertFalse(local_boundaries)
+
 
 if __name__ == '__main__':
     unittest.main()
