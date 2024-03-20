@@ -384,6 +384,7 @@ class MeshTest(unittest.TestCase):
             'tests/data/get_local_patch/elements.dat')
         path_to_dirichlet = Path('tests/data/get_local_patch/dirichlet.dat')
         path_to_neumann = Path('tests/data/get_local_patch/neumann.dat')
+        # TODO add local value test
 
         global_coordinates, global_elements = io_helpers.read_mesh(
             path_to_coordinates=path_to_coordinates,
