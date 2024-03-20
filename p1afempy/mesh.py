@@ -169,6 +169,47 @@ def get_transform(unique_idxs: np.ndarray):
     return perform_transform
 
 
+def global_to_local_indices(global_indices: np.ndarray) -> np.ndarray:
+    """
+    this function transforms any array of global indices
+    to a corresponding array of local indices in an order
+    preserving fashion
+
+    parameters
+    ----------
+    global_indices: np.ndarray
+        an array of global indices
+
+    returns
+    -------
+    local_indices: np.ndarray
+        an array of local indices of the same shape as global_indices
+
+    notes
+    -----
+    - if global[i, j, ...] <= global[i', j', ...], then we also have
+      local[i, j, ...]  <= local[i', j', ...]
+    - if N is the number of distinct indices in global_indices,
+      then local_indices contains the integers 0, 1, ..., N-1
+
+    example
+    -------
+    >>> global_indices = np.array([[12, 3, 6],
+    >>>                            [12, 2, 6],
+    >>>                            [12, 3, 15],
+    >>>                            [66, 77, 88]])
+    >>> local_indices = global_to_local_indices(global_indices)
+    >>> local_indices
+        array([[3, 1, 2],
+               [3, 0, 2],
+               [3, 1, 4],
+               [5, 6, 7]])
+    """
+    unique_indices = np.unique(global_indices)
+    global_to_local_transform = get_transform(unique_indices)
+    return global_to_local_transform(global_indices)
+
+
 def complete_boundaries(elements: data_structures.ElementsType,
                         boundaries: list[data_structures.BoundaryType]
                         ) -> list[data_structures.BoundaryType]:
