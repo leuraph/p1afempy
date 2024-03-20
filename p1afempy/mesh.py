@@ -270,6 +270,13 @@ def get_local_patch(coordinates: data_structures.CoordinatesType,
         the given boundaries, i.e. if none of the elements
         in the local patch touch the boundary at hand,
         an empty list is returned
+
+    notes
+    -----
+    the returned local patch is indexed in a local fashion, i.e.
+    - the indices in local_elements refer to the entries in local_coordinates
+    - the indices in all elements in local_boundaries refer to entries in
+      local_coordinates
     """
     # global indices of the marked element's nodes
     nodes = elements[which_for]
