@@ -396,7 +396,7 @@ class MeshTest(unittest.TestCase):
 
         # local patch of element not touching any boundary
         # ------------------------------------------------
-        local_coordinates, local_elements, local_boundaries = \
+        local_coordinates, local_elements, local_boundaries, _ = \
             mesh.get_local_patch(coordinates=global_coordinates,
                                  elements=global_elements,
                                  boundaries=global_boundaries,
@@ -435,7 +435,7 @@ class MeshTest(unittest.TestCase):
 
         # local patch of element touching both boundaries
         # --------------------------------------------------
-        local_coordinates, local_elements, local_boundaries = \
+        local_coordinates, local_elements, local_boundaries, _ = \
             mesh.get_local_patch(coordinates=global_coordinates,
                                  elements=global_elements,
                                  boundaries=global_boundaries,
@@ -467,7 +467,7 @@ class MeshTest(unittest.TestCase):
 
         # local patch of element touching dirichlet boundaries
         # -----------------------------------------------
-        local_coordinates, local_elements, local_boundaries = \
+        local_coordinates, local_elements, local_boundaries, _ = \
             mesh.get_local_patch(coordinates=global_coordinates,
                                  elements=global_elements,
                                  boundaries=global_boundaries,
@@ -502,6 +502,7 @@ class MeshTest(unittest.TestCase):
 
         # local patch of element s.t. local patch inherits no boundary
         # ------------------------------------------------------------
+        # TODO add global to local value test
         base_path = Path(
             'tests/data/local_patch_touching_no_boundary')
         path_to_coordinates = base_path / Path('coordinates.dat')
@@ -513,7 +514,7 @@ class MeshTest(unittest.TestCase):
         boundary = io_helpers.read_boundary_condition(
             path_to_boundary=path_to_boundary)
 
-        local_coordinates, local_elements, local_boundaries = \
+        local_coordinates, local_elements, local_boundaries, _ = \
             mesh.get_local_patch(coordinates=coordinates,
                                  elements=elements,
                                  boundaries=[boundary],

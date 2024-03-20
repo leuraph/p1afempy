@@ -235,7 +235,8 @@ def complete_boundaries(elements: data_structures.ElementsType,
 def get_local_patch(coordinates: data_structures.CoordinatesType,
                     elements: data_structures.ElementsType,
                     boundaries: list[data_structures.BoundaryType],
-                    which_for: int
+                    which_for: int,
+                    global_values: np.ndarray = np.array([])
                     ) -> tuple[data_structures.CoordinatesType,
                                data_structures.ElementsType,
                                list[data_structures.BoundaryType]]:
@@ -254,6 +255,8 @@ def get_local_patch(coordinates: data_structures.CoordinatesType,
         boundaries of the mesh at hand
     which_for: int
         index of the element for which to extract the local patch
+    global_values: np.ndarray = np.array([])
+        an array of values defined on the global coordinates
 
     returns
     -------
@@ -270,6 +273,8 @@ def get_local_patch(coordinates: data_structures.CoordinatesType,
         the given boundaries, i.e. if none of the elements
         in the local patch touch the boundary at hand,
         an empty list is returned
+    local_values: np.ndarray
+        the global values given on the local coordinates
 
     notes
     -----
@@ -307,4 +312,7 @@ def get_local_patch(coordinates: data_structures.CoordinatesType,
     # local patch's coordinates
     local_coordinates = coordinates[unique_idxs]
 
-    return local_coordinates, local_elements, local_boundaries
+    # TODO implement local value extraction
+    local_values = global_values
+
+    return local_coordinates, local_elements, local_boundaries, local_values
