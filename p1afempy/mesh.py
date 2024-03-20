@@ -312,7 +312,9 @@ def get_local_patch(coordinates: data_structures.CoordinatesType,
     # local patch's coordinates
     local_coordinates = coordinates[unique_idxs]
 
-    # TODO implement local value extraction
-    local_values = global_values
+    # local value extraction, if given
+    local_values = np.array([])
+    if global_values.size > 0:
+        local_values = global_values[unique_idxs]
 
     return local_coordinates, local_elements, local_boundaries, local_values
