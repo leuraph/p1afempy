@@ -139,9 +139,14 @@ def provide_geometric_data(elements: data_structures.ElementsType,
 
 def get_transform(unique_idxs: np.ndarray):
     """
-    given a unique set of n non-negative integers I,
-    this function returns an order preserving mapping
-    perform_transform : I -> [0, 1, 2, ..., n-1] := I'
+    given a set of n unique, non-negative integers I,
+    this function returns a vectorized and order preserving mapping
+    `perform_transform` : I -> [0, 1, 2, ..., n-1] =: I'
+
+    notes
+    -----
+    the returned mapping may be used, e.g. to transform global indexation
+    to local indexation after extraction of a local patch
 
     example
     -------
