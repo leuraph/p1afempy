@@ -474,11 +474,12 @@ class MeshTest(unittest.TestCase):
 
         # local patch of element touching dirichlet boundaries
         # -----------------------------------------------
-        local_coordinates, local_elements, local_boundaries, _ = \
+        local_coordinates, local_elements, local_boundaries, local_values = \
             mesh.get_local_patch(coordinates=global_coordinates,
                                  elements=global_elements,
                                  boundaries=global_boundaries,
-                                 which_for=0)
+                                 which_for=0,
+                                 global_values=global_values)
         expected_local_elements = np.array([
             [3, 2, 0],
             [4, 3, 1],
@@ -496,6 +497,7 @@ class MeshTest(unittest.TestCase):
                 [2, 0],
                 [0, 1]
             ])]
+        expected_local_values = np.array([0.0, 0.1, 0.3, 0.4, 0.5])
         self.assertTrue(np.all(
             local_coordinates == expected_local_coordinates))
         self.assertTrue(np.all(
@@ -506,6 +508,7 @@ class MeshTest(unittest.TestCase):
             local_boundary = local_boundaries[k]
             expected_local_boundary = expected_local_boundaries[k]
             self.assertTrue(np.all(local_boundary == expected_local_boundary))
+        self.assertTrue(np.all(expected_local_values == local_values))
 
         # local patch of element s.t. local patch inherits no boundary
         # ------------------------------------------------------------
