@@ -282,7 +282,11 @@ class MeshTest(unittest.TestCase):
             [3, 1, 4],
             [5, 6, 7]
         ])
-        computed_local_indices = mesh.global_to_local_indices(global_indices)
+
+        unique_indices = np.unique(global_indices)
+        global_to_local_index_mapping = mesh.get_global_to_local_index_mapping(
+            unique_indices)
+        computed_local_indices = global_to_local_index_mapping(global_indices)
 
         self.assertTrue(
             np.all(expected_local_indices == computed_local_indices))
