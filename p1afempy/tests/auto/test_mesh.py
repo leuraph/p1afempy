@@ -502,24 +502,27 @@ class MeshTest(unittest.TestCase):
 
         # local patch of element s.t. local patch inherits no boundary
         # ------------------------------------------------------------
-        # TODO add global to local value test
         base_path = Path(
             'tests/data/local_patch_touching_no_boundary')
         path_to_coordinates = base_path / Path('coordinates.dat')
         path_to_elements = base_path / Path('elements.dat')
         path_to_boundary = base_path / Path('boundary.dat')
+        path_to_global_values = base_path / Path('global_values.dat')
         coordinates, elements = io_helpers.read_mesh(
             path_to_coordinates=path_to_coordinates,
             path_to_elements=path_to_elements)
         boundary = io_helpers.read_boundary_condition(
             path_to_boundary=path_to_boundary)
+        global_values = np.loadtxt(path_to_global_values)
 
-        local_coordinates, local_elements, local_boundaries, _ = \
+        local_coordinates, local_elements, local_boundaries, local_values = \
             mesh.get_local_patch(coordinates=coordinates,
                                  elements=elements,
                                  boundaries=[boundary],
-                                 which_for=6)
+                                 which_for=6,
+                                 global_values=global_values)
 
+        # TODO add global to local value test, i.e. test local_values
         self.assertFalse(local_boundaries)
 
 
