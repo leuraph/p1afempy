@@ -137,7 +137,7 @@ def provide_geometric_data(elements: data_structures.ElementsType,
     return element_to_edges, edge_to_nodes, boundaries_to_edges
 
 
-def get_transform(unique_idxs: np.ndarray):
+def get_global_to_local_index_mapping(unique_idxs: np.ndarray):
     """
     given a set of n unique, non-negative integers I,
     this function returns a vectorized and order preserving mapping
@@ -155,7 +155,7 @@ def get_transform(unique_idxs: np.ndarray):
     >>>                            [12, 3, 15],
     >>>                            [66, 77, 88]])
     >>> unique_indices = np.unique(global_indices)
-    >>> perform_transform = get_transform(unique_indices)
+    >>> perform_transform = get_global_to_local_index_mapping(unique_indices)
     >>> local_indices = perform_transform(global_indices)
     >>> local_indices
         array([[3, 1, 2],
@@ -206,8 +206,9 @@ def global_to_local_indices(global_indices: np.ndarray) -> np.ndarray:
                [5, 6, 7]])
     """
     unique_indices = np.unique(global_indices)
-    global_to_local_transform = get_transform(unique_indices)
-    return global_to_local_transform(global_indices)
+    global_to_local_index_mapping = get_global_to_local_index_mapping(
+        unique_indices)
+    return global_to_local_index_mapping(global_indices)
 
 
 def complete_boundaries(elements: data_structures.ElementsType,
@@ -310,7 +311,7 @@ def get_local_patch(coordinates: data_structures.CoordinatesType,
     unique_idxs = np.unique(local_elements)
 
     # retreiving the transformation (global -> local indices)
-    perform_transform = get_transform(unique_idxs)
+    perform_transform = get_global_to_local_index_mapping(unique_idxs)
 
     local_boundaries = []
     for boundary in boundaries:
