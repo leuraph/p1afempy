@@ -516,6 +516,8 @@ class MeshTest(unittest.TestCase):
             path_to_boundary=path_to_boundary)
         global_values = np.loadtxt(path_to_global_values)
 
+        expected_local_values = np.array([0.1, 0.3, 0.4, 0.5, 0.6, 0.8])
+
         local_coordinates, local_elements, local_boundaries, local_values = \
             mesh.get_local_patch(coordinates=coordinates,
                                  elements=elements,
@@ -523,7 +525,7 @@ class MeshTest(unittest.TestCase):
                                  which_for=6,
                                  global_values=global_values)
 
-        # TODO add global to local value test, i.e. test local_values
+        self.assertTrue(np.all(expected_local_values == local_values))
         self.assertFalse(local_boundaries)
 
 
