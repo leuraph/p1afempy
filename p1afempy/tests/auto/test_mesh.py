@@ -269,6 +269,258 @@ class MeshTest(unittest.TestCase):
             expected_area, mesh.get_area(coordinates=ahw_coordinates,
                                          elements=ahw_elements)))
 
+    def test_relabel_global_indices(self):
+        global_indices = np.array([
+            [12, 3, 6],
+            [12, 2, 6],
+            [12, 3, 15],
+            [66, 77, 88],
+        ])
+        expected_local_indices = np.array([
+            [3, 1, 2],
+            [3, 0, 2],
+            [3, 1, 4],
+            [5, 6, 7]
+        ])
+
+        unique_indices = np.unique(global_indices)
+        global_to_local_index_mapping = mesh.get_global_to_local_index_mapping(
+            unique_indices)
+        computed_local_indices = global_to_local_index_mapping(global_indices)
+
+        self.assertTrue(
+            np.all(expected_local_indices == computed_local_indices))
+
+    def test_complete_boundaries(self) -> None:
+        path_to_elements = Path(
+            'tests/data/simple_square_mesh/elements.dat')
+        elements = io_helpers.read_elements(
+            path_to_elements=path_to_elements)
+
+        # test with one missing edge
+        # --------------------------
+        input_boundary = np.array([
+            [0, 1],
+            [1, 2],
+            [2, 3]
+        ])
+        expected_artificial_boundary = np.array([
+            [3, 0]
+        ])
+
+        expected_boundaries = [input_boundary,
+                               expected_artificial_boundary]
+        calculated_completed_boundaries = mesh.complete_boundaries(
+            elements=elements,
+            boundaries=[input_boundary])
+
+        for calc, exp in zip(calculated_completed_boundaries,
+                             expected_boundaries):
+            self.assertTrue(np.all(calc == exp))
+
+        # test with two missing edges
+        # ---------------------------
+        input_boundary_0 = np.array([
+            [0, 1]
+        ])
+        input_boundary_1 = np.array([
+            [2, 3]
+        ])
+        expected_artificial_boundary = np.array([
+            [1, 2],
+            [3, 0]
+        ])
+
+        expected_boundaries = [input_boundary_0,
+                               input_boundary_1,
+                               expected_artificial_boundary]
+        calculated_completed_boundaries = mesh.complete_boundaries(
+            elements=elements,
+            boundaries=[input_boundary_0, input_boundary_1])
+        for calc, exp in zip(calculated_completed_boundaries,
+                             expected_boundaries):
+            self.assertTrue(np.all(calc == exp))
+
+        # test with already complete edge
+        # -------------------------------
+        input_boundary = np.array([
+            [0, 1],
+            [1, 2],
+            [2, 3],
+            [3, 0]
+        ])
+
+        expected_boundaries = [input_boundary]
+        calculated_completed_boundaries = mesh.complete_boundaries(
+            elements=elements,
+            boundaries=[input_boundary])
+
+        for calc, exp in zip(calculated_completed_boundaries,
+                             expected_boundaries):
+            self.assertTrue(np.all(calc == exp))
+
+        # test with all edges missing
+        # ---------------------------
+        expected_artificial_boundary = np.array([
+            [0, 1],
+            [1, 2],
+            [2, 3],
+            [3, 0]
+        ])
+
+        expected_boundaries = [expected_artificial_boundary]
+        calculated_completed_boundaries = mesh.complete_boundaries(
+            elements=elements,
+            boundaries=[])
+
+        for calc, exp in zip(calculated_completed_boundaries,
+                             expected_boundaries):
+            self.assertTrue(np.all(calc == exp))
+
+    def test_get_local_patch(self) -> None:
+        path_to_coordinates = Path(
+            'tests/data/get_local_patch/coordinates.dat')
+        path_to_elements = Path(
+            'tests/data/get_local_patch/elements.dat')
+        path_to_dirichlet = Path('tests/data/get_local_patch/dirichlet.dat')
+        path_to_neumann = Path('tests/data/get_local_patch/neumann.dat')
+
+        global_coordinates, global_elements = io_helpers.read_mesh(
+            path_to_coordinates=path_to_coordinates,
+            path_to_elements=path_to_elements)
+        global_dirichlet = io_helpers.read_boundary_condition(
+            path_to_boundary=path_to_dirichlet)
+        global_neumann = io_helpers.read_boundary_condition(
+            path_to_boundary=path_to_neumann)
+        global_boundaries = [global_dirichlet, global_neumann]
+
+        # local patch of element not touching any boundary
+        # ------------------------------------------------
+        local_coordinates, local_elements, local_boundaries = \
+            mesh.get_local_patch(coordinates=global_coordinates,
+                                 elements=global_elements,
+                                 boundaries=global_boundaries,
+                                 which_for=3)
+        expected_local_coordinates = np.array([
+            [0., 0.],
+            [1., 0.],
+            [2., 0.],
+            [1., 1.],
+            [2., 1.],
+            [2., 2.]
+        ])
+        expected_local_elements = np.array([
+            [0, 1, 3],
+            [1, 2, 4],
+            [3, 4, 5],
+            [4, 3, 1]
+        ])
+        expected_local_boundaries = [
+            np.array([
+                [0, 1], [1, 2]
+            ]),
+            np.array([
+                [2, 4], [4, 5]
+            ])]
+        self.assertTrue(np.all(
+            local_coordinates == expected_local_coordinates))
+        self.assertTrue(np.all(
+            local_elements == expected_local_elements))
+        self.assertTrue(
+            len(expected_local_boundaries) == len(local_boundaries))
+        for k in range(len(local_boundaries)):
+            local_boundary = local_boundaries[k]
+            expected_local_boundary = expected_local_boundaries[k]
+            self.assertTrue(np.all(local_boundary == expected_local_boundary))
+
+        # local patch of element touching both boundaries
+        # --------------------------------------------------
+        local_coordinates, local_elements, local_boundaries = \
+            mesh.get_local_patch(coordinates=global_coordinates,
+                                 elements=global_elements,
+                                 boundaries=global_boundaries,
+                                 which_for=1)
+        expected_local_elements = np.array([
+            [3, 2, 0],
+            [0, 1, 3],
+        ])
+        expected_local_coordinates = np.array([
+            [1, 0],
+            [2, 0],
+            [1, 1],
+            [2, 1]
+        ])
+        expected_local_boundaries = [
+            np.array([0, 1]),
+            np.array([1, 3])
+        ]
+        self.assertTrue(np.all(
+            local_coordinates == expected_local_coordinates))
+        self.assertTrue(np.all(
+            local_elements == expected_local_elements))
+        self.assertTrue(
+            len(expected_local_boundaries) == len(local_boundaries))
+        for k in range(len(local_boundaries)):
+            local_boundary = local_boundaries[k]
+            expected_local_boundary = expected_local_boundaries[k]
+            self.assertTrue(np.all(local_boundary == expected_local_boundary))
+
+        # local patch of element touching dirichlet boundaries
+        # -----------------------------------------------
+        local_coordinates, local_elements, local_boundaries = \
+            mesh.get_local_patch(coordinates=global_coordinates,
+                                 elements=global_elements,
+                                 boundaries=global_boundaries,
+                                 which_for=0)
+        expected_local_elements = np.array([
+            [3, 2, 0],
+            [4, 3, 1],
+            [0, 1, 3]
+        ])
+        expected_local_coordinates = np.array([
+            [0, 0],
+            [1, 0],
+            [0, 1],
+            [1, 1],
+            [2, 1]
+        ])
+        expected_local_boundaries = [
+            np.array([
+                [2, 0],
+                [0, 1]
+            ])]
+        self.assertTrue(np.all(
+            local_coordinates == expected_local_coordinates))
+        self.assertTrue(np.all(
+            local_elements == expected_local_elements))
+        self.assertTrue(
+            len(expected_local_boundaries) == len(local_boundaries))
+        for k in range(len(local_boundaries)):
+            local_boundary = local_boundaries[k]
+            expected_local_boundary = expected_local_boundaries[k]
+            self.assertTrue(np.all(local_boundary == expected_local_boundary))
+
+        # local patch of element s.t. local patch inherits no boundary
+        # ------------------------------------------------------------
+        base_path = Path(
+            'tests/data/local_patch_touching_no_boundary')
+        path_to_coordinates = base_path / Path('coordinates.dat')
+        path_to_elements = base_path / Path('elements.dat')
+        path_to_boundary = base_path / Path('boundary.dat')
+        coordinates, elements = io_helpers.read_mesh(
+            path_to_coordinates=path_to_coordinates,
+            path_to_elements=path_to_elements)
+        boundary = io_helpers.read_boundary_condition(
+            path_to_boundary=path_to_boundary)
+
+        local_coordinates, local_elements, local_boundaries = \
+            mesh.get_local_patch(coordinates=coordinates,
+                                 elements=elements,
+                                 boundaries=[boundary],
+                                 which_for=6)
+
+        self.assertFalse(local_boundaries)
+
 
 if __name__ == '__main__':
     unittest.main()

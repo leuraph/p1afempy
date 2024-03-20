@@ -135,3 +135,176 @@ def provide_geometric_data(elements: data_structures.ElementsType,
         boundaries_to_edges.append(
             edge_number[np.arange(pointer[j+1]+1, pointer[j+2]+1, dtype=int)])
     return element_to_edges, edge_to_nodes, boundaries_to_edges
+
+
+def get_global_to_local_index_mapping(unique_idxs: np.ndarray):
+    """
+    given a set of n unique, non-negative integers I,
+    this function returns a vectorized and order preserving mapping
+    `perform_transform` : I -> [0, 1, 2, ..., n-1] =: I'
+
+    notes
+    -----
+    - the returned mapping may be used, e.g. to transform global indexation
+      to local indexation after extraction of a local patch
+    - if global[i, j, ...] <= global[i', j', ...], then we also have
+      local[i, j, ...]  <= local[i', j', ...]
+    - if N is the number of distinct indices in global_indices,
+      then local_indices contains the integers 0, 1, ..., N-1
+
+    example
+    -------
+    >>> global_indices = np.array([[12, 3, 6],
+    >>>                            [12, 2, 6],
+    >>>                            [12, 3, 15],
+    >>>                            [66, 77, 88]])
+    >>> unique_indices = np.unique(global_indices)
+    >>> perform_transform = get_global_to_local_index_mapping(unique_indices)
+    >>> local_indices = perform_transform(global_indices)
+    >>> local_indices
+        array([[3, 1, 2],
+               [3, 0, 2],
+               [3, 1, 4],
+               [5, 6, 7]])
+    """
+    local_idx = np.arange(unique_idxs.size)
+    transform = dict(zip(unique_idxs, local_idx))
+    perform_transform = np.vectorize(lambda old: transform[old])
+    return perform_transform
+
+
+def complete_boundaries(elements: data_structures.ElementsType,
+                        boundaries: list[data_structures.BoundaryType]
+                        ) -> list[data_structures.BoundaryType]:
+    """
+    given a possibly incomplete list of boundaries,
+    returns a complete list of boundaries, i.e. adds
+    an artificial boundary where needed
+
+    parameters
+    ----------
+    elements: data_structures.ElementsType
+        elements of the mesh at hand
+    boundaries: list[data_structures.BoundaryType]
+        a possibly incomplete list of boundaries
+        of the elements given
+
+    returns
+    -------
+    completed_boundaries: list[data_structures.BoundaryType]
+        a coomplete list of boundaries of the elements given
+
+    example
+    -------
+    >>> elements = np.array([[0, 1, 2], [0, 2, 3]])
+    >>> boundary = np.array([[0, 1], [1, 2]])
+    >>> completed_boundaries = complete_boundaries(
+    >>>     elements, [boundary])
+    >>> completed_boundaries
+        [array([[0, 1], [1, 2]]), array([[2, 3], [3, 0]])]
+    """
+    element_indices_i = elements.flatten()
+    element_indices_j = elements[:, [1, 2, 0]].flatten()
+    all_edges = np.column_stack([element_indices_i, element_indices_j])
+
+    exterior_edges = []
+    for edge in all_edges:
+        # mark all rows where edge appears
+        edge_is_here = np.sum(np.isin(all_edges, edge), axis=1) == 2
+        # if edge appears twice, it is shared by two elements and therefore
+        # must be interior
+        is_interior = np.sum(edge_is_here) == 2
+        if not is_interior:
+            exterior_edges.append(edge)
+
+    artificial_boundary = []
+    for exterior_edge in exterior_edges:
+        covered = False
+        for boundary in boundaries:
+            if np.any(np.sum(np.isin(boundary, exterior_edge), axis=1) == 2):
+                covered = True
+                break
+        if not covered:
+            artificial_boundary.append(exterior_edge)
+
+    if artificial_boundary:
+        boundaries.append(np.array(artificial_boundary))
+    return boundaries
+
+
+def get_local_patch(coordinates: data_structures.CoordinatesType,
+                    elements: data_structures.ElementsType,
+                    boundaries: list[data_structures.BoundaryType],
+                    which_for: int
+                    ) -> tuple[data_structures.CoordinatesType,
+                               data_structures.ElementsType,
+                               list[data_structures.BoundaryType]]:
+    """
+    returns the local mesh corresponding to the k-th element
+    and its immediate neightbours, i.e. elements that share an edge
+    with the selected k-th element
+
+    parameters
+    ----------
+    coordinates: data_structures.CoordinatesType
+        coordinates of the mesh at hand
+    elements: data_structures.ElementsType
+        elements of the mesh at hand
+    boundaries: list[data_structures.BoundaryType]
+        boundaries of the mesh at hand
+    which_for: int
+        index of the element for which to extract the local patch
+
+    returns
+    -------
+    local_coordinates: data_structures.CoordinatesType
+        coordinates of the selected element and its neighbours,
+        where neighbours are elements that share an edge with
+        the selected element
+    local_elements: data_structures.ElementsType
+        neighbours of the selected element, i.e.
+        elements that share an edge with
+        the selected element
+    local_boundaries: list[data_structures.BoundaryType]
+        boundaries of the local patch inherited from
+        the given boundaries, i.e. if none of the elements
+        in the local patch touch the boundary at hand,
+        an empty list is returned
+
+    notes
+    -----
+    the returned local patch is indexed in a local fashion, i.e.
+    - the indices in local_elements refer to the entries in local_coordinates
+    - the indices in all elements in local_boundaries refer to entries in
+      local_coordinates
+    """
+    # global indices of the marked element's nodes
+    nodes = elements[which_for]
+
+    # identifying the marked element's nieghbours
+    neighbours = np.sum(np.isin(elements, nodes), axis=1) == 2
+
+    # global indices of the local patch's elements
+    local_elements = np.vstack([elements[neighbours], nodes])
+
+    # unique sorted global indices of all nodes in global patch
+    unique_idxs = np.unique(local_elements)
+
+    # retreiving the transformation (global -> local indices)
+    perform_transform = get_global_to_local_index_mapping(unique_idxs)
+
+    local_boundaries = []
+    for boundary in boundaries:
+        edge_in_local_patch = np.sum(
+            np.isin(boundary, local_elements), axis=1) == 2
+        local_boundary = boundary[edge_in_local_patch]
+        if local_boundary.size > 0:
+            local_boundaries.append(perform_transform(local_boundary))
+
+    # local patch's elements in local indices
+    local_elements = perform_transform(local_elements)
+
+    # local patch's coordinates
+    local_coordinates = coordinates[unique_idxs]
+
+    return local_coordinates, local_elements, local_boundaries
