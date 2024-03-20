@@ -300,10 +300,14 @@ def get_local_patch(coordinates: data_structures.CoordinatesType,
 
     local_boundaries = []
     for boundary in boundaries:
-        edge_in_local_patch = np.sum(
-            np.isin(boundary, local_elements), axis=1) == 2
-        local_boundary = boundary[edge_in_local_patch]
-        if local_boundary.size > 0:
+        local_boundary = []
+        for edge in boundary:
+            edge_in_local_patch = np.sum(
+                np.isin(local_elements, edge), axis=1) == 2
+            if np.any(edge_in_local_patch):
+                local_boundary.append(edge)
+        if len(local_boundary) > 0:
+            local_boundary = np.array(local_boundary)
             local_boundaries.append(perform_transform(local_boundary))
 
     # local patch's elements in local indices
