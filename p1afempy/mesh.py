@@ -193,6 +193,15 @@ def complete_boundaries(elements: data_structures.ElementsType,
     -------
     completed_boundaries: list[data_structures.BoundaryType]
         a coomplete list of boundaries of the elements given
+
+    example
+    -------
+    >>> elements = np.array([[0, 1, 2], [0, 2, 3]])
+    >>> boundary = np.array([[0, 1], [1, 2]])
+    >>> completed_boundaries = complete_boundaries(
+    >>>     elements, [boundary])
+    >>> completed_boundaries
+        [array([[0, 1], [1, 2]]), array([[2, 3], [3, 0]])]
     """
     element_indices_i = elements.flatten()
     element_indices_j = elements[:, [1, 2, 0]].flatten()
@@ -231,7 +240,9 @@ def get_local_patch(coordinates: data_structures.CoordinatesType,
                                data_structures.ElementsType,
                                list[data_structures.BoundaryType]]:
     """
-    returns the local mesh corresponding to k-th element
+    returns the local mesh corresponding to the k-th element
+    and its immediate neightbours, i.e. elements that share an edge
+    with the selected k-th element
 
     parameters
     ----------
