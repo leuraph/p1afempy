@@ -378,13 +378,11 @@ class MeshTest(unittest.TestCase):
             self.assertTrue(np.all(calc == exp))
 
     def test_get_local_patch(self) -> None:
-        path_to_coordinates = Path(
-            'tests/data/get_local_patch/coordinates.dat')
-        path_to_elements = Path(
-            'tests/data/get_local_patch/elements.dat')
-        path_to_dirichlet = Path('tests/data/get_local_patch/dirichlet.dat')
-        path_to_neumann = Path('tests/data/get_local_patch/neumann.dat')
-        # TODO add local value test
+        base_path = Path('tests/data/get_local_patch')
+        path_to_coordinates = base_path / Path('coordinates.dat')
+        path_to_elements = base_path / Path('elements.dat')
+        path_to_dirichlet = base_path / Path('dirichlet.dat')
+        path_to_neumann = base_path / Path('neumann.dat')
 
         global_coordinates, global_elements = io_helpers.read_mesh(
             path_to_coordinates=path_to_coordinates,
