@@ -232,6 +232,24 @@ def complete_boundaries(elements: data_structures.ElementsType,
     return boundaries
 
 
+def get_local_boundaries(boundaries: list[data_structures.BoundaryType],
+                         local_elements: data_structures.ElementsType,
+                         perform_transform: np.vectorize
+                         ) -> list[data_structures.BoundaryType]:
+    local_boundaries = []
+    for boundary in boundaries:
+        local_boundary = []
+        for edge in boundary:
+            edge_in_local_patch = np.sum(
+                np.isin(local_elements, edge), axis=1) == 2
+            if np.any(edge_in_local_patch):
+                local_boundary.append(edge)
+        if len(local_boundary) > 0:
+            local_boundary = np.array(local_boundary)
+            local_boundaries.append(perform_transform(local_boundary))
+    return local_boundaries
+
+
 def get_neighbouring_elements(elements: data_structures.ElementsType,
                               which_for: int) -> data_structures.ElementsType:
     """
@@ -321,17 +339,11 @@ def get_local_patch(coordinates: data_structures.CoordinatesType,
     # retreiving the transformation (global -> local indices)
     perform_transform = get_global_to_local_index_mapping(unique_idxs)
 
-    local_boundaries = []
-    for boundary in boundaries:
-        local_boundary = []
-        for edge in boundary:
-            edge_in_local_patch = np.sum(
-                np.isin(local_elements, edge), axis=1) == 2
-            if np.any(edge_in_local_patch):
-                local_boundary.append(edge)
-        if len(local_boundary) > 0:
-            local_boundary = np.array(local_boundary)
-            local_boundaries.append(perform_transform(local_boundary))
+    # retreive the local boundaries
+    local_boundaries = get_local_boundaries(
+        boundaries=boundaries,
+        local_elements=local_elements,
+        perform_transform=perform_transform)
 
     # local patch's elements in local indices
     local_elements = perform_transform(local_elements)
