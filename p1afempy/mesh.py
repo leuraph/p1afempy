@@ -232,6 +232,35 @@ def complete_boundaries(elements: data_structures.ElementsType,
     return boundaries
 
 
+def get_neighbouring_elements(elements: data_structures.ElementsType,
+                              which_for: int) -> data_structures.ElementsType:
+    """
+    identifies and returns neighbouring elements for a marked element
+
+    Parameters
+    ----------
+    elements: data_structures.ElementsType
+        a 2D array-like structure containing all elements.
+    which_for: int
+        index of the marked element for which neighbouring
+        elements are to be found.
+
+    Returns
+    -------
+    data_structures.ElementsType:
+        a 2D array-like structure containing neighbouring
+        elements along with the marked element.
+    """
+    # global indices of the marked element's nodes
+    nodes = elements[which_for]
+
+    # identifying the marked element's nieghbours
+    neighbours = np.sum(np.isin(elements, nodes), axis=1) == 2
+
+    # global indices of the local patch's elements
+    return np.vstack([elements[neighbours], nodes])
+
+
 def get_local_patch(coordinates: data_structures.CoordinatesType,
                     elements: data_structures.ElementsType,
                     boundaries: list[data_structures.BoundaryType],
@@ -283,14 +312,8 @@ def get_local_patch(coordinates: data_structures.CoordinatesType,
     - the indices in all elements in local_boundaries refer to entries in
       local_coordinates
     """
-    # global indices of the marked element's nodes
-    nodes = elements[which_for]
-
-    # identifying the marked element's nieghbours
-    neighbours = np.sum(np.isin(elements, nodes), axis=1) == 2
-
-    # global indices of the local patch's elements
-    local_elements = np.vstack([elements[neighbours], nodes])
+    local_elements = get_neighbouring_elements(elements=elements,
+                                               which_for=which_for)
 
     # unique sorted global indices of all nodes in global patch
     unique_idxs = np.unique(local_elements)
