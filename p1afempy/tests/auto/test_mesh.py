@@ -537,6 +537,60 @@ class MeshTest(unittest.TestCase):
         self.assertTrue(np.all(expected_local_values == local_values))
         self.assertFalse(local_boundaries)
 
+        # local patch edge case:
+        # an edge of the actual boundary is not covered by the local patch
+        # but the nodes making up the edge are both part of the local patch
+        # we consider two cases fo the same setup
+        # -----------------------------------------------------------------
+        base_path = Path('tests/data/centered_square_mesh')
+        path_to_coordinates = base_path / Path('coordinates.dat')
+        path_to_elements = base_path / Path('elements.dat')
+        path_to_dirichlet_full = base_path / Path('dirichlet_full.dat')
+        path_to_dirichlet_single = base_path / Path('dirichlet_single.dat')
+
+        global_coordinates, global_elements = io_helpers.read_mesh(
+            path_to_coordinates=path_to_coordinates,
+            path_to_elements=path_to_elements)
+        global_dirichlet_full = io_helpers.read_boundary_condition(
+            path_to_boundary=path_to_dirichlet_full)
+        global_dirichlet_single = io_helpers.read_boundary_condition(
+            path_to_boundary=path_to_dirichlet_single)
+
+        # we expect the same local elements in both cases
+        expected_local_elements = np.array([
+            [0, 2, 3],
+            [1, 4, 2],
+            [0, 1, 2]])
+
+        expected_local_boundary_full = np.array([
+            [0, 1],
+            [1, 4],
+            [3, 0]])
+
+        local_coordinates, local_elements, local_boundaries, _ = \
+            mesh.get_local_patch(
+                coordinates=global_coordinates,
+                elements=global_elements,
+                boundaries=[global_dirichlet_full],
+                which_for=0)
+        # all global coordinates are in the local patch
+        self.assertTrue(np.all(local_coordinates == global_coordinates))
+        self.assertTrue(np.all(local_elements == expected_local_elements))
+        self.assertEqual(len(local_boundaries), 1)
+        self.assertTrue(np.all(
+            local_boundaries[0] == expected_local_boundary_full))
+
+        local_coordinates, local_elements, local_boundaries, _ = \
+            mesh.get_local_patch(
+                coordinates=global_coordinates,
+                elements=global_elements,
+                boundaries=[global_dirichlet_single],
+                which_for=0)
+        # all global coordinates are in the local patch
+        self.assertTrue(np.all(local_coordinates == global_coordinates))
+        self.assertTrue(np.all(local_elements == expected_local_elements))
+        self.assertEqual(len(local_boundaries), 0)
+
 
 if __name__ == '__main__':
     unittest.main()
