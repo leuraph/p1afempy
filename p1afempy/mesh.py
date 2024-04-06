@@ -212,18 +212,12 @@ def complete_boundaries(elements: data_structures.ElementsType,
 
     exterior_edges = all_edges_ij[np.logical_not(is_interior)]
 
-    artificial_boundary = []
-    for exterior_edge in exterior_edges:
-        covered = False
-        for boundary in boundaries:
-            if np.any(np.sum(np.isin(boundary, exterior_edge), axis=1) == 2):
-                covered = True
-                break
-        if not covered:
-            artificial_boundary.append(exterior_edge)
+    for boundary in boundaries:
+        covered = utility.is_row_in(exterior_edges, boundary)
+        exterior_edges = exterior_edges[np.logical_not(covered)]
 
-    if artificial_boundary:
-        boundaries.append(np.array(artificial_boundary))
+    if exterior_edges.size > 0:
+        boundaries.append(exterior_edges)
     return boundaries
 
 
