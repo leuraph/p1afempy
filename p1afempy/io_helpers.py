@@ -32,6 +32,10 @@ def read_boundary_condition(path_to_boundary: Path,
     boundary_indices = np.loadtxt(path_to_boundary).astype(np.uint32)
     if shift_indices:
         boundary_indices = boundary_indices - 1
+    # make sure we match the expected shape even if (in an edge case)
+    # the specified boundary condition is only valid on one single edge
+    if len(boundary_indices.shape) == 1:
+        return boundary_indices[None, :]
     return boundary_indices
 
 
