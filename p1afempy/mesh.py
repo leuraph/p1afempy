@@ -206,17 +206,11 @@ def complete_boundaries(elements: data_structures.ElementsType,
     """
     element_indices_i = elements.flatten()
     element_indices_j = elements[:, [1, 2, 0]].flatten()
-    all_edges = np.column_stack([element_indices_i, element_indices_j])
+    all_edges_ij = np.column_stack([element_indices_i, element_indices_j])
 
-    exterior_edges = []
-    for edge in all_edges:
-        # mark all rows where edge appears
-        edge_is_here = np.sum(np.isin(all_edges, edge), axis=1) == 2
-        # if edge appears twice, it is shared by two elements and therefore
-        # must be interior
-        is_interior = np.sum(edge_is_here) == 2
-        if not is_interior:
-            exterior_edges.append(edge)
+    is_interior = utility.is_row_in(all_edges_ij, all_edges_ij[:, [1, 0]])
+
+    exterior_edges = all_edges_ij[np.logical_not(is_interior)]
 
     artificial_boundary = []
     for exterior_edge in exterior_edges:
