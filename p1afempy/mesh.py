@@ -1,5 +1,6 @@
 import numpy as np
 from p1afempy import data_structures
+from p1afempy import utility
 from scipy.sparse import coo_matrix, find
 from matplotlib import pyplot as plt
 
@@ -236,17 +237,16 @@ def get_local_boundaries(boundaries: list[data_structures.BoundaryType],
                          local_elements: data_structures.ElementsType,
                          perform_transform: np.vectorize
                          ) -> list[data_structures.BoundaryType]:
+    nodes_idx_i = local_elements[:, [0, 1, 2]].flatten()
+    nodes_idx_j = local_elements[:, [1, 2, 0]].flatten()
+    local_edges = np.column_stack((nodes_idx_i, nodes_idx_j))
+
     local_boundaries = []
     for boundary in boundaries:
-        local_boundary = []
-        for edge in boundary:
-            edge_in_local_patch = np.sum(
-                np.isin(local_elements, edge), axis=1) == 2
-            if np.any(edge_in_local_patch):
-                local_boundary.append(edge)
-        if len(local_boundary) > 0:
-            local_boundary = np.array(local_boundary)
-            local_boundaries.append(perform_transform(local_boundary))
+        shared_edges = utility.is_row_in(boundary, local_edges)
+        if np.any(shared_edges):
+            local_boundaries.append(
+                perform_transform(boundary[shared_edges]))
     return local_boundaries
 
 
