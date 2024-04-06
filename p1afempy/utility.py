@@ -14,8 +14,8 @@ def is_row_in(a: np.ndarray, b: np.ndarray) -> np.ndarray:
 
     Returns
     -------
-    np.ndarray:
-        the indices of the rows of `a` shared with `b`
+    isin: np.ndarray
+        has the same shape as a. The rows a[isin] are also rows in b.
 
     References
     ----------
