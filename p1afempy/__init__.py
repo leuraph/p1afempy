@@ -9,3 +9,4 @@ from .io_helpers import *
 from .mesh import *
 from .refinement import *
 from .solvers import *
+from .utility import *
