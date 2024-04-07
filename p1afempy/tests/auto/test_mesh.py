@@ -591,6 +591,30 @@ class MeshTest(unittest.TestCase):
         self.assertTrue(np.all(local_elements == expected_local_elements))
         self.assertEqual(len(local_boundaries), 0)
 
+    def test_get_element_to_neighbours(self):
+        base_path = Path('tests/data/get_neighbours')
+        path_to_elements = base_path / Path('elements_matlab.dat')
+        path_to_expected_output = base_path / Path(
+            'element2neighbours_matlab.dat')
+
+        elements = io_helpers.read_elements(path_to_elements=path_to_elements,
+                                            shift_indices=True)
+
+        expected_element_to_neighbours = io_helpers.read_elements(
+            path_to_elements=path_to_expected_output)
+        element_to_neighbours = mesh.get_element_to_neighbours(
+            elements=elements)
+
+        self.assertEqual(expected_element_to_neighbours.size,
+                         element_to_neighbours.size)
+        for expected, actual in zip(expected_element_to_neighbours,
+                                    element_to_neighbours):
+            # transormation between python and matlab representatives
+            if actual == -1:
+                self.assertEqual(expected, 0)
+                continue
+            self.assertEqual(expected, actual + 1)
+
 
 if __name__ == '__main__':
     unittest.main()

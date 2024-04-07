@@ -347,6 +347,7 @@ def get_local_patch(coordinates: data_structures.CoordinatesType,
     return local_coordinates, local_elements, local_boundaries, local_values
 
 
-def get_neighbours(elements: data_structures.ElementsType) -> np.ndarray:
+def get_element_to_neighbours(
+        elements: data_structures.ElementsType) -> np.ndarray:
     # TODO implement
     return np.array([])
