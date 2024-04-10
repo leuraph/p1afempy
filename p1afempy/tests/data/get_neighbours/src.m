@@ -1,6 +1,6 @@
 load elements_matlab.dat
 
-element2neighbours = get_element_to_neighbour(elements)
+element2neighbours = get_element_to_neighbour(elements_matlab)
 
 save("element2neighbours_matlab.dat", "element2neighbours", "-ascii")
 
