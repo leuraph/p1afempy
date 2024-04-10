@@ -349,6 +349,23 @@ def get_local_patch(coordinates: data_structures.CoordinatesType,
 
 def get_element_to_neighbours(
         elements: data_structures.ElementsType) -> np.ndarray:
+    """
+    calculates and returns a map element to neighbours
+
+    parameters
+    ----------
+    elements: data_structures.ElementsType
+        all elements at hand
+
+    returns
+    -------
+    element2neighbours: np.ndarray
+        element2neighbours[k] holds the indices of thk-th
+        element's neighbours, where element2neighbours[k, i]
+        corresponds to the index of the element sharing the i-th
+        edge of the k-th element.
+        a value of `-1` resembles a boundary, i.e. an edge without a neighbour
+    """
     n_elements = elements.shape[0]
     I = elements.flatten(order='F')
     J = elements[:, [1, 2, 0]].flatten(order='F')
