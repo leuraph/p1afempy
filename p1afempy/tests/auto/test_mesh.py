@@ -607,13 +607,8 @@ class MeshTest(unittest.TestCase):
 
         self.assertEqual(expected_element_to_neighbours.size,
                          element_to_neighbours.size)
-        for expected, actual in zip(expected_element_to_neighbours,
-                                    element_to_neighbours):
-            # transormation between python and matlab representatives
-            if actual == -1:
-                self.assertEqual(expected, 0)
-                continue
-            self.assertEqual(expected, actual + 1)
+        self.assertTrue(np.all(
+            expected_element_to_neighbours - 1 == element_to_neighbours))
 
 
 if __name__ == '__main__':
