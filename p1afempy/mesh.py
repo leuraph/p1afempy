@@ -349,5 +349,18 @@ def get_local_patch(coordinates: data_structures.CoordinatesType,
 
 def get_element_to_neighbours(
         elements: data_structures.ElementsType) -> np.ndarray:
-    # TODO implement
-    return np.array([])
+    n_elements = elements.shape[0]
+    I = elements.flatten(order='F')
+    J = elements[:, [1, 2, 0]].flatten(order='F')
+    nodes2edge = coo_matrix((np.arange(1, 3*n_elements+1), (I, J)))
+    mask = nodes2edge > 0
+    _, _, idxIJ = find(nodes2edge)
+    aranged_element_indices = np.arange(1, n_elements + 1)
+    tmp = np.hstack((
+        aranged_element_indices,
+        aranged_element_indices,
+        aranged_element_indices))
+    _, _, neighbourIJ = find(mask + mask.multiply(coo_matrix((tmp, (J, I)))))
+    element2neighbours = np.zeros(3 * n_elements, dtype=np.uint32)
+    element2neighbours[idxIJ-1] = neighbourIJ - 1
+    return element2neighbours.reshape((n_elements, 3), order='F') - 1
