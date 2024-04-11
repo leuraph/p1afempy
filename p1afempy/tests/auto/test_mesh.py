@@ -395,14 +395,19 @@ class MeshTest(unittest.TestCase):
         global_boundaries = [global_dirichlet, global_neumann]
         global_values = np.loadtxt(path_to_global_values)
 
+        element_to_neighbours = mesh.get_element_to_neighbours(
+            elements=global_elements)
+
         # local patch of element not touching any boundary
         # ------------------------------------------------
         local_coordinates, local_elements, local_boundaries, local_values = \
-            mesh.get_local_patch(coordinates=global_coordinates,
-                                 elements=global_elements,
-                                 boundaries=global_boundaries,
-                                 which_for=3,
-                                 global_values=global_values)
+            mesh.get_local_patch(
+                coordinates=global_coordinates,
+                elements=global_elements,
+                boundaries=global_boundaries,
+                which_for=3,
+                global_values=global_values,
+                element_to_neighbours=element_to_neighbours)
         expected_local_coordinates = np.array([
             [0., 0.],
             [1., 0.],
@@ -412,9 +417,9 @@ class MeshTest(unittest.TestCase):
             [2., 2.]
         ])
         expected_local_elements = np.array([
+            [3, 4, 5],
             [0, 1, 3],
             [1, 2, 4],
-            [3, 4, 5],
             [4, 3, 1]
         ])
         expected_local_boundaries = [
@@ -444,7 +449,8 @@ class MeshTest(unittest.TestCase):
                                  elements=global_elements,
                                  boundaries=global_boundaries,
                                  which_for=1,
-                                 global_values=global_values)
+                                 global_values=global_values,
+                                 element_to_neighbours=element_to_neighbours)
         expected_local_elements = np.array([
             [3, 2, 0],
             [0, 1, 3],
@@ -479,10 +485,11 @@ class MeshTest(unittest.TestCase):
                                  elements=global_elements,
                                  boundaries=global_boundaries,
                                  which_for=0,
-                                 global_values=global_values)
+                                 global_values=global_values,
+                                 element_to_neighbours=element_to_neighbours)
         expected_local_elements = np.array([
-            [3, 2, 0],
             [4, 3, 1],
+            [3, 2, 0],
             [0, 1, 3]
         ])
         expected_local_coordinates = np.array([
@@ -511,6 +518,8 @@ class MeshTest(unittest.TestCase):
         self.assertTrue(np.all(expected_local_values == local_values))
 
         # local patch of element s.t. local patch inherits no boundary
+        # here, we only test that the returned list of boundaries
+        # is indeed an empty list
         # ------------------------------------------------------------
         base_path = Path(
             'tests/data/local_patch_touching_no_boundary')
@@ -555,11 +564,13 @@ class MeshTest(unittest.TestCase):
             path_to_boundary=path_to_dirichlet_full)
         global_dirichlet_single = io_helpers.read_boundary_condition(
             path_to_boundary=path_to_dirichlet_single)
+        element_to_neighbours = mesh.get_element_to_neighbours(
+            elements=global_elements)
 
         # we expect the same local elements in both cases
         expected_local_elements = np.array([
-            [0, 2, 3],
             [1, 4, 2],
+            [0, 2, 3],
             [0, 1, 2]])
 
         expected_local_boundary_full = np.array([
@@ -572,7 +583,8 @@ class MeshTest(unittest.TestCase):
                 coordinates=global_coordinates,
                 elements=global_elements,
                 boundaries=[global_dirichlet_full],
-                which_for=0)
+                which_for=0,
+                element_to_neighbours=element_to_neighbours)
         # all global coordinates are in the local patch
         self.assertTrue(np.all(local_coordinates == global_coordinates))
         self.assertTrue(np.all(local_elements == expected_local_elements))
@@ -585,7 +597,8 @@ class MeshTest(unittest.TestCase):
                 coordinates=global_coordinates,
                 elements=global_elements,
                 boundaries=[global_dirichlet_single],
-                which_for=0)
+                which_for=0,
+                element_to_neighbours=element_to_neighbours)
         # all global coordinates are in the local patch
         self.assertTrue(np.all(local_coordinates == global_coordinates))
         self.assertTrue(np.all(local_elements == expected_local_elements))
