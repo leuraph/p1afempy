@@ -240,7 +240,7 @@ def get_local_boundaries(boundaries: list[data_structures.BoundaryType],
 
 def get_neighbouring_elements(elements: data_structures.ElementsType,
                               which_for: int,
-                              element_to_neighbours: np.ndarray = None
+                              element_to_neighbours: np.ndarray
                               ) -> data_structures.ElementsType:
     """
     identifies and returns neighbouring elements for a marked element
@@ -259,20 +259,11 @@ def get_neighbouring_elements(elements: data_structures.ElementsType,
         a 2D array-like structure containing neighbouring
         elements along with the marked element.
     """
-    if element_to_neighbours is not None:
-        local_neighbours = element_to_neighbours[which_for]
-        has_neighbour = local_neighbours >= 0
-        return np.vstack([
-            elements[local_neighbours[has_neighbour], :],
-            elements[which_for]])
-    # global indices of the marked element's nodes
-    nodes = elements[which_for]
-
-    # identifying the marked element's nieghbours
-    neighbours = np.sum(np.isin(elements, nodes), axis=1) == 2
-
-    # global indices of the local patch's elements
-    return np.vstack([elements[neighbours], nodes])
+    local_neighbours = element_to_neighbours[which_for]
+    has_neighbour = local_neighbours >= 0
+    return np.vstack([
+        elements[local_neighbours[has_neighbour], :],
+        elements[which_for]])
 
 
 def get_local_patch(coordinates: data_structures.CoordinatesType,
