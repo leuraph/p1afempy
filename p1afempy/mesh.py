@@ -389,6 +389,6 @@ def get_element_to_neighbours(
         aranged_element_indices,
         aranged_element_indices))
     _, _, neighbourIJ = find(mask + mask.multiply(coo_matrix((tmp, (J, I)))))
-    element2neighbours = np.zeros(3 * n_elements, dtype=np.uint32)
+    element2neighbours = np.zeros(3 * n_elements, dtype=int)
     element2neighbours[idxIJ-1] = neighbourIJ - 1
     return element2neighbours.reshape((n_elements, 3), order='F') - 1
