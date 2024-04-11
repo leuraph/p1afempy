@@ -600,8 +600,8 @@ class MeshTest(unittest.TestCase):
         elements = io_helpers.read_elements(path_to_elements=path_to_elements,
                                             shift_indices=True)
 
-        expected_element_to_neighbours = io_helpers.read_elements(
-            path_to_elements=path_to_expected_output)
+        expected_element_to_neighbours = np.loadtxt(
+            fname=path_to_expected_output)
         element_to_neighbours = mesh.get_element_to_neighbours(
             elements=elements)
 
