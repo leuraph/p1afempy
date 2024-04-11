@@ -533,6 +533,8 @@ class MeshTest(unittest.TestCase):
         boundary = io_helpers.read_boundary_condition(
             path_to_boundary=path_to_boundary)
         global_values = np.loadtxt(path_to_global_values)
+        element_to_neighbours = mesh.get_element_to_neighbours(
+            elements=elements)
 
         expected_local_values = np.array([0.1, 0.3, 0.4, 0.5, 0.6, 0.8])
 
@@ -541,6 +543,7 @@ class MeshTest(unittest.TestCase):
                                  elements=elements,
                                  boundaries=[boundary],
                                  which_for=6,
+                                 element_to_neighbours=element_to_neighbours,
                                  global_values=global_values)
 
         self.assertTrue(np.all(expected_local_values == local_values))
