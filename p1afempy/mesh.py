@@ -279,8 +279,8 @@ def get_local_patch(coordinates: data_structures.CoordinatesType,
                     elements: data_structures.ElementsType,
                     boundaries: list[data_structures.BoundaryType],
                     which_for: int,
+                    element_to_neighbours: np.ndarray,
                     global_values: np.ndarray = np.array([]),
-                    element_to_neighbours: np.ndarray = None
                     ) -> tuple[data_structures.CoordinatesType,
                                data_structures.ElementsType,
                                list[data_structures.BoundaryType]]:
