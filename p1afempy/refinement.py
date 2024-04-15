@@ -1,4 +1,5 @@
 import numpy as np
+import ismember
 from p1afempy.mesh import provide_geometric_data
 from p1afempy.data_structures import \
     CoordinatesType, ElementsType, BoundaryType
@@ -197,6 +198,141 @@ def refineRG(coordinates: CoordinatesType,
                              newNodes[red, 2]])])
 
     return new_coordinates, new_elements, new_boundaries, embedded_values
+
+
+def refineRG_single(coordinates: CoordinatesType,
+                    elements: ElementsType,
+                    which: int,
+                    boundaries: list[BoundaryType],
+                    element_to_neighbours,
+                    to_embed: np.ndarray = np.array([])
+                    ) -> tuple[CoordinatesType,
+                               ElementsType,
+                               list[BoundaryType]]:
+    # building (three) new coordinates
+    # --------------------------------
+    x_y_1 = coordinates[elements[which, [0, 1, 2]], :]
+    x_y_2 = coordinates[elements[which, [1, 2, 0]], :]
+    new_coordinates = np.vstack([coordinates,
+                                 (x_y_1 + x_y_2)/2.])
+    # retrieving new nodes' indices
+    n_nodes = coordinates.shape[0]
+    index_new_node_1 = n_nodes  # indexing starts at zero
+    index_new_node_2 = n_nodes + 1
+    index_new_node_3 = n_nodes + 2
+
+    # interpolating `to_embed`
+    # ------------------------
+    if to_embed.size > 0:
+        interpolated = (to_embed[elements[which][0, 1, 2].flatten()] +
+                        to_embed[elements[which][1, 2, 0].flatten()])/2.
+        to_embed = np.vstack([to_embed, interpolated])
+
+    # building new elements
+    # ---------------------
+    n_elements = elements.shape[0]
+    # element whose first neighbour is `which`
+    green_1 = np.isin(element_to_neighbours[:, 0], which)
+    # element whose second neighbour is `which`
+    green_2 = np.isin(element_to_neighbours[:, 1], which)
+    # element whose third neighbour is `which`
+    green_3 = np.isin(element_to_neighbours[:, 2], which)
+    # marking `which` as being red-refined
+    red = np.zeros(n_elements, dtype=bool)
+    red[which] = True
+    # the rest of the elements is not marked for refinement
+    none = np.logical_not(
+        np.logical_or.reduce((green_1, green_2,
+                              green_3, red)))
+    # retreiving new elements' indices
+    idx = np.ones(n_elements, dtype=int)
+    idx[green_1] = 2
+    idx[green_2] = 2
+    idx[green_3] = 2
+    idx[red] = 4
+    idx = np.hstack([0, np.cumsum(idx)])
+    new_elements = np.zeros((idx[-1], 3))
+    idx = idx[:-1]
+    # generate new elements
+    new_elements[idx[none]] = elements[none]
+    new_elements[
+        np.hstack((idx[green_1], idx[green_1]+1)), :] = np.vstack((
+            np.array([elements[green_1, 0],
+                      index_new_node_1,
+                      elements[green_1, 2]]),
+            np.array([index_new_node_1,
+                      elements[green_1, 1],
+                      elements[green_1, 2]])
+            ))
+    new_elements[
+        np.hstack((idx[green_2],
+                   idx[green_2]+1)), :] = np.vstack((
+                       np.array([elements[green_2][1],
+                                 index_new_node_2,
+                                 elements[green_2][0]]),
+                       np.array([index_new_node_2,
+                                 elements[green_2][2],
+                                 elements[green_2][0]])
+                   ))
+    new_elements[
+        np.hstack((idx[green_3],
+                   idx[green_3]+1)), :] = np.vstack((
+                       np.array([elements[green_2][2],
+                                 index_new_node_3,
+                                 elements[green_3][1]]),
+                       np.array([index_new_node_3,
+                                 elements[green_3][0],
+                                 elements[green_3][1]])
+                   ))
+    new_elements[
+        np.hstack((idx[red],
+                   idx[red]+1,
+                   idx[red]+2,
+                   idx[red]+3)), :] = np.vstack((
+                       np.array([elements[red][0],
+                                 index_new_node_1,
+                                 index_new_node_3]),
+                       np.array([index_new_node_1,
+                                 elements[red][1],
+                                 index_new_node_2]),
+                       np.array([index_new_node_3,
+                                 index_new_node_2,
+                                 elements[red][2]]),
+                       np.array([index_new_node_1,
+                                 index_new_node_2,
+                                 index_new_node_3])
+                   ))
+
+    # splitting the boundary, where necessary
+    # ---------------------------------------
+    # 3x2 array of all edges of k-th element
+    possible_edges = np.column_stack((
+        elements[which][0, 1, 2].flatten(),
+        elements[which][1, 2, 0].flatten()))
+    # isolate edges to be split, i.e. edges
+    # of the k-th element lying on the
+    # domain's boundary
+    edges_to_split_bool = element_to_neighbours[which, :] == -1
+    edges_to_split = possible_edges[edges_to_split_bool]
+
+    new_boundaries = []
+    for boundary in boundaries:
+        if boundary.size > 0:
+            boundary_to_split_bool, idx = \
+                ismember.ismember(boundary, edges_to_split, method='rows')
+            # indices of new nodes to be inserted in the bundary at hand
+            idx_new_nodes = idx + n_nodes
+            boundary = np.vstack([
+                boundary[np.logical_not(boundary_to_split_bool)],
+                np.column_stack([
+                    boundary[boundary_to_split_bool, 0], idx_new_nodes
+                ]),
+                np.column_stack([
+                    idx_new_nodes, boundary[boundary_to_split_bool, 1]
+                ])
+            ])
+        new_boundaries.append(boundary)
+    return new_coordinates, new_elements, new_boundaries, to_embed
 
 
 # TODO refactor s.t. boundary_conditions is optional
