@@ -254,7 +254,11 @@ def refineRG_single(coordinates: CoordinatesType,
     new_elements = np.zeros((idx[-1], 3))
     idx = idx[:-1]
     # generate new elements
+
+    # no refinement
     new_elements[idx[none]] = elements[none]
+
+    # green refinement (1)
     new_elements[
         np.hstack((idx[green_1], idx[green_1]+1)), :] = np.vstack((
             np.column_stack([elements[green_1, 0],
@@ -264,6 +268,8 @@ def refineRG_single(coordinates: CoordinatesType,
                              elements[green_1, 1],
                              elements[green_1, 2]])
         ))
+
+    # green refinement (2)
     new_elements[
         np.hstack((idx[green_2], idx[green_2]+1)), :] = np.vstack((
             np.column_stack([elements[green_2, 1],
@@ -273,6 +279,8 @@ def refineRG_single(coordinates: CoordinatesType,
                              elements[green_2, 2],
                              elements[green_2, 0]])
         ))
+
+    # green refinement (3)
     new_elements[
         np.hstack((idx[green_3], idx[green_3]+1)), :] = np.vstack((
             np.column_stack([elements[green_3, 2],
@@ -282,6 +290,8 @@ def refineRG_single(coordinates: CoordinatesType,
                              elements[green_3, 0],
                              elements[green_3, 1]])
                    ))
+
+    # red refinement
     new_elements[
         np.hstack((
             idx[red], idx[red]+1,
