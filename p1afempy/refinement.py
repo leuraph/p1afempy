@@ -304,8 +304,8 @@ def refineRG_single(coordinates: CoordinatesType,
     # ---------------------------------------
     # 3x2 array of all edges of k-th element
     possible_edges = np.column_stack((
-        elements[which][0, 1, 2].flatten(),
-        elements[which][1, 2, 0].flatten()))
+        elements[which, [0, 1, 2]].flatten(),
+        elements[which, [1, 2, 0]].flatten()))
     # isolate edges to be split, i.e. edges
     # of the k-th element lying on the
     # domain's boundary
