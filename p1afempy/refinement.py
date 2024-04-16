@@ -259,37 +259,40 @@ def refineRG_single(coordinates: CoordinatesType,
     new_elements[idx[none]] = elements[none]
 
     # green refinement (1)
-    new_elements[
-        np.hstack((idx[green_1], idx[green_1]+1)), :] = np.vstack((
-            np.column_stack([elements[green_1, 0],
-                             index_new_node_1,
-                             elements[green_1, 2]]),
-            np.column_stack([index_new_node_1,
-                             elements[green_1, 1],
-                             elements[green_1, 2]])
-        ))
+    if np.any(green_1):
+        new_elements[
+            np.hstack((idx[green_1], idx[green_1]+1)), :] = np.vstack((
+                np.column_stack([elements[green_1, 0],
+                                index_new_node_1,
+                                elements[green_1, 2]]),
+                np.column_stack([index_new_node_1,
+                                elements[green_1, 1],
+                                elements[green_1, 2]])
+            ))
 
     # green refinement (2)
-    new_elements[
-        np.hstack((idx[green_2], idx[green_2]+1)), :] = np.vstack((
-            np.column_stack([elements[green_2, 1],
-                             index_new_node_2,
-                             elements[green_2, 0]]),
-            np.column_stack([index_new_node_2,
-                             elements[green_2, 2],
-                             elements[green_2, 0]])
-        ))
+    if np.any(green_2):
+        new_elements[
+            np.hstack((idx[green_2], idx[green_2]+1)), :] = np.vstack((
+                np.column_stack([elements[green_2, 1],
+                                index_new_node_2,
+                                elements[green_2, 0]]),
+                np.column_stack([index_new_node_2,
+                                elements[green_2, 2],
+                                elements[green_2, 0]])
+            ))
 
     # green refinement (3)
-    new_elements[
-        np.hstack((idx[green_3], idx[green_3]+1)), :] = np.vstack((
-            np.column_stack([elements[green_3, 2],
-                             index_new_node_3,
-                             elements[green_3, 1]]),
-            np.column_stack([index_new_node_3,
-                             elements[green_3, 0],
-                             elements[green_3, 1]])
-                   ))
+    if np.any(green_3):
+        new_elements[
+            np.hstack((idx[green_3], idx[green_3]+1)), :] = np.vstack((
+                np.column_stack([elements[green_3, 2],
+                                index_new_node_3,
+                                elements[green_3, 1]]),
+                np.column_stack([index_new_node_3,
+                                elements[green_3, 0],
+                                elements[green_3, 1]])
+                    ))
 
     # red refinement
     new_elements[
