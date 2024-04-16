@@ -238,6 +238,43 @@ class RefinementTest(unittest.TestCase):
         self.assertTrue(np.all(
             new_boundaries[1] == expected_neumann))
 
+        # ------------
+        # case neumann
+        # ------------
+        marked_element = 5
+
+        new_coordinates, new_elements, new_boundaries, _ = \
+            refinement.refineRG_single(
+                coordinates=coordinates,
+                elements=elements,
+                which=marked_element,
+                boundaries=boundaries,
+                element_to_neighbours=element_to_neighbours)
+
+        path_to_refined_coordinates = Path(
+            'tests/data/refine_rg/case_neumann/new_coordinates.dat')
+        path_to_refined_elements = Path(
+            'tests/data/refine_rg/case_neumann/new_elements.dat')
+        expected_coordinates, expected_elements = io_helpers.read_mesh(
+            path_to_coordinates=path_to_refined_coordinates,
+            path_to_elements=path_to_refined_elements,
+            shift_indices=False)
+        expected_dirichlet = io_helpers.read_boundary_condition(
+            Path('tests/data/refine_rg/case_neumann/new_dirichlet.dat'),
+            shift_indices=False)
+        expected_neumann = io_helpers.read_boundary_condition(
+            Path('tests/data/refine_rg/case_neumann/new_neumann.dat'),
+            shift_indices=False)
+
+        self.assertTrue(np.all(
+            new_coordinates == expected_coordinates))
+        self.assertTrue(np.all(
+            new_elements == expected_elements))
+        self.assertTrue(np.all(
+            new_boundaries[0] == expected_dirichlet))
+        self.assertTrue(np.all(
+            new_boundaries[1] == expected_neumann))
+
 
 if __name__ == '__main__':
     unittest.main()
