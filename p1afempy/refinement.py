@@ -275,7 +275,7 @@ def refineRG_single(coordinates: CoordinatesType,
         ))
     new_elements[
         np.hstack((idx[green_3], idx[green_3]+1)), :] = np.vstack((
-            np.column_stack([elements[green_2, 2],
+            np.column_stack([elements[green_3, 2],
                              index_new_node_3,
                              elements[green_3, 1]]),
             np.column_stack([index_new_node_3,
