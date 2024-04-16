@@ -257,51 +257,48 @@ def refineRG_single(coordinates: CoordinatesType,
     new_elements[idx[none]] = elements[none]
     new_elements[
         np.hstack((idx[green_1], idx[green_1]+1)), :] = np.vstack((
-            np.array([elements[green_1, 0],
-                      index_new_node_1,
-                      elements[green_1, 2]]),
-            np.array([index_new_node_1,
-                      elements[green_1, 1],
-                      elements[green_1, 2]])
-            ))
+            np.column_stack([elements[green_1, 0],
+                             index_new_node_1,
+                             elements[green_1, 2]]),
+            np.column_stack([index_new_node_1,
+                             elements[green_1, 1],
+                             elements[green_1, 2]])
+        ))
     new_elements[
-        np.hstack((idx[green_2],
-                   idx[green_2]+1)), :] = np.vstack((
-                       np.array([elements[green_2][1],
-                                 index_new_node_2,
-                                 elements[green_2][0]]),
-                       np.array([index_new_node_2,
-                                 elements[green_2][2],
-                                 elements[green_2][0]])
+        np.hstack((idx[green_2], idx[green_2]+1)), :] = np.vstack((
+            np.column_stack([elements[green_2][1],
+                             index_new_node_2,
+                             elements[green_2][0]]),
+            np.column_stack([index_new_node_2,
+                             elements[green_2][2],
+                             elements[green_2][0]])
+        ))
+    new_elements[
+        np.hstack((idx[green_3], idx[green_3]+1)), :] = np.vstack((
+            np.column_stack([elements[green_2][2],
+                             index_new_node_3,
+                             elements[green_3][1]]),
+            np.column_stack([index_new_node_3,
+                             elements[green_3][0],
+                             elements[green_3][1]])
                    ))
     new_elements[
-        np.hstack((idx[green_3],
-                   idx[green_3]+1)), :] = np.vstack((
-                       np.array([elements[green_2][2],
-                                 index_new_node_3,
-                                 elements[green_3][1]]),
-                       np.array([index_new_node_3,
-                                 elements[green_3][0],
-                                 elements[green_3][1]])
-                   ))
-    new_elements[
-        np.hstack((idx[red],
-                   idx[red]+1,
-                   idx[red]+2,
-                   idx[red]+3)), :] = np.vstack((
-                       np.array([elements[red][0],
+        np.hstack((
+            idx[red], idx[red]+1,
+            idx[red]+2, idx[red]+3)), :] = np.vstack((
+                np.column_stack([elements[red][0],
                                  index_new_node_1,
                                  index_new_node_3]),
-                       np.array([index_new_node_1,
+                np.column_stack([index_new_node_1,
                                  elements[red][1],
                                  index_new_node_2]),
-                       np.array([index_new_node_3,
+                np.column_stack([index_new_node_3,
                                  index_new_node_2,
                                  elements[red][2]]),
-                       np.array([index_new_node_1,
+                np.column_stack([index_new_node_1,
                                  index_new_node_2,
                                  index_new_node_3])
-                   ))
+            ))
 
     # splitting the boundary, where necessary
     # ---------------------------------------
