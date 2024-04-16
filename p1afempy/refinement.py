@@ -322,14 +322,12 @@ def refineRG_single(coordinates: CoordinatesType,
     # isolate edges to be split, i.e. edges
     # of the k-th element lying on the
     # domain's boundary
-    edges_to_split_bool = element_to_neighbours[which, :] == -1
-    edges_to_split = possible_edges[edges_to_split_bool]
 
     new_boundaries = []
     for boundary in boundaries:
         if boundary.size > 0:
             boundary_to_split_bool, idx = \
-                ismember.ismember(boundary, edges_to_split, method='rows')
+                ismember.ismember(boundary, possible_edges, method='rows')
             # indices of new nodes to be inserted in the bundary at hand
             idx_new_nodes = idx + n_nodes
             boundary = np.vstack([
