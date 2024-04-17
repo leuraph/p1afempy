@@ -262,7 +262,7 @@ def refineRG_single(coordinates: CoordinatesType,
     if np.any(green_1):
         # get the indices of the elements to be green (1) refined
         idx_element_green_1 = np.nonzero(green_1)[0]
-        # get the index of the corresponding new node
+        # get the indices of the corresponding new nodes
         _, iloc = ismember.ismember(
             idx_element_green_1, element_to_neighbours[which, :])
         idx_new_node_green_1 = n_nodes + iloc
@@ -281,7 +281,7 @@ def refineRG_single(coordinates: CoordinatesType,
     if np.any(green_2):
         # get the index of the element to be green (2) refined
         idx_element_green_2 = np.nonzero(green_2)[0]
-        # get the index of the corresponding new node
+        # get the indices of the corresponding new nodes
         _, iloc = ismember.ismember(
             idx_element_green_2, element_to_neighbours[which, :])
         idx_new_node_green_2 = n_nodes + iloc
@@ -300,7 +300,7 @@ def refineRG_single(coordinates: CoordinatesType,
     if np.any(green_3):
         # get the index of the element to be green (3) refined
         idx_element_green_3 = np.nonzero(green_3)[0]
-        # get the index of the corresponding new node
+        # get the indices of the corresponding new nodes
         _, iloc = ismember.ismember(
             idx_element_green_3, element_to_neighbours[which, :])
         idx_new_node_green_3 = n_nodes + iloc
