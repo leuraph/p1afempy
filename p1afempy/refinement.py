@@ -224,9 +224,9 @@ def refineRG_single(coordinates: CoordinatesType,
     # interpolating `to_embed`
     # ------------------------
     if to_embed.size > 0:
-        interpolated = (to_embed[elements[which][0, 1, 2].flatten()] +
-                        to_embed[elements[which][1, 2, 0].flatten()])/2.
-        to_embed = np.vstack([to_embed, interpolated])
+        interpolated = (to_embed[elements[which, [0, 1, 2]].flatten()] +
+                        to_embed[elements[which, [1, 2, 0]].flatten()])/2.
+        to_embed = np.hstack([to_embed, interpolated])
 
     # building new elements
     # ---------------------
