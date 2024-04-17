@@ -251,7 +251,7 @@ def refineRG_single(coordinates: CoordinatesType,
     idx[green_3] = 2
     idx[red] = 4
     idx = np.hstack([0, np.cumsum(idx)])
-    new_elements = np.zeros((idx[-1], 3))
+    new_elements = np.zeros((idx[-1], 3), dtype=int)
     idx = idx[:-1]
     # generate new elements
 
@@ -260,36 +260,54 @@ def refineRG_single(coordinates: CoordinatesType,
 
     # green refinement (1)
     if np.any(green_1):
+        # get the index of the element to be green (1) refined
+        idx_element_green_1 = np.nonzero(green_1)[0][0]
+        # get the index of the corresponding new node
+        idx_new_node_green_1 = n_nodes + np.nonzero(
+            element_to_neighbours[which, :] == idx_element_green_1)[0]
+        # creating and adding the green (1) refined element
         new_elements[
             np.hstack((idx[green_1], idx[green_1]+1)), :] = np.vstack((
                 np.column_stack([elements[green_1, 0],
-                                index_new_node_1,
+                                idx_new_node_green_1,
                                 elements[green_1, 2]]),
-                np.column_stack([index_new_node_1,
+                np.column_stack([idx_new_node_green_1,
                                 elements[green_1, 1],
                                 elements[green_1, 2]])
             ))
 
     # green refinement (2)
     if np.any(green_2):
+        # get the index of the element to be green (2) refined
+        idx_element_green_2 = np.nonzero(green_2)[0][0]
+        # get the index of the corresponding new node
+        idx_new_node_green_2 = n_nodes + np.nonzero(
+            element_to_neighbours[which, :] == idx_element_green_2)[0]
+        # creating and adding the green (2) refined element
         new_elements[
             np.hstack((idx[green_2], idx[green_2]+1)), :] = np.vstack((
                 np.column_stack([elements[green_2, 1],
-                                index_new_node_2,
+                                idx_new_node_green_2,
                                 elements[green_2, 0]]),
-                np.column_stack([index_new_node_2,
+                np.column_stack([idx_new_node_green_2,
                                 elements[green_2, 2],
                                 elements[green_2, 0]])
             ))
 
     # green refinement (3)
     if np.any(green_3):
+        # get the index of the element to be green (3) refined
+        idx_element_green_3 = np.nonzero(green_3)[0][0]
+        # get the index of the corresponding new node
+        idx_new_node_green_3 = n_nodes + np.nonzero(
+            element_to_neighbours[which, :] == idx_element_green_3)[0]
+        # creating and adding the green (3) refined element
         new_elements[
             np.hstack((idx[green_3], idx[green_3]+1)), :] = np.vstack((
                 np.column_stack([elements[green_3, 2],
-                                index_new_node_3,
+                                idx_new_node_green_3,
                                 elements[green_3, 1]]),
-                np.column_stack([index_new_node_3,
+                np.column_stack([idx_new_node_green_3,
                                 elements[green_3, 0],
                                 elements[green_3, 1]])
                     ))
