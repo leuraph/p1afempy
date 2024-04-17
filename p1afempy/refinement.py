@@ -260,11 +260,12 @@ def refineRG_single(coordinates: CoordinatesType,
 
     # green refinement (1)
     if np.any(green_1):
-        # get the index of the element to be green (1) refined
-        idx_element_green_1 = np.nonzero(green_1)[0][0]
+        # get the indices of the elements to be green (1) refined
+        idx_element_green_1 = np.nonzero(green_1)[0]
         # get the index of the corresponding new node
-        idx_new_node_green_1 = n_nodes + np.nonzero(
-            element_to_neighbours[which, :] == idx_element_green_1)[0]
+        _, iloc = ismember.ismember(
+            idx_element_green_1, element_to_neighbours[which, :])
+        idx_new_node_green_1 = n_nodes + iloc
         # creating and adding the green (1) refined element
         new_elements[
             np.hstack((idx[green_1], idx[green_1]+1)), :] = np.vstack((
@@ -279,10 +280,11 @@ def refineRG_single(coordinates: CoordinatesType,
     # green refinement (2)
     if np.any(green_2):
         # get the index of the element to be green (2) refined
-        idx_element_green_2 = np.nonzero(green_2)[0][0]
+        idx_element_green_2 = np.nonzero(green_2)[0]
         # get the index of the corresponding new node
-        idx_new_node_green_2 = n_nodes + np.nonzero(
-            element_to_neighbours[which, :] == idx_element_green_2)[0]
+        _, iloc = ismember.ismember(
+            idx_element_green_2, element_to_neighbours[which, :])
+        idx_new_node_green_2 = n_nodes + iloc
         # creating and adding the green (2) refined element
         new_elements[
             np.hstack((idx[green_2], idx[green_2]+1)), :] = np.vstack((
@@ -297,10 +299,11 @@ def refineRG_single(coordinates: CoordinatesType,
     # green refinement (3)
     if np.any(green_3):
         # get the index of the element to be green (3) refined
-        idx_element_green_3 = np.nonzero(green_3)[0][0]
+        idx_element_green_3 = np.nonzero(green_3)[0]
         # get the index of the corresponding new node
-        idx_new_node_green_3 = n_nodes + np.nonzero(
-            element_to_neighbours[which, :] == idx_element_green_3)[0]
+        _, iloc = ismember.ismember(
+            idx_element_green_3, element_to_neighbours[which, :])
+        idx_new_node_green_3 = n_nodes + iloc
         # creating and adding the green (3) refined element
         new_elements[
             np.hstack((idx[green_3], idx[green_3]+1)), :] = np.vstack((
