@@ -241,6 +241,7 @@ def refineRG_single(coordinates: CoordinatesType,
     red = np.zeros(n_elements, dtype=bool)
     red[which] = True
     # the rest of the elements is not marked for refinement
+    # TODO check if this can be improved without reducec
     none = np.logical_not(
         np.logical_or.reduce((green_1, green_2,
                               green_3, red)))
