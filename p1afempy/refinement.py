@@ -208,7 +208,47 @@ def refineRG_single(coordinates: CoordinatesType,
                     to_embed: np.ndarray = np.array([])
                     ) -> tuple[CoordinatesType,
                                ElementsType,
-                               list[BoundaryType]]:
+                               list[BoundaryType],
+                               np.ndarray]:
+    """
+    red refines a single specified element and removes
+    hanging nodes by green refining neighbouring elements
+
+    Parameters
+    ----------
+    coordinates: CoordinatesType
+        coordinates of the mesh at hand
+    elements: ElementsType
+        elements of the mesh at hand
+    which: int
+        index of the element to be red refined
+    boundaries: list[BoundaryType]
+        list of boundaries at hand
+    element_to_neighbours: np.ndarray
+        array whose j-th entry in the i-th row represents the
+        index of the element sharing the i-th edge of the j-th element
+    to_embed: np.ndarray, optional
+        array containing data on the nodes to be linearly interpolated,
+        defaults to an empty array
+
+    Returns
+    -------
+    new_coordinates: CoordinatesType
+        coordinates of the refined mesh
+    new_elements: ElementsType
+        elements of the refined mesh
+    new_boundaries: list[BoundaryType]
+        boundaries of the refined mesh
+    to_embed: np.ndarray
+        linearly interpolated data on the refined mesh
+
+    Notes
+    -----
+    - this routine does not assume the list of boundary
+      conditions to be complete.
+    - during refinement, three new coordinates are generated,
+      these get simply appended to the existing coordinates
+    """
     # building (three) new coordinates
     # --------------------------------
     x_y_1 = coordinates[elements[which, [0, 1, 2]], :]
