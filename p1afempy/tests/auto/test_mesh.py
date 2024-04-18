@@ -400,7 +400,8 @@ class MeshTest(unittest.TestCase):
 
         # local patch of element not touching any boundary
         # ------------------------------------------------
-        local_coordinates, local_elements, local_boundaries, local_values = \
+        local_coordinates, local_elements, \
+            local_boundaries, local_values, _ = \
             mesh.get_local_patch(
                 coordinates=global_coordinates,
                 elements=global_elements,
@@ -444,7 +445,8 @@ class MeshTest(unittest.TestCase):
 
         # local patch of element touching both boundaries
         # --------------------------------------------------
-        local_coordinates, local_elements, local_boundaries, local_values = \
+        local_coordinates, local_elements, \
+            local_boundaries, local_values, _ = \
             mesh.get_local_patch(coordinates=global_coordinates,
                                  elements=global_elements,
                                  boundaries=global_boundaries,
@@ -480,7 +482,8 @@ class MeshTest(unittest.TestCase):
 
         # local patch of element touching dirichlet boundaries
         # -----------------------------------------------
-        local_coordinates, local_elements, local_boundaries, local_values = \
+        local_coordinates, local_elements, \
+            local_boundaries, local_values, _ = \
             mesh.get_local_patch(coordinates=global_coordinates,
                                  elements=global_elements,
                                  boundaries=global_boundaries,
@@ -538,7 +541,8 @@ class MeshTest(unittest.TestCase):
 
         expected_local_values = np.array([0.1, 0.3, 0.4, 0.5, 0.6, 0.8])
 
-        local_coordinates, local_elements, local_boundaries, local_values = \
+        local_coordinates, local_elements, \
+            local_boundaries, local_values, _ = \
             mesh.get_local_patch(coordinates=coordinates,
                                  elements=elements,
                                  boundaries=[boundary],
@@ -581,7 +585,7 @@ class MeshTest(unittest.TestCase):
             [1, 4],
             [3, 0]])
 
-        local_coordinates, local_elements, local_boundaries, _ = \
+        local_coordinates, local_elements, local_boundaries, _, _ = \
             mesh.get_local_patch(
                 coordinates=global_coordinates,
                 elements=global_elements,
@@ -595,7 +599,7 @@ class MeshTest(unittest.TestCase):
         self.assertTrue(np.all(
             local_boundaries[0] == expected_local_boundary_full))
 
-        local_coordinates, local_elements, local_boundaries, _ = \
+        local_coordinates, local_elements, local_boundaries, _, _ = \
             mesh.get_local_patch(
                 coordinates=global_coordinates,
                 elements=global_elements,
