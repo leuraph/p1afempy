@@ -342,11 +342,26 @@ def get_local_patch(coordinates: data_structures.CoordinatesType,
     - the indices in all elements in local_boundaries refer to entries in
       local_coordinates
     """
-    local_elements, local_element_to_neighbours = get_neighbouring_elements(
-        elements=elements,
-        which_for=which_for,
-        element_to_neighbours=element_to_neighbours)
+    # indices of all elements neighbouring the selected element
+    # (including the index of the selected element)
+    global_elements_idx = np.hstack((
+        element_to_neighbours[which_for],
+        which_for))
+    # remove -1 as index
+    global_elements_idx = global_elements_idx[global_elements_idx != -1]
+    local_elements_idx = np.arange(global_elements_idx.size)
+    transform = dict(zip(
+        np.hstack((global_elements_idx, -1)),
+        np.hstack((local_elements_idx, -1))))
+    global_to_local_element_index_mapping = np.vectorize(
+        lambda old: transform[old])
 
+    local_element_to_neighbours = element_to_neighbours[global_elements_idx, :]
+    exceeding_elements = np.logical_not(np.isin(
+        local_element_to_neighbours, global_elements_idx))
+    local_element_to_neighbours[exceeding_elements] = -1
+
+    local_elements = elements[global_elements_idx, :]
     # unique sorted global indices of all nodes in global patch
     unique_idxs = np.unique(local_elements)
 
@@ -364,10 +379,7 @@ def get_local_patch(coordinates: data_structures.CoordinatesType,
     # local patch's neighbour map in local indices
     # note that we map neighbours of the patch as -1,
     # indicating a local boundary
-    exceeding_indices = np.logical_not(np.isin(
-        local_element_to_neighbours, unique_idxs))
-    local_element_to_neighbours[exceeding_indices] = -1
-    local_element_to_neighbours = perform_transform(
+    local_element_to_neighbours = global_to_local_element_index_mapping(
         local_element_to_neighbours)
 
     # local patch's coordinates
