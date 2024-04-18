@@ -390,6 +390,11 @@ def get_local_patch(coordinates: data_structures.CoordinatesType,
     if global_values.size > 0:
         local_values = global_values[unique_idxs]
 
+    # TODO return a local which as well
+    # makes code more maintainable in the future,
+    # because then, outside of the function, we do not
+    # need to assume a specific order of anything
+    # (only in the unit tests, of course)
     return local_coordinates, local_elements, \
         local_boundaries, local_values, local_element_to_neighbours
 
