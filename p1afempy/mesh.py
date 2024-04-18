@@ -245,7 +245,9 @@ def get_local_boundaries(boundaries: list[data_structures.BoundaryType],
 def get_neighbouring_elements(elements: data_structures.ElementsType,
                               which_for: int,
                               element_to_neighbours: np.ndarray
-                              ) -> data_structures.ElementsType:
+                              ) -> tuple[
+                                data_structures.ElementsType,
+                                np.ndarray]:
     """
     identifies and returns neighbouring elements for a marked element
 
@@ -256,18 +258,31 @@ def get_neighbouring_elements(elements: data_structures.ElementsType,
     which_for: int
         index of the marked element for which neighbouring
         elements are to be found.
+    element_to_neighbours: np.ndarray
+        array mapping each element to its neighbours
 
     Returns
     -------
-    data_structures.ElementsType:
+    local_elements: data_structures.ElementsType
         a 2D array-like structure containing neighbouring
-        elements along with the marked element.
+        elements along with the marked element
+    local_element_to_neighbours: np.ndarray
+        all rows of `element_to_neighbours` that correspond
+        to an element included in `local_elements`
     """
     local_neighbours = element_to_neighbours[which_for]
     has_neighbour = local_neighbours >= 0
-    return np.vstack([
+
+    local_elements = np.vstack([
         elements[local_neighbours[has_neighbour], :],
         elements[which_for]])
+
+    local_element_to_neighbours = np.vstack([
+        element_to_neighbours[local_neighbours[has_neighbour], :],
+        element_to_neighbours[which_for]
+    ])
+
+    return local_elements, local_element_to_neighbours
 
 
 def get_local_patch(coordinates: data_structures.CoordinatesType,
@@ -322,7 +337,7 @@ def get_local_patch(coordinates: data_structures.CoordinatesType,
     - the indices in all elements in local_boundaries refer to entries in
       local_coordinates
     """
-    local_elements = get_neighbouring_elements(
+    local_elements, local_element_to_neighbours = get_neighbouring_elements(
         elements=elements,
         which_for=which_for,
         element_to_neighbours=element_to_neighbours)
