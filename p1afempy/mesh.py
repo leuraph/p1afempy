@@ -293,7 +293,8 @@ def get_local_patch(coordinates: data_structures.CoordinatesType,
                     global_values: np.ndarray = np.array([]),
                     ) -> tuple[data_structures.CoordinatesType,
                                data_structures.ElementsType,
-                               list[data_structures.BoundaryType]]:
+                               list[data_structures.BoundaryType],
+                               np.ndarray, np.ndarray]:
     """
     returns the local mesh corresponding to the k-th element
     and its immediate neightbours, i.e. elements that share an edge
@@ -309,6 +310,8 @@ def get_local_patch(coordinates: data_structures.CoordinatesType,
         boundaries of the mesh at hand
     which_for: int
         index of the element for which to extract the local patch
+    element_to_neighbours: np.ndarray
+        array mapping elements to their neighbours
     global_values: np.ndarray = np.array([])
         an array of values defined on the global coordinates
 
@@ -329,6 +332,8 @@ def get_local_patch(coordinates: data_structures.CoordinatesType,
         an empty list is returned
     local_values: np.ndarray
         the global values given on the local coordinates
+    local_element_to_neighbours: np.ndarray
+        array mapping local elements to local neighbours
 
     notes
     -----
@@ -356,6 +361,14 @@ def get_local_patch(coordinates: data_structures.CoordinatesType,
 
     # local patch's elements in local indices
     local_elements = perform_transform(local_elements)
+    # local patch's neighbour map in local indices
+    # note that we map neighbours of the patch as -1,
+    # indicating a local boundary
+    exceeding_indices = np.logical_not(np.isin(
+        local_element_to_neighbours, unique_idxs))
+    local_element_to_neighbours[exceeding_indices] = -1
+    local_element_to_neighbours = perform_transform(
+        local_element_to_neighbours)
 
     # local patch's coordinates
     local_coordinates = coordinates[unique_idxs]
@@ -365,7 +378,8 @@ def get_local_patch(coordinates: data_structures.CoordinatesType,
     if global_values.size > 0:
         local_values = global_values[unique_idxs]
 
-    return local_coordinates, local_elements, local_boundaries, local_values
+    return local_coordinates, local_elements, \
+        local_boundaries, local_values, local_element_to_neighbours
 
 
 def get_element_to_neighbours(
