@@ -142,7 +142,7 @@ def get_global_to_local_index_mapping(unique_idxs: np.ndarray):
     """
     given a set of n unique, non-negative integers I,
     this function returns a vectorized and order preserving mapping
-    `perform_transform` : I -> [0, 1, 2, ..., n-1] =: I'
+    `perform_transform` : I -> [-1, 0, 1, 2, ..., n-1] =: I'
 
     notes
     -----
@@ -152,6 +152,8 @@ def get_global_to_local_index_mapping(unique_idxs: np.ndarray):
       local[i, j, ...]  <= local[i', j', ...]
     - if N is the number of distinct indices in global_indices,
       then local_indices contains the integers 0, 1, ..., N-1
+    - values of -1 get mapped to -1 as they indicate a boundary in
+      element to neighbour mapping arrays
 
     example
     -------
@@ -169,7 +171,9 @@ def get_global_to_local_index_mapping(unique_idxs: np.ndarray):
                [5, 6, 7]])
     """
     local_idx = np.arange(unique_idxs.size)
-    transform = dict(zip(unique_idxs, local_idx))
+    transform = dict(zip(
+        np.hstack((unique_idxs, -1)),
+        np.hstack((local_idx, -1))))
     perform_transform = np.vectorize(lambda old: transform[old])
     return perform_transform
 
