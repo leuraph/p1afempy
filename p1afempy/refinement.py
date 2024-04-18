@@ -259,6 +259,7 @@ def refineRG_single(coordinates: CoordinatesType,
     # no refinement
     new_elements[idx[none]] = elements[none]
 
+    # TODO check if/how we can remove these `np.any`
     # green refinement (1)
     if np.any(green_1):
         # get the indices of the elements to be green (1) refined
