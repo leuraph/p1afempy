@@ -421,10 +421,13 @@ def refineRG_single(coordinates: CoordinatesType,
                                    which=which,
                                    n_nodes=n_nodes)
 
-    new_boundaries = refine_boundaries(elements=elements,
-                                       boundaries=boundaries,
-                                       n_nodes=n_nodes,
-                                       which=which)
+    if np.any(element_to_neighbours[which] == -1):
+        new_boundaries = refine_boundaries(elements=elements,
+                                           boundaries=boundaries,
+                                           n_nodes=n_nodes,
+                                           which=which)
+    else:
+        new_boundaries = boundaries
 
     return new_coordinates, new_elements, new_boundaries, to_embed
 
