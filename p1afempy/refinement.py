@@ -200,73 +200,45 @@ def refineRG(coordinates: CoordinatesType,
     return new_coordinates, new_elements, new_boundaries, embedded_values
 
 
-def refineRG_single(coordinates: CoordinatesType,
-                    elements: ElementsType,
-                    which: int,
-                    boundaries: list[BoundaryType],
+def refine_boundaries(elements, which,
+                      boundaries, n_nodes) -> list[BoundaryType]:
+    # splitting the boundary, where necessary
+    # ---------------------------------------
+    # 3x2 array of all edges of k-th element
+    possible_edges = np.column_stack((
+        elements[which, [0, 1, 2]].flatten(),
+        elements[which, [1, 2, 0]].flatten()))
+    # isolate edges to be split, i.e. edges
+    # of the k-th element lying on the
+    # domain's boundary
+
+    new_boundaries = []
+    for boundary in boundaries:
+        if boundary.size > 0:
+            boundary_to_split_bool, idx = \
+                ismember.ismember(boundary, possible_edges, method='rows')
+            # indices of new nodes to be inserted in the bundary at hand
+            idx_new_nodes = idx + n_nodes
+            boundary = np.vstack([
+                boundary[np.logical_not(boundary_to_split_bool)],
+                np.column_stack([
+                    boundary[boundary_to_split_bool, 0], idx_new_nodes
+                ]),
+                np.column_stack([
+                    idx_new_nodes, boundary[boundary_to_split_bool, 1]
+                ])
+            ])
+        new_boundaries.append(boundary)
+    return new_boundaries
+
+
+def refine_elements(elements,
                     element_to_neighbours,
-                    to_embed: np.ndarray = np.array([])
-                    ) -> tuple[CoordinatesType,
-                               ElementsType,
-                               list[BoundaryType],
-                               np.ndarray]:
-    """
-    red refines a single specified element and removes
-    hanging nodes by green refining neighbouring elements
-
-    Parameters
-    ----------
-    coordinates: CoordinatesType
-        coordinates of the mesh at hand
-    elements: ElementsType
-        elements of the mesh at hand
-    which: int
-        index of the element to be red refined
-    boundaries: list[BoundaryType]
-        list of boundaries at hand
-    element_to_neighbours: np.ndarray
-        array whose j-th entry in the i-th row represents the
-        index of the element sharing the i-th edge of the j-th element
-    to_embed: np.ndarray, optional
-        array containing data on the nodes to be linearly interpolated,
-        defaults to an empty array
-
-    Returns
-    -------
-    new_coordinates: CoordinatesType
-        coordinates of the refined mesh
-    new_elements: ElementsType
-        elements of the refined mesh
-    new_boundaries: list[BoundaryType]
-        boundaries of the refined mesh
-    to_embed: np.ndarray
-        linearly interpolated data on the refined mesh
-
-    Notes
-    -----
-    - this routine does not assume the list of boundary
-      conditions to be complete.
-    - during refinement, three new coordinates are generated,
-      these get simply appended to the existing coordinates
-    """
-    # building (three) new coordinates
-    # --------------------------------
-    x_y_1 = coordinates[elements[which, [0, 1, 2]], :]
-    x_y_2 = coordinates[elements[which, [1, 2, 0]], :]
-    new_coordinates = np.vstack([coordinates,
-                                 (x_y_1 + x_y_2)/2.])
-    # retrieving new nodes' indices
-    n_nodes = coordinates.shape[0]
+                    which,
+                    n_nodes) -> ElementsType:
     index_new_node_1 = n_nodes  # indexing starts at zero
     index_new_node_2 = n_nodes + 1
     index_new_node_3 = n_nodes + 2
-
-    # interpolating `to_embed`
-    # ------------------------
-    if to_embed.size > 0:
-        interpolated = (to_embed[elements[which, [0, 1, 2]].flatten()] +
-                        to_embed[elements[which, [1, 2, 0]].flatten()])/2.
-        to_embed = np.hstack([to_embed, interpolated])
 
     # building new elements
     # ---------------------
@@ -376,33 +348,84 @@ def refineRG_single(coordinates: CoordinatesType,
                                  index_new_node_3])
             ))
 
-    # splitting the boundary, where necessary
-    # ---------------------------------------
-    # 3x2 array of all edges of k-th element
-    possible_edges = np.column_stack((
-        elements[which, [0, 1, 2]].flatten(),
-        elements[which, [1, 2, 0]].flatten()))
-    # isolate edges to be split, i.e. edges
-    # of the k-th element lying on the
-    # domain's boundary
+    return new_elements
 
-    new_boundaries = []
-    for boundary in boundaries:
-        if boundary.size > 0:
-            boundary_to_split_bool, idx = \
-                ismember.ismember(boundary, possible_edges, method='rows')
-            # indices of new nodes to be inserted in the bundary at hand
-            idx_new_nodes = idx + n_nodes
-            boundary = np.vstack([
-                boundary[np.logical_not(boundary_to_split_bool)],
-                np.column_stack([
-                    boundary[boundary_to_split_bool, 0], idx_new_nodes
-                ]),
-                np.column_stack([
-                    idx_new_nodes, boundary[boundary_to_split_bool, 1]
-                ])
-            ])
-        new_boundaries.append(boundary)
+
+def refineRG_single(coordinates: CoordinatesType,
+                    elements: ElementsType,
+                    which: int,
+                    boundaries: list[BoundaryType],
+                    element_to_neighbours,
+                    to_embed: np.ndarray = np.array([])
+                    ) -> tuple[CoordinatesType,
+                               ElementsType,
+                               list[BoundaryType],
+                               np.ndarray]:
+    """
+    red refines a single specified element and removes
+    hanging nodes by green refining neighbouring elements
+
+    Parameters
+    ----------
+    coordinates: CoordinatesType
+        coordinates of the mesh at hand
+    elements: ElementsType
+        elements of the mesh at hand
+    which: int
+        index of the element to be red refined
+    boundaries: list[BoundaryType]
+        list of boundaries at hand
+    element_to_neighbours: np.ndarray
+        array whose j-th entry in the i-th row represents the
+        index of the element sharing the i-th edge of the j-th element
+    to_embed: np.ndarray, optional
+        array containing data on the nodes to be linearly interpolated,
+        defaults to an empty array
+
+    Returns
+    -------
+    new_coordinates: CoordinatesType
+        coordinates of the refined mesh
+    new_elements: ElementsType
+        elements of the refined mesh
+    new_boundaries: list[BoundaryType]
+        boundaries of the refined mesh
+    to_embed: np.ndarray
+        linearly interpolated data on the refined mesh
+
+    Notes
+    -----
+    - this routine does not assume the list of boundary
+      conditions to be complete.
+    - during refinement, three new coordinates are generated,
+      these get simply appended to the existing coordinates
+    """
+    # building (three) new coordinates
+    # --------------------------------
+    x_y_1 = coordinates[elements[which, [0, 1, 2]], :]
+    x_y_2 = coordinates[elements[which, [1, 2, 0]], :]
+    new_coordinates = np.vstack([coordinates,
+                                 (x_y_1 + x_y_2)/2.])
+    # retrieving new nodes' indices
+    n_nodes = coordinates.shape[0]
+
+    # interpolating `to_embed`
+    # ------------------------
+    if to_embed.size > 0:
+        interpolated = (to_embed[elements[which, [0, 1, 2]].flatten()] +
+                        to_embed[elements[which, [1, 2, 0]].flatten()])/2.
+        to_embed = np.hstack([to_embed, interpolated])
+
+    new_elements = refine_elements(elements=elements,
+                                   element_to_neighbours=element_to_neighbours,
+                                   which=which,
+                                   n_nodes=n_nodes)
+
+    new_boundaries = refine_boundaries(elements=elements,
+                                       boundaries=boundaries,
+                                       n_nodes=n_nodes,
+                                       which=which)
+
     return new_coordinates, new_elements, new_boundaries, to_embed
 
 
