@@ -203,6 +203,11 @@ def refineRG(coordinates: CoordinatesType,
 def refine_boundaries(elements, which,
                       boundaries, n_nodes,
                       element_to_neighbours) -> list[BoundaryType]:
+    edges_to_split_bool = element_to_neighbours[which] == -1
+
+    if not np.any(edges_to_split_bool):
+        return boundaries
+
     # splitting the boundary, where necessary
     # ---------------------------------------
     # 3x2 array of all edges of k-th element
@@ -422,16 +427,12 @@ def refineRG_single(coordinates: CoordinatesType,
                                    which=which,
                                    n_nodes=n_nodes)
 
-    edges_to_split_bool = element_to_neighbours[which] == -1
-    if np.any(edges_to_split_bool):
-        new_boundaries = refine_boundaries(
-            elements=elements,
-            boundaries=boundaries,
-            n_nodes=n_nodes,
-            which=which,
-            element_to_neighbours=element_to_neighbours)
-    else:
-        new_boundaries = boundaries
+    new_boundaries = refine_boundaries(
+        elements=elements,
+        boundaries=boundaries,
+        n_nodes=n_nodes,
+        which=which,
+        element_to_neighbours=element_to_neighbours)
 
     return new_coordinates, new_elements, new_boundaries, to_embed
 
