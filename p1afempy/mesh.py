@@ -294,7 +294,7 @@ def get_local_patch(coordinates: data_structures.CoordinatesType,
                     ) -> tuple[data_structures.CoordinatesType,
                                data_structures.ElementsType,
                                list[data_structures.BoundaryType],
-                               np.ndarray, np.ndarray]:
+                               np.ndarray, np.ndarray, int]:
     """
     returns the local mesh corresponding to the k-th element
     and its immediate neightbours, i.e. elements that share an edge
@@ -334,6 +334,8 @@ def get_local_patch(coordinates: data_structures.CoordinatesType,
         the global values given on the local coordinates
     local_element_to_neighbours: np.ndarray
         array mapping local elements to local neighbours
+    local_which: int
+        the local index of the marked element `which_for`
 
     notes
     -----
@@ -390,13 +392,16 @@ def get_local_patch(coordinates: data_structures.CoordinatesType,
     if global_values.size > 0:
         local_values = global_values[unique_idxs]
 
+    local_which = global_to_local_element_index_mapping(which_for)
+
     # TODO return a local which as well
     # makes code more maintainable in the future,
     # because then, outside of the function, we do not
     # need to assume a specific order of anything
     # (only in the unit tests, of course)
     return local_coordinates, local_elements, \
-        local_boundaries, local_values, local_element_to_neighbours
+        local_boundaries, local_values, local_element_to_neighbours, \
+        local_which
 
 
 def get_element_to_neighbours(
