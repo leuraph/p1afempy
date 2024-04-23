@@ -41,7 +41,7 @@ class SanityChecks(unittest.TestCase):
 
     idea
     ----
-    The ides is to compute the discrete version of the energy
+    The idea is to compute the discrete version of the energy
     E(u) := a(u, u)
     of a function u(x, y) that is exactly represented already
     on the initial mesh. In this way, we can check the interplay
