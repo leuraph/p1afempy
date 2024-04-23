@@ -437,7 +437,6 @@ def refineRG_single(coordinates: CoordinatesType,
     return new_coordinates, new_elements, new_boundaries, to_embed
 
 
-# TODO refactor s.t. boundary_conditions is optional
 def refineRGB(coordinates: CoordinatesType,
               elements: ElementsType,
               marked_elements: np.ndarray,
@@ -493,7 +492,6 @@ def refineRGB(coordinates: CoordinatesType,
 
 
 # TODO refactor s.t. sort_for_longest_egde vanishes, this is an ugly solution
-# TODO refactor s.t. boundary_conditions is optional
 def refineNVB(coordinates: CoordinatesType,
               elements: ElementsType,
               marked_elements: np.ndarray,
