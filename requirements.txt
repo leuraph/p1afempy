@@ -2,5 +2,4 @@ numpy
 scipy
 pathlib
 matplotlib
-notebook
-sympy
+ismember>=1.0.3

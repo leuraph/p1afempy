@@ -15,7 +15,8 @@ dependencies = [
   "numpy",
   "scipy",
   "pathlib",
-  "matplotlib"
+  "matplotlib",
+  "ismember>=1.0.3"
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
