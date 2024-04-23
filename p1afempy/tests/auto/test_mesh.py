@@ -8,16 +8,6 @@ import numpy as np
 
 class MeshTest(unittest.TestCase):
 
-    @staticmethod
-    # TODO Refactor the calls to get_simple_square_mesh
-    def get_simple_square_mesh() -> tuple[np.ndarray, np.ndarray]:
-        path_to_coordinates = Path(
-            'tests/data/simple_square_mesh/coordinates.dat')
-        path_to_elements = Path(
-            'tests/data/simple_square_mesh/elements.dat')
-        return io_helpers.read_mesh(path_to_coordinates=path_to_coordinates,
-                                    path_to_elements=path_to_elements)
-
     def test_read_mesh(self):
         z0, z1, z2, z3 = [0., 0.], [1., 0.], [1., 1.], [0., 1.]
         e0, e1 = [0, 1, 2], [0, 2, 3]
