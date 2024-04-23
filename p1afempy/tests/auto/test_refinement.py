@@ -189,7 +189,7 @@ class RefinementTest(unittest.TestCase):
         marked_element = 3
 
         new_coordinates, new_elements, new_boundaries, _ = \
-            refinement.refineRG(
+            refinement.refineRG_without_element_to_neighbours(
                 coordinates=coordinates,
                 elements=elements,
                 marked_element=marked_element,
@@ -225,7 +225,7 @@ class RefinementTest(unittest.TestCase):
         marked_element = 0
 
         new_coordinates, new_elements, new_boundaries, _ = \
-            refinement.refineRG(
+            refinement.refineRG_without_element_to_neighbours(
                 coordinates=coordinates,
                 elements=elements,
                 marked_element=marked_element,
@@ -261,7 +261,7 @@ class RefinementTest(unittest.TestCase):
         marked_element = 5
 
         new_coordinates, new_elements, new_boundaries, _ = \
-            refinement.refineRG(
+            refinement.refineRG_without_element_to_neighbours(
                 coordinates=coordinates,
                 elements=elements,
                 marked_element=marked_element,

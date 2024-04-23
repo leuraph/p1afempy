@@ -159,11 +159,12 @@ class SanityChecks(unittest.TestCase):
             marked_element = random.randrange(n_elements)
 
             # perform refinement
-            coordinates, elements, boundaries, _ = refinement.refineRG(
-                coordinates=coordinates,
-                elements=elements,
-                marked_element=marked_element,
-                boundaries=boundaries)
+            coordinates, elements, boundaries, _ = \
+                refinement.refineRG_without_element_to_neighbours(
+                    coordinates=coordinates,
+                    elements=elements,
+                    marked_element=marked_element,
+                    boundaries=boundaries)
 
             # in each step, compare the computed vs. expected eenergy
             expected_energy = 4.
@@ -214,12 +215,13 @@ class SanityChecks(unittest.TestCase):
             marked_element = random.randrange(n_elements)
 
             # perform refinement
-            coordinates, elements, boundaries, to_embed = refinement.refineRG(
-                coordinates=coordinates,
-                elements=elements,
-                marked_element=marked_element,
-                boundaries=boundaries,
-                to_embed=to_embed)
+            coordinates, elements, boundaries, to_embed = \
+                refinement.refineRG_without_element_to_neighbours(
+                    coordinates=coordinates,
+                    elements=elements,
+                    marked_element=marked_element,
+                    boundaries=boundaries,
+                    to_embed=to_embed)
 
             # in each step, compare the computed vs. expected eenergy
             expected_energy = 4.

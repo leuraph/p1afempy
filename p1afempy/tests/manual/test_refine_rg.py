@@ -30,7 +30,7 @@ def main() -> None:
     marked_element = 3
 
     new_coordinates, new_elements, new_boundaries, _ = \
-        refinement.refineRG(
+        refinement.refineRG_without_element_to_neighbours(
             coordinates=coordinates,
             elements=elements,
             marked_element=marked_element,

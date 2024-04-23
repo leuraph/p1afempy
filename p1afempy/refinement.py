@@ -277,13 +277,14 @@ def refineRG_with_element_to_neighbours(coordinates: CoordinatesType,
 # [1] S. Funken, D. Praetorius, and P. Wissgott.
 #     Efficient Implementation of Adaptive P1-FEM in Matlab
 #     http://dx.doi.org/10.2478/cmam-2011-0026
-def refineRG(coordinates: CoordinatesType,
-             elements: ElementsType,
-             marked_element: int,
-             boundaries: list[BoundaryType],
-             to_embed: np.ndarray = np.array([])) -> tuple[CoordinatesType,
-                                                           ElementsType,
-                                                           list[BoundaryType]]:
+def refineRG_without_element_to_neighbours(
+    coordinates: CoordinatesType,
+    elements: ElementsType,
+    marked_element: int,
+    boundaries: list[BoundaryType],
+    to_embed: np.ndarray = np.array([])) -> tuple[CoordinatesType,
+                                                  ElementsType,
+                                                  list[BoundaryType]]:
     """
     refines the mesh according to
     red-green refinement of one single element
