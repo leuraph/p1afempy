@@ -47,7 +47,7 @@ class SanityChecks(unittest.TestCase):
     on the initial mesh. In this way, we can check the interplay
     of stiffness matrix assembly and mesh refinement by checking
     the computed energy E:= x.T * A * x with the exact value for
-    the initial mesh and all subsequent refined meshes therof.
+    the initial mesh and all subsequent refined meshes thereof.
 
     implementation
     --------------
