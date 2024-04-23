@@ -24,7 +24,14 @@ class MeshTest(unittest.TestCase):
         expected_coordinates = np.array([z0, z1, z2, z3])
         expected_elements = np.array([e0, e1])
 
-        coordinates, elements = MeshTest.get_simple_square_mesh()
+        path_to_coordinates = Path(
+            'tests/data/simple_square_mesh/coordinates.dat')
+        path_to_elements = Path(
+            'tests/data/simple_square_mesh/elements.dat')
+
+        coordinates, elements = io_helpers.read_mesh(
+            path_to_coordinates=path_to_coordinates,
+            path_to_elements=path_to_elements)
 
         self.assertTrue(np.all(expected_coordinates == coordinates))
         self.assertTrue(np.all(expected_elements == elements))
@@ -38,7 +45,15 @@ class MeshTest(unittest.TestCase):
         boundary_conditions = [boundary_condition_0,
                                boundary_condition_1]
 
-        _, elements = MeshTest.get_simple_square_mesh()
+        path_to_coordinates = Path(
+            'tests/data/simple_square_mesh/coordinates.dat')
+        path_to_elements = Path(
+            'tests/data/simple_square_mesh/elements.dat')
+
+        _, elements = io_helpers.read_mesh(
+            path_to_coordinates=path_to_coordinates,
+            path_to_elements=path_to_elements)
+
         element2edges, edge2nodes, boundaries_to_edges = \
             mesh.provide_geometric_data(elements=elements,
                                         boundaries=boundary_conditions)
@@ -114,7 +129,15 @@ class MeshTest(unittest.TestCase):
             Path('tests/data/simple_square_mesh/square_boundary_1.dat'))
         boundary_conditions = [boundary_condition_0,
                                boundary_condition_1]
-        coordinates, elements = MeshTest.get_simple_square_mesh()
+
+        path_to_coordinates = Path(
+            'tests/data/simple_square_mesh/coordinates.dat')
+        path_to_elements = Path(
+            'tests/data/simple_square_mesh/elements.dat')
+
+        coordinates, elements = io_helpers.read_mesh(
+            path_to_coordinates=path_to_coordinates,
+            path_to_elements=path_to_elements)
 
         refined_coordinates, refined_elements, new_boundaries, _ = \
             refinement.refineNVB(coordinates=coordinates,
