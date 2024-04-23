@@ -31,6 +31,16 @@ def generate_new_nodes(edge2newNode: np.ndarray,
     return np.vstack([coordinates, new_node_coordinates]), to_embed
 
 
+# NOTE This function is based on the refinement technology found in [1]
+# and hence, in theory, is capable of red-green refining more than one
+# element at once, where each marked element is red-refined and hanging
+# nodes removed by green-refinement. To obtain this behaviour, simply
+# pass an array of indices as `marked_element`. However, be aware that
+# this function is only tested when used for refining single elements.
+#
+# [1] S. Funken, D. Praetorius, and P. Wissgott.
+#     Efficient Implementation of Adaptive P1-FEM in Matlab
+#     http://dx.doi.org/10.2478/cmam-2011-0026
 def refineRG(coordinates: CoordinatesType,
              elements: ElementsType,
              marked_element: int,
