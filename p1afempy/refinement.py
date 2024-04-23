@@ -31,185 +31,6 @@ def generate_new_nodes(edge2newNode: np.ndarray,
     return np.vstack([coordinates, new_node_coordinates]), to_embed
 
 
-# NOTE This function is based on the refinement technology found in [1]
-# and hence, in theory, is capable of red-green refining more than one
-# element at once, where each marked element is red-refined and hanging
-# nodes removed by green-refinement. To obtain this behaviour, simply
-# pass an array of indices as `marked_element`. However, be aware that
-# this function is only tested when used for refining single elements.
-#
-# [1] S. Funken, D. Praetorius, and P. Wissgott.
-#     Efficient Implementation of Adaptive P1-FEM in Matlab
-#     http://dx.doi.org/10.2478/cmam-2011-0026
-def refineRG(coordinates: CoordinatesType,
-             elements: ElementsType,
-             marked_element: int,
-             boundaries: list[BoundaryType],
-             to_embed: np.ndarray = np.array([])) -> tuple[CoordinatesType,
-                                                           ElementsType,
-                                                           list[BoundaryType]]:
-    """
-    refines the mesh according to
-    red-green refinement of one single element
-
-    parameters
-    ----------
-    coordinates: CoordinatesType
-    elements: ElementsType
-    marked_element: int
-        the index of the element to be red refined
-    boundaries: list[BoundaryType]
-    to_embed: np.ndarray = np.array([])
-        vector of values on coordinates to be interpolated
-        (canonically embedded) onto the refined mesh
-
-    returns
-    -------
-    new_coordinates: CoordinatesType
-        coordinates of the refined mesh
-    new_elements: ElementsType
-        elements of the refined mesh
-    new_boundaries: list[BoundaryType]
-        boundaries of the refines mesh
-    embedded_values: np.ndarray
-        to_embed interpolated onto the refined mesh
-
-    notes
-    -----
-    this method does the following
-    - given an element k=marked_element marked for
-      refinement
-    - red refine element k
-    - green refine all neighbouring elements (at most three),
-      meaning that the new vertex on the edge shared by k
-      and its neighbour k' gets connected to the vertex
-      in k' opposite to the shared edge
-    - if any new vertex lies on a boundary,
-      refine the boundary accordingly
-    """
-    nE = elements.shape[0]
-
-    # Obtain geometric information on edges
-    element2edges, edge2nodes, boundary2edges = \
-        provide_geometric_data(elements=elements, boundaries=boundaries)
-
-    # Mark edges for refinement
-    edge2newNode = np.zeros(edge2nodes.shape[0], dtype=int)
-    edge2newNode[element2edges[marked_element].flatten()] = 1
-
-    new_coordinates, embedded_values = generate_new_nodes(
-        edge2newNode=edge2newNode,
-        edge2nodes=edge2nodes,
-        coordinates=coordinates,
-        to_embed=to_embed)
-
-    # refine boundary conditions
-    new_boundaries = []
-    for k, boundary in enumerate(boundaries):
-        if boundary.size:
-            new_nodes_on_boundary = edge2newNode[boundary2edges[k]]
-            marked_edges = np.nonzero(new_nodes_on_boundary)[0]
-            if marked_edges.size:
-                boundary = np.vstack(
-                    [boundary[np.logical_not(new_nodes_on_boundary), :],
-                     np.column_stack([boundary[marked_edges, 0],
-                                      new_nodes_on_boundary[marked_edges]]),
-                     np.column_stack([new_nodes_on_boundary[marked_edges],
-                                      boundary[marked_edges, 1]])])
-        new_boundaries.append(boundary)
-
-    # Provide new nodes for refinement of elements
-    newNodes = edge2newNode[element2edges]
-
-    # Determine type of refinement for each element
-    marked_edges = newNodes != 0
-
-    first_marked = marked_edges[:, 0]
-    second_marked = marked_edges[:, 1]
-    third_marked = marked_edges[:, 2]
-
-    not_first = np.logical_not(first_marked)
-    not_second = np.logical_not(second_marked)
-    not_third = np.logical_not(third_marked)
-
-    none = not_first & not_second & not_third
-    green1 = first_marked & not_second & not_third
-    green2 = not_first & second_marked & not_third
-    green3 = not_first & not_second & third_marked
-    red = first_marked & second_marked & third_marked
-
-    # generate element numbering for refined mesh
-    idx = np.ones(nE, dtype=int)
-    idx[green1] = 2  # green(1): green refinement of 1st edge
-    idx[green2] = 2  # green(2): green refinement of 2nd edge
-    idx[green3] = 2  # green(3): green refinement of 3rd edge
-    idx[red] = 4  # red: red refinement
-    idx = np.hstack([0, np.cumsum(idx)])
-
-    # generate new elements
-    # ---------------------
-    new_elements = np.zeros((idx[-1], 3), dtype=int)
-    idx = idx[:-1]
-
-    # no refinement
-    new_elements[idx[none], :] = elements[none, :]
-
-    # green refinement (1)
-    new_elements[np.hstack([idx[green1], 1+idx[green1]]), :] \
-        = np.vstack(
-            [np.column_stack([
-                elements[green1, 0],
-                newNodes[green1, 0],
-                elements[green1, 2]]),
-             np.column_stack([
-                 newNodes[green1, 0],
-                 elements[green1, 1],
-                 elements[green1, 2]])])
-
-    # green refinement (2)
-    new_elements[np.hstack([idx[green2], 1+idx[green2]]), :] \
-        = np.vstack(
-            [np.column_stack([
-                elements[green2, 1],
-                newNodes[green2, 1],
-                elements[green2, 0]]),
-             np.column_stack([
-                 newNodes[green2, 1],
-                 elements[green2, 2],
-                 elements[green2, 0]])])
-
-    # green refinement (3)
-    new_elements[np.hstack([idx[green3], 1+idx[green3]]), :] \
-        = np.vstack(
-            [np.column_stack([
-                elements[green3, 2],
-                newNodes[green3, 2],
-                elements[green3, 1]]),
-             np.column_stack([
-                 newNodes[green3, 2],
-                 elements[green3, 0],
-                 elements[green3, 1]])])
-
-    # red refinement
-    new_elements[np.hstack([idx[red], 1+idx[red],
-                            2+idx[red], 3+idx[red]]), :] \
-        = np.vstack([
-            np.column_stack([elements[red, 0],
-                             newNodes[red, 0],
-                             newNodes[red, 2]]),
-            np.column_stack([newNodes[red, 0],
-                             elements[red, 1],
-                             newNodes[red, 1]]),
-            np.column_stack([newNodes[red, 2],
-                             newNodes[red, 1],
-                             elements[red, 2]]),
-            np.column_stack([newNodes[red, 0],
-                             newNodes[red, 1],
-                             newNodes[red, 2]])])
-
-    return new_coordinates, new_elements, new_boundaries, embedded_values
-
-
 def refine_boundaries(elements, which,
                       boundaries, n_nodes,
                       element_to_neighbours) -> list[BoundaryType]:
@@ -445,6 +266,185 @@ def refineRG_single(coordinates: CoordinatesType,
         element_to_neighbours=element_to_neighbours)
 
     return new_coordinates, new_elements, new_boundaries, to_embed
+
+
+# NOTE This function is based on the refinement technology found in [1]
+# and hence, in theory, is capable of red-green refining more than one
+# element at once, where each marked element is red-refined and hanging
+# nodes removed by green-refinement. To obtain this behaviour, simply
+# pass an array of indices as `marked_element`. However, be aware that
+# this function is only tested when used for refining single elements.
+#
+# [1] S. Funken, D. Praetorius, and P. Wissgott.
+#     Efficient Implementation of Adaptive P1-FEM in Matlab
+#     http://dx.doi.org/10.2478/cmam-2011-0026
+def refineRG(coordinates: CoordinatesType,
+             elements: ElementsType,
+             marked_element: int,
+             boundaries: list[BoundaryType],
+             to_embed: np.ndarray = np.array([])) -> tuple[CoordinatesType,
+                                                           ElementsType,
+                                                           list[BoundaryType]]:
+    """
+    refines the mesh according to
+    red-green refinement of one single element
+
+    parameters
+    ----------
+    coordinates: CoordinatesType
+    elements: ElementsType
+    marked_element: int
+        the index of the element to be red refined
+    boundaries: list[BoundaryType]
+    to_embed: np.ndarray = np.array([])
+        vector of values on coordinates to be interpolated
+        (canonically embedded) onto the refined mesh
+
+    returns
+    -------
+    new_coordinates: CoordinatesType
+        coordinates of the refined mesh
+    new_elements: ElementsType
+        elements of the refined mesh
+    new_boundaries: list[BoundaryType]
+        boundaries of the refines mesh
+    embedded_values: np.ndarray
+        to_embed interpolated onto the refined mesh
+
+    notes
+    -----
+    this method does the following
+    - given an element k=marked_element marked for
+      refinement
+    - red refine element k
+    - green refine all neighbouring elements (at most three),
+      meaning that the new vertex on the edge shared by k
+      and its neighbour k' gets connected to the vertex
+      in k' opposite to the shared edge
+    - if any new vertex lies on a boundary,
+      refine the boundary accordingly
+    """
+    nE = elements.shape[0]
+
+    # Obtain geometric information on edges
+    element2edges, edge2nodes, boundary2edges = \
+        provide_geometric_data(elements=elements, boundaries=boundaries)
+
+    # Mark edges for refinement
+    edge2newNode = np.zeros(edge2nodes.shape[0], dtype=int)
+    edge2newNode[element2edges[marked_element].flatten()] = 1
+
+    new_coordinates, embedded_values = generate_new_nodes(
+        edge2newNode=edge2newNode,
+        edge2nodes=edge2nodes,
+        coordinates=coordinates,
+        to_embed=to_embed)
+
+    # refine boundary conditions
+    new_boundaries = []
+    for k, boundary in enumerate(boundaries):
+        if boundary.size:
+            new_nodes_on_boundary = edge2newNode[boundary2edges[k]]
+            marked_edges = np.nonzero(new_nodes_on_boundary)[0]
+            if marked_edges.size:
+                boundary = np.vstack(
+                    [boundary[np.logical_not(new_nodes_on_boundary), :],
+                     np.column_stack([boundary[marked_edges, 0],
+                                      new_nodes_on_boundary[marked_edges]]),
+                     np.column_stack([new_nodes_on_boundary[marked_edges],
+                                      boundary[marked_edges, 1]])])
+        new_boundaries.append(boundary)
+
+    # Provide new nodes for refinement of elements
+    newNodes = edge2newNode[element2edges]
+
+    # Determine type of refinement for each element
+    marked_edges = newNodes != 0
+
+    first_marked = marked_edges[:, 0]
+    second_marked = marked_edges[:, 1]
+    third_marked = marked_edges[:, 2]
+
+    not_first = np.logical_not(first_marked)
+    not_second = np.logical_not(second_marked)
+    not_third = np.logical_not(third_marked)
+
+    none = not_first & not_second & not_third
+    green1 = first_marked & not_second & not_third
+    green2 = not_first & second_marked & not_third
+    green3 = not_first & not_second & third_marked
+    red = first_marked & second_marked & third_marked
+
+    # generate element numbering for refined mesh
+    idx = np.ones(nE, dtype=int)
+    idx[green1] = 2  # green(1): green refinement of 1st edge
+    idx[green2] = 2  # green(2): green refinement of 2nd edge
+    idx[green3] = 2  # green(3): green refinement of 3rd edge
+    idx[red] = 4  # red: red refinement
+    idx = np.hstack([0, np.cumsum(idx)])
+
+    # generate new elements
+    # ---------------------
+    new_elements = np.zeros((idx[-1], 3), dtype=int)
+    idx = idx[:-1]
+
+    # no refinement
+    new_elements[idx[none], :] = elements[none, :]
+
+    # green refinement (1)
+    new_elements[np.hstack([idx[green1], 1+idx[green1]]), :] \
+        = np.vstack(
+            [np.column_stack([
+                elements[green1, 0],
+                newNodes[green1, 0],
+                elements[green1, 2]]),
+             np.column_stack([
+                 newNodes[green1, 0],
+                 elements[green1, 1],
+                 elements[green1, 2]])])
+
+    # green refinement (2)
+    new_elements[np.hstack([idx[green2], 1+idx[green2]]), :] \
+        = np.vstack(
+            [np.column_stack([
+                elements[green2, 1],
+                newNodes[green2, 1],
+                elements[green2, 0]]),
+             np.column_stack([
+                 newNodes[green2, 1],
+                 elements[green2, 2],
+                 elements[green2, 0]])])
+
+    # green refinement (3)
+    new_elements[np.hstack([idx[green3], 1+idx[green3]]), :] \
+        = np.vstack(
+            [np.column_stack([
+                elements[green3, 2],
+                newNodes[green3, 2],
+                elements[green3, 1]]),
+             np.column_stack([
+                 newNodes[green3, 2],
+                 elements[green3, 0],
+                 elements[green3, 1]])])
+
+    # red refinement
+    new_elements[np.hstack([idx[red], 1+idx[red],
+                            2+idx[red], 3+idx[red]]), :] \
+        = np.vstack([
+            np.column_stack([elements[red, 0],
+                             newNodes[red, 0],
+                             newNodes[red, 2]]),
+            np.column_stack([newNodes[red, 0],
+                             elements[red, 1],
+                             newNodes[red, 1]]),
+            np.column_stack([newNodes[red, 2],
+                             newNodes[red, 1],
+                             elements[red, 2]]),
+            np.column_stack([newNodes[red, 0],
+                             newNodes[red, 1],
+                             newNodes[red, 2]])])
+
+    return new_coordinates, new_elements, new_boundaries, embedded_values
 
 
 def refineRGB(coordinates: CoordinatesType,
