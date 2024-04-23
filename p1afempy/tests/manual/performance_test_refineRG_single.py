@@ -48,7 +48,7 @@ def main() -> None:
     for _ in range(N_RED_REFINEMENT_LOOPS):
         for marked_element in tqdm(range(n_elements)):
             # refine and throw away the result
-            _, _, _, _ = refinement.refineRG_single(
+            _, _, _, _ = refinement.refineRG_with_element_to_neighbours(
                 coordinates=coordinates,
                 elements=elements,
                 which=marked_element,

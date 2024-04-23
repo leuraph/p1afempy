@@ -188,16 +188,16 @@ def refine_elements(elements,
     return new_elements
 
 
-def refineRG_single(coordinates: CoordinatesType,
-                    elements: ElementsType,
-                    which: int,
-                    boundaries: list[BoundaryType],
-                    element_to_neighbours,
-                    to_embed: np.ndarray = np.array([])
-                    ) -> tuple[CoordinatesType,
-                               ElementsType,
-                               list[BoundaryType],
-                               np.ndarray]:
+def refineRG_with_element_to_neighbours(coordinates: CoordinatesType,
+                                        elements: ElementsType,
+                                        which: int,
+                                        boundaries: list[BoundaryType],
+                                        element_to_neighbours,
+                                        to_embed: np.ndarray = np.array([])
+                                        ) -> tuple[CoordinatesType,
+                                                   ElementsType,
+                                                   list[BoundaryType],
+                                                   np.ndarray]:
     """
     red refines a single specified element and removes
     hanging nodes by green refining neighbouring elements
