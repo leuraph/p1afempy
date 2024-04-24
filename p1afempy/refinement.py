@@ -313,16 +313,21 @@ def refineRG_without_element_to_neighbours(
 
     notes
     -----
-    this method does the following
-    - given an element k=marked_element marked for
-      refinement
-    - red refine element k
-    - green refine all neighbouring elements (at most three),
-      meaning that the new vertex on the edge shared by k
-      and its neighbour k' gets connected to the vertex
-      in k' opposite to the shared edge
-    - if any new vertex lies on a boundary,
-      refine the boundary accordingly
+    - this function requires to be passed a complete list of
+      boundaries, i.e. each edge of the mesh at hand must be
+      part of a boundary in `boundaries` (due to implementation
+      details in `provide_geometric_data`)
+
+    - this method does the following:
+        1. given an element k=marked_element marked for
+           refinement
+        2. red refine element k
+        3. green refine all neighbouring elements (at most three),
+           meaning that the new vertex on the edge shared by k
+           and its neighbour k' gets connected to the vertex
+           in k' opposite to the shared edge
+        4. if any new vertex lies on a boundary,
+           refine the boundary accordingly
     """
     nE = elements.shape[0]
 
