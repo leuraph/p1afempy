@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "p1afempy"
-version = "0.2.4"
+version = "0.2.5"
 authors = [
   { name="Raphael Leu", email="raphaelleu95@gmail.com" },
 ]
@@ -15,7 +15,8 @@ dependencies = [
   "numpy",
   "scipy",
   "pathlib",
-  "matplotlib"
+  "matplotlib",
+  "ismember @ git+https://github.com/erdogant/ismember.git@48c8609ba230d22ad0b416cb7aeb54d63a98df0b"
 ]
 classifiers = [
     "Programming Language :: Python :: 3",

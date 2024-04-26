@@ -1,4 +1,5 @@
 import numpy as np
+import ismember
 from p1afempy.mesh import provide_geometric_data
 from p1afempy.data_structures import \
     CoordinatesType, ElementsType, BoundaryType
@@ -30,13 +31,260 @@ def generate_new_nodes(edge2newNode: np.ndarray,
     return np.vstack([coordinates, new_node_coordinates]), to_embed
 
 
-def refineRG(coordinates: CoordinatesType,
-             elements: ElementsType,
-             marked_element: int,
-             boundaries: list[BoundaryType],
-             to_embed: np.ndarray = np.array([])) -> tuple[CoordinatesType,
-                                                           ElementsType,
-                                                           list[BoundaryType]]:
+def refine_boundaries(elements, which,
+                      boundaries, n_nodes,
+                      element_to_neighbours) -> list[BoundaryType]:
+    edges_to_split_bool = element_to_neighbours[which] == -1
+
+    if not np.any(edges_to_split_bool):
+        return boundaries
+
+    # splitting the boundary, where necessary
+    # ---------------------------------------
+    # 3x2 array of all edges of k-th element
+    possible_edges = np.column_stack((
+        elements[which, [0, 1, 2]].flatten(),
+        elements[which, [1, 2, 0]].flatten()))
+    # isolate edges to be split, i.e. edges
+    # of the k-th element lying on the
+    # domain's boundary
+
+    new_boundaries = []
+    for boundary in boundaries:
+        if boundary.size > 0:
+            boundary_to_split_bool, idx = \
+                ismember.ismember(boundary, possible_edges, method='rows')
+            # indices of new nodes to be inserted in the bundary at hand
+            idx_new_nodes = idx + n_nodes
+            boundary = np.vstack([
+                boundary[np.logical_not(boundary_to_split_bool)],
+                np.column_stack([
+                    boundary[boundary_to_split_bool, 0], idx_new_nodes
+                ]),
+                np.column_stack([
+                    idx_new_nodes, boundary[boundary_to_split_bool, 1]
+                ])
+            ])
+        new_boundaries.append(boundary)
+    return new_boundaries
+
+
+def refine_elements(elements,
+                    element_to_neighbours,
+                    which,
+                    n_nodes) -> ElementsType:
+    index_new_node_1 = n_nodes  # indexing starts at zero
+    index_new_node_2 = n_nodes + 1
+    index_new_node_3 = n_nodes + 2
+
+    # building new elements
+    # ---------------------
+    n_elements = elements.shape[0]
+    # element whose first neighbour is `which`
+    green_1 = np.isin(element_to_neighbours[:, 0], which)
+    # element whose second neighbour is `which`
+    green_2 = np.isin(element_to_neighbours[:, 1], which)
+    # element whose third neighbour is `which`
+    green_3 = np.isin(element_to_neighbours[:, 2], which)
+    # marking `which` as being red-refined
+    red = np.zeros(n_elements, dtype=bool)
+    red[which] = True
+    # the rest of the elements is not marked for refinement
+    # TODO check if this can be improved without reduce
+    none = np.logical_not(
+        np.logical_or.reduce((green_1, green_2,
+                              green_3, red)))
+    # retreiving new elements' indices
+    idx = np.ones(n_elements, dtype=int)
+    idx[green_1] = 2
+    idx[green_2] = 2
+    idx[green_3] = 2
+    idx[red] = 4
+    idx = np.hstack([0, np.cumsum(idx)])
+    new_elements = np.zeros((idx[-1], 3), dtype=int)
+    idx = idx[:-1]
+    # generate new elements
+
+    # no refinement
+    new_elements[idx[none]] = elements[none]
+
+    # TODO check if/how we can remove these `np.any`
+    # green refinement (1)
+    if np.any(green_1):
+        # get the indices of the elements to be green (1) refined
+        idx_element_green_1 = np.nonzero(green_1)[0]
+        # get the indices of the corresponding new nodes
+        _, iloc = ismember.ismember(
+            idx_element_green_1, element_to_neighbours[which, :])
+        idx_new_node_green_1 = n_nodes + iloc
+        # creating and adding the green (1) refined element
+        new_elements[
+            np.hstack((idx[green_1], idx[green_1]+1)), :] = np.vstack((
+                np.column_stack([elements[green_1, 0],
+                                idx_new_node_green_1,
+                                elements[green_1, 2]]),
+                np.column_stack([idx_new_node_green_1,
+                                elements[green_1, 1],
+                                elements[green_1, 2]])
+            ))
+
+    # green refinement (2)
+    if np.any(green_2):
+        # get the index of the element to be green (2) refined
+        idx_element_green_2 = np.nonzero(green_2)[0]
+        # get the indices of the corresponding new nodes
+        _, iloc = ismember.ismember(
+            idx_element_green_2, element_to_neighbours[which, :])
+        idx_new_node_green_2 = n_nodes + iloc
+        # creating and adding the green (2) refined element
+        new_elements[
+            np.hstack((idx[green_2], idx[green_2]+1)), :] = np.vstack((
+                np.column_stack([elements[green_2, 1],
+                                idx_new_node_green_2,
+                                elements[green_2, 0]]),
+                np.column_stack([idx_new_node_green_2,
+                                elements[green_2, 2],
+                                elements[green_2, 0]])
+            ))
+
+    # green refinement (3)
+    if np.any(green_3):
+        # get the index of the element to be green (3) refined
+        idx_element_green_3 = np.nonzero(green_3)[0]
+        # get the indices of the corresponding new nodes
+        _, iloc = ismember.ismember(
+            idx_element_green_3, element_to_neighbours[which, :])
+        idx_new_node_green_3 = n_nodes + iloc
+        # creating and adding the green (3) refined element
+        new_elements[
+            np.hstack((idx[green_3], idx[green_3]+1)), :] = np.vstack((
+                np.column_stack([elements[green_3, 2],
+                                idx_new_node_green_3,
+                                elements[green_3, 1]]),
+                np.column_stack([idx_new_node_green_3,
+                                elements[green_3, 0],
+                                elements[green_3, 1]])
+                    ))
+
+    # red refinement
+    new_elements[
+        np.hstack((
+            idx[red], idx[red]+1,
+            idx[red]+2, idx[red]+3)), :] = np.vstack((
+                np.column_stack([elements[red, 0],
+                                 index_new_node_1,
+                                 index_new_node_3]),
+                np.column_stack([index_new_node_1,
+                                 elements[red, 1],
+                                 index_new_node_2]),
+                np.column_stack([index_new_node_3,
+                                 index_new_node_2,
+                                 elements[red, 2]]),
+                np.column_stack([index_new_node_1,
+                                 index_new_node_2,
+                                 index_new_node_3])
+            ))
+
+    return new_elements
+
+
+def refineRG_with_element_to_neighbours(coordinates: CoordinatesType,
+                                        elements: ElementsType,
+                                        which: int,
+                                        boundaries: list[BoundaryType],
+                                        element_to_neighbours,
+                                        to_embed: np.ndarray = np.array([])
+                                        ) -> tuple[CoordinatesType,
+                                                   ElementsType,
+                                                   list[BoundaryType],
+                                                   np.ndarray]:
+    """
+    red refines a single specified element and removes
+    hanging nodes by green refining neighbouring elements
+
+    Parameters
+    ----------
+    coordinates: CoordinatesType
+        coordinates of the mesh at hand
+    elements: ElementsType
+        elements of the mesh at hand
+    which: int
+        index of the element to be red refined
+    boundaries: list[BoundaryType]
+        list of boundaries at hand
+    element_to_neighbours: np.ndarray
+        array whose j-th entry in the i-th row represents the
+        index of the element sharing the i-th edge of the j-th element
+    to_embed: np.ndarray, optional
+        array containing data on the nodes to be linearly interpolated,
+        defaults to an empty array
+
+    Returns
+    -------
+    new_coordinates: CoordinatesType
+        coordinates of the refined mesh
+    new_elements: ElementsType
+        elements of the refined mesh
+    new_boundaries: list[BoundaryType]
+        boundaries of the refined mesh
+    to_embed: np.ndarray
+        linearly interpolated data on the refined mesh
+
+    Notes
+    -----
+    - this routine does not assume the list of boundary
+      conditions to be complete.
+    - during refinement, three new coordinates are generated,
+      these get simply appended to the existing coordinates
+    """
+    # building (three) new coordinates
+    # --------------------------------
+    x_y_1 = coordinates[elements[which, [0, 1, 2]], :]
+    x_y_2 = coordinates[elements[which, [1, 2, 0]], :]
+    new_coordinates = np.vstack([coordinates,
+                                 (x_y_1 + x_y_2)/2.])
+    # retrieving new nodes' indices
+    n_nodes = coordinates.shape[0]
+
+    # interpolating `to_embed`
+    # ------------------------
+    if to_embed.size > 0:
+        interpolated = (to_embed[elements[which, [0, 1, 2]].flatten()] +
+                        to_embed[elements[which, [1, 2, 0]].flatten()])/2.
+        to_embed = np.hstack([to_embed, interpolated])
+
+    new_elements = refine_elements(elements=elements,
+                                   element_to_neighbours=element_to_neighbours,
+                                   which=which,
+                                   n_nodes=n_nodes)
+
+    new_boundaries = refine_boundaries(
+        elements=elements,
+        boundaries=boundaries,
+        n_nodes=n_nodes,
+        which=which,
+        element_to_neighbours=element_to_neighbours)
+
+    return new_coordinates, new_elements, new_boundaries, to_embed
+
+
+# NOTE This function is based on the refinement technology found in [1]
+# and hence, in theory, should be capable of red-green refining more than one
+# element at once, where each marked element is red-refined and hanging
+# nodes removed by green-refinement. However, checking/testing/realizing
+# this implementation remains an open TODO.
+#
+# [1] S. Funken, D. Praetorius, and P. Wissgott.
+#     Efficient Implementation of Adaptive P1-FEM in Matlab
+#     http://dx.doi.org/10.2478/cmam-2011-0026
+def refineRG_without_element_to_neighbours(
+    coordinates: CoordinatesType,
+    elements: ElementsType,
+    marked_element: int,
+    boundaries: list[BoundaryType],
+    to_embed: np.ndarray = np.array([])) -> tuple[CoordinatesType,
+                                                  ElementsType,
+                                                  list[BoundaryType]]:
     """
     refines the mesh according to
     red-green refinement of one single element
@@ -65,16 +313,21 @@ def refineRG(coordinates: CoordinatesType,
 
     notes
     -----
-    this method does the following
-    - given an element k=marked_element marked for
-      refinement
-    - red refine element k
-    - green refine all neighbouring elements (at most three),
-      meaning that the new vertex on the edge shared by k
-      and its neighbour k' gets connected to the vertex
-      in k' opposite to the shared edge
-    - if any new vertex lies on a boundary,
-      refine the boundary accordingly
+    - this function requires to be passed a complete list of
+      boundaries, i.e. each edge of the mesh at hand must be
+      part of a boundary in `boundaries` (due to implementation
+      details in `provide_geometric_data`)
+
+    - this method does the following:
+        1. given an element k=marked_element marked for
+           refinement
+        2. red refine element k
+        3. green refine all neighbouring elements (at most three),
+           meaning that the new vertex on the edge shared by k
+           and its neighbour k' gets connected to the vertex
+           in k' opposite to the shared edge
+        4. if any new vertex lies on a boundary,
+           refine the boundary accordingly
     """
     nE = elements.shape[0]
 
@@ -199,7 +452,6 @@ def refineRG(coordinates: CoordinatesType,
     return new_coordinates, new_elements, new_boundaries, embedded_values
 
 
-# TODO refactor s.t. boundary_conditions is optional
 def refineRGB(coordinates: CoordinatesType,
               elements: ElementsType,
               marked_elements: np.ndarray,
@@ -255,7 +507,6 @@ def refineRGB(coordinates: CoordinatesType,
 
 
 # TODO refactor s.t. sort_for_longest_egde vanishes, this is an ugly solution
-# TODO refactor s.t. boundary_conditions is optional
 def refineNVB(coordinates: CoordinatesType,
               elements: ElementsType,
               marked_elements: np.ndarray,

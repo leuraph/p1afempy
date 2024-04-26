@@ -2,7 +2,7 @@ import numpy as np
 import unittest
 import random
 from pathlib import Path
-from p1afempy import io_helpers, solvers
+from p1afempy import io_helpers, solvers, mesh
 from p1afempy.data_structures import \
     CoordinatesType, ElementsType, BoundaryType
 from p1afempy import refinement
@@ -41,13 +41,13 @@ class SanityChecks(unittest.TestCase):
 
     idea
     ----
-    The ides is to compute the discrete version of the energy
+    The idea is to compute the discrete version of the energy
     E(u) := a(u, u)
     of a function u(x, y) that is exactly represented already
     on the initial mesh. In this way, we can check the interplay
     of stiffness matrix assembly and mesh refinement by checking
     the computed energy E:= x.T * A * x with the exact value for
-    the initial mesh and all subsequent refined meshes therof.
+    the initial mesh and all subsequent refined meshes thereof.
 
     implementation
     --------------
@@ -159,11 +159,40 @@ class SanityChecks(unittest.TestCase):
             marked_element = random.randrange(n_elements)
 
             # perform refinement
-            coordinates, elements, boundaries, _ = refinement.refineRG(
-                coordinates=coordinates,
-                elements=elements,
-                marked_element=marked_element,
-                boundaries=boundaries)
+            coordinates, elements, boundaries, _ = \
+                refinement.refineRG_without_element_to_neighbours(
+                    coordinates=coordinates,
+                    elements=elements,
+                    marked_element=marked_element,
+                    boundaries=boundaries)
+
+            # in each step, compare the computed vs. expected eenergy
+            expected_energy = 4.
+            computed_energy = evaluate_energy_on_mesh(
+                coordinates=coordinates, elements=elements)
+
+            self.assertEqual(expected_energy, computed_energy)
+
+    def test_refine_rg_single(self) -> None:
+        random.seed(42)
+        coordinates, elements, dirichlet = SanityChecks.get_initial_mesh()
+
+        boundaries = [dirichlet]
+        n_refinements = 100
+        for _ in range(n_refinements):
+            # mark a random element for refinement
+            n_elements = elements.shape[0]
+            marked_element = random.randrange(n_elements)
+
+            # perform refinement
+            coordinates, elements, boundaries, _ = \
+                refinement.refineRG_with_element_to_neighbours(
+                    coordinates=coordinates,
+                    elements=elements,
+                    which=marked_element,
+                    boundaries=boundaries,
+                    element_to_neighbours=mesh.get_element_to_neighbours(
+                        elements))
 
             # in each step, compare the computed vs. expected eenergy
             expected_energy = 4.
@@ -186,12 +215,45 @@ class SanityChecks(unittest.TestCase):
             marked_element = random.randrange(n_elements)
 
             # perform refinement
-            coordinates, elements, boundaries, to_embed = refinement.refineRG(
-                coordinates=coordinates,
-                elements=elements,
-                marked_element=marked_element,
-                boundaries=boundaries,
-                to_embed=to_embed)
+            coordinates, elements, boundaries, to_embed = \
+                refinement.refineRG_without_element_to_neighbours(
+                    coordinates=coordinates,
+                    elements=elements,
+                    marked_element=marked_element,
+                    boundaries=boundaries,
+                    to_embed=to_embed)
+
+            # in each step, compare the computed vs. expected eenergy
+            expected_energy = 4.
+            computed_energy = evaluate_energy_on_mesh(
+                coordinates=coordinates, elements=elements,
+                test_function_vector=to_embed)
+
+            self.assertEqual(expected_energy, computed_energy)
+
+    def test_refine_rg_single_with_solution_interpolation(self) -> None:
+        random.seed(42)
+        coordinates, elements, dirichlet = SanityChecks.get_initial_mesh()
+
+        to_embed = np.array([test_function(x, y) for (x, y) in coordinates])
+
+        boundaries = [dirichlet]
+        n_refinements = 100
+        for _ in range(n_refinements):
+            # mark a random element for refinement
+            n_elements = elements.shape[0]
+            marked_element = random.randrange(n_elements)
+
+            # perform refinement
+            coordinates, elements, boundaries, to_embed = \
+                refinement.refineRG_with_element_to_neighbours(
+                    coordinates=coordinates,
+                    elements=elements,
+                    which=marked_element,
+                    boundaries=boundaries,
+                    to_embed=to_embed,
+                    element_to_neighbours=mesh.get_element_to_neighbours(
+                        elements=elements))
 
             # in each step, compare the computed vs. expected eenergy
             expected_energy = 4.

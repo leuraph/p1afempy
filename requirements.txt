@@ -2,5 +2,4 @@ numpy
 scipy
 pathlib
 matplotlib
-notebook
-sympy
+ismember @ git+https://github.com/erdogant/ismember.git@48c8609ba230d22ad0b416cb7aeb54d63a98df0b

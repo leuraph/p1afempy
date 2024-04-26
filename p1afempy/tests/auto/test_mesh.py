@@ -8,23 +8,20 @@ import numpy as np
 
 class MeshTest(unittest.TestCase):
 
-    @staticmethod
-    # TODO Refactor the calls to get_simple_square_mesh
-    def get_simple_square_mesh() -> tuple[np.ndarray, np.ndarray]:
-        path_to_coordinates = Path(
-            'tests/data/simple_square_mesh/coordinates.dat')
-        path_to_elements = Path(
-            'tests/data/simple_square_mesh/elements.dat')
-        return io_helpers.read_mesh(path_to_coordinates=path_to_coordinates,
-                                    path_to_elements=path_to_elements)
-
     def test_read_mesh(self):
         z0, z1, z2, z3 = [0., 0.], [1., 0.], [1., 1.], [0., 1.]
         e0, e1 = [0, 1, 2], [0, 2, 3]
         expected_coordinates = np.array([z0, z1, z2, z3])
         expected_elements = np.array([e0, e1])
 
-        coordinates, elements = MeshTest.get_simple_square_mesh()
+        path_to_coordinates = Path(
+            'tests/data/simple_square_mesh/coordinates.dat')
+        path_to_elements = Path(
+            'tests/data/simple_square_mesh/elements.dat')
+
+        coordinates, elements = io_helpers.read_mesh(
+            path_to_coordinates=path_to_coordinates,
+            path_to_elements=path_to_elements)
 
         self.assertTrue(np.all(expected_coordinates == coordinates))
         self.assertTrue(np.all(expected_elements == elements))
@@ -38,7 +35,15 @@ class MeshTest(unittest.TestCase):
         boundary_conditions = [boundary_condition_0,
                                boundary_condition_1]
 
-        _, elements = MeshTest.get_simple_square_mesh()
+        path_to_coordinates = Path(
+            'tests/data/simple_square_mesh/coordinates.dat')
+        path_to_elements = Path(
+            'tests/data/simple_square_mesh/elements.dat')
+
+        _, elements = io_helpers.read_mesh(
+            path_to_coordinates=path_to_coordinates,
+            path_to_elements=path_to_elements)
+
         element2edges, edge2nodes, boundaries_to_edges = \
             mesh.provide_geometric_data(elements=elements,
                                         boundaries=boundary_conditions)
@@ -105,151 +110,6 @@ class MeshTest(unittest.TestCase):
         self.assertTrue(np.all(boundaries_to_edges[1] == [8, 4, 10]))
         self.assertTrue(np.all(boundaries_to_edges[2] == [11, 12]))
         self.assertEqual(len(boundaries_to_edges), 3)
-
-    def test_refineNVB(self) -> None:
-        # Square Domain
-        boundary_condition_0 = io_helpers.read_boundary_condition(
-            Path('tests/data/simple_square_mesh/square_boundary_0.dat'))
-        boundary_condition_1 = io_helpers.read_boundary_condition(
-            Path('tests/data/simple_square_mesh/square_boundary_1.dat'))
-        boundary_conditions = [boundary_condition_0,
-                               boundary_condition_1]
-        coordinates, elements = MeshTest.get_simple_square_mesh()
-
-        refined_coordinates, refined_elements, new_boundaries, _ = \
-            refinement.refineNVB(coordinates=coordinates,
-                                 elements=elements,
-                                 marked_elements=np.array([0, 1]),
-                                 boundary_conditions=boundary_conditions)
-
-        expected_refined_coordinates = np.array([[0., 0.],
-                                                 [1., 0.],
-                                                 [1., 1.],
-                                                 [0., 1.],
-                                                 [0.5, 0.],
-                                                 [0.5, 0.5],
-                                                 [1., 0.5],
-                                                 [0.5, 1.],
-                                                 [0., 0.5]])
-        expected_refined_elements = np.array([[4, 2, 5],
-                                              [0, 4, 5],
-                                              [4, 1, 6],
-                                              [2, 4, 6],
-                                              [5, 3, 8],
-                                              [0, 5, 8],
-                                              [5, 2, 7],
-                                              [3, 5, 7]], dtype=int)
-        expected_refined_bc_0 = np.array([[0, 4],
-                                          [1, 6],
-                                          [4, 1],
-                                          [6, 2]], dtype=int)
-        expected_refined_bc_1 = np.array([[2, 7],
-                                          [3, 8],
-                                          [7, 3],
-                                          [8, 0]], dtype=int)
-        self.assertTrue(
-            np.all(expected_refined_coordinates == refined_coordinates))
-        self.assertTrue(
-            np.all(expected_refined_elements == refined_elements))
-        self.assertTrue(
-            np.all(expected_refined_bc_0 == new_boundaries[0]))
-        self.assertTrue(
-            np.all(expected_refined_bc_1 == new_boundaries[1]))
-
-        # L-shaped Domain
-        path_to_coordinates = Path(
-            'tests/data/l_shape_mesh/l_shape_coordinates.dat')
-        path_to_elements = Path(
-            'tests/data/l_shape_mesh/l_shape_elements.dat')
-        path_to_bc_0 = Path('tests/data/l_shape_mesh/l_shape_bc_0.dat')
-        path_to_bc_1 = Path('tests/data/l_shape_mesh/l_shape_bc_1.dat')
-        path_to_bc_2 = Path('tests/data/l_shape_mesh/l_shape_bc_2.dat')
-        coordinates, elements = io_helpers.read_mesh(
-            path_to_coordinates=path_to_coordinates,
-            path_to_elements=path_to_elements)
-        marked_elements = np.array([0, 1, 3, 5])
-        refined_coordinates, refined_elements, new_boundaries, _ = \
-            refinement.refineNVB(
-                coordinates=coordinates,
-                elements=elements,
-                marked_elements=marked_elements,
-                boundary_conditions=[
-                    io_helpers.read_boundary_condition(path_to_bc_0),
-                    io_helpers.read_boundary_condition(path_to_bc_1),
-                    io_helpers.read_boundary_condition(path_to_bc_2)])
-
-        path_to_refined_coordinates = Path(
-            'tests/data/refined_nvb/l_shape_coordinates_refined.dat')
-        path_to_refined_elements = Path(
-            'tests/data/refined_nvb/l_shape_elements_refined.dat')
-        expected_coordinates, expected_elements = io_helpers.read_mesh(
-            path_to_coordinates=path_to_refined_coordinates,
-            path_to_elements=path_to_refined_elements)
-        refined_bc_0 = io_helpers.read_boundary_condition(
-            Path('tests/data/refined_nvb/l_shape_boundary_0_refined.dat'))
-        refined_bc_1 = io_helpers.read_boundary_condition(
-            Path('tests/data/refined_nvb/l_shape_boundary_1_refined.dat'))
-        refined_bc_2 = io_helpers.read_boundary_condition(
-            Path('tests/data/refined_nvb/l_shape_boundary_2_refined.dat'))
-
-        self.assertTrue(np.all(
-            refined_coordinates == expected_coordinates))
-        self.assertTrue(np.all(
-            refined_elements == expected_elements - 1))
-        self.assertTrue(np.all(
-            new_boundaries[0] == refined_bc_0 - 1))
-        self.assertTrue(np.all(
-            new_boundaries[1] == refined_bc_1 - 1))
-        self.assertTrue(np.all(
-            new_boundaries[2] == refined_bc_2 - 1))
-
-    def test_refineRGB(self) -> None:
-        # L-shaped Domain
-        path_to_coordinates = Path(
-            'tests/data/l_shape_mesh/l_shape_coordinates.dat')
-        path_to_elements = Path(
-            'tests/data/l_shape_mesh/l_shape_elements.dat')
-        path_to_bc_0 = Path('tests/data/l_shape_mesh/l_shape_bc_0.dat')
-        path_to_bc_1 = Path('tests/data/l_shape_mesh/l_shape_bc_1.dat')
-        path_to_bc_2 = Path('tests/data/l_shape_mesh/l_shape_bc_2.dat')
-        coordinates, elements = io_helpers.read_mesh(
-            path_to_coordinates=path_to_coordinates,
-            path_to_elements=path_to_elements)
-        marked_elements = np.array([0, 1, 3, 5])
-        refined_coordinates, refined_elements, new_boundaries, _ = \
-            refinement.refineRGB(
-                coordinates=coordinates,
-                elements=elements,
-                marked_elements=marked_elements,
-                boundary_conditions=[
-                    io_helpers.read_boundary_condition(path_to_bc_0),
-                    io_helpers.read_boundary_condition(path_to_bc_1),
-                    io_helpers.read_boundary_condition(path_to_bc_2)])
-
-        path_to_refined_coordinates = Path(
-            'tests/data/refined_rgb/l_shape_coordinates_refined.dat')
-        path_to_refined_elements = Path(
-            'tests/data/refined_rgb/l_shape_elements_refined.dat')
-        expected_coordinates, expected_elements = io_helpers.read_mesh(
-            path_to_coordinates=path_to_refined_coordinates,
-            path_to_elements=path_to_refined_elements)
-        refined_bc_0 = io_helpers.read_boundary_condition(
-            Path('tests/data/refined_rgb/l_shape_boundary_0_refined.dat'))
-        refined_bc_1 = io_helpers.read_boundary_condition(
-            Path('tests/data/refined_rgb/l_shape_boundary_1_refined.dat'))
-        refined_bc_2 = io_helpers.read_boundary_condition(
-            Path('tests/data/refined_rgb/l_shape_boundary_2_refined.dat'))
-
-        self.assertTrue(np.all(
-            refined_coordinates == expected_coordinates))
-        self.assertTrue(np.all(
-            refined_elements == expected_elements - 1))
-        self.assertTrue(np.all(
-            new_boundaries[0] == refined_bc_0 - 1))
-        self.assertTrue(np.all(
-            new_boundaries[1] == refined_bc_1 - 1))
-        self.assertTrue(np.all(
-            new_boundaries[2] == refined_bc_2 - 1))
 
     def test_get_area(self) -> None:
         path_to_coordinates = Path(
@@ -395,14 +255,21 @@ class MeshTest(unittest.TestCase):
         global_boundaries = [global_dirichlet, global_neumann]
         global_values = np.loadtxt(path_to_global_values)
 
+        element_to_neighbours = mesh.get_element_to_neighbours(
+            elements=global_elements)
+
         # local patch of element not touching any boundary
         # ------------------------------------------------
-        local_coordinates, local_elements, local_boundaries, local_values = \
-            mesh.get_local_patch(coordinates=global_coordinates,
-                                 elements=global_elements,
-                                 boundaries=global_boundaries,
-                                 which_for=3,
-                                 global_values=global_values)
+        local_coordinates, local_elements, \
+            local_boundaries, local_values, local_element_to_neighbours, \
+            local_which = \
+            mesh.get_local_patch(
+                coordinates=global_coordinates,
+                elements=global_elements,
+                boundaries=global_boundaries,
+                which_for=3,
+                global_values=global_values,
+                element_to_neighbours=element_to_neighbours)
         expected_local_coordinates = np.array([
             [0., 0.],
             [1., 0.],
@@ -412,10 +279,16 @@ class MeshTest(unittest.TestCase):
             [2., 2.]
         ])
         expected_local_elements = np.array([
+            [3, 4, 5],
             [0, 1, 3],
             [1, 2, 4],
-            [3, 4, 5],
             [4, 3, 1]
+        ])
+        expected_local_element_to_neighbours = np.array([
+            [3, -1, -1],
+            [-1, 3, -1],
+            [-1, -1, 3],
+            [0, 1, 2]
         ])
         expected_local_boundaries = [
             np.array([
@@ -425,12 +298,16 @@ class MeshTest(unittest.TestCase):
                 [2, 4], [4, 5]
             ])]
         expected_local_values = np.array([0.0, 0.1, 0.2, 0.4, 0.5, 0.8])
+        self.assertEqual(local_which, 3)
         self.assertTrue(np.all(
             local_coordinates == expected_local_coordinates))
         self.assertTrue(np.all(
             local_elements == expected_local_elements))
         self.assertTrue(
             len(expected_local_boundaries) == len(local_boundaries))
+        self.assertTrue(np.all(
+            local_element_to_neighbours == expected_local_element_to_neighbours
+        ))
         for k in range(len(local_boundaries)):
             local_boundary = local_boundaries[k]
             expected_local_boundary = expected_local_boundaries[k]
@@ -439,12 +316,15 @@ class MeshTest(unittest.TestCase):
 
         # local patch of element touching both boundaries
         # --------------------------------------------------
-        local_coordinates, local_elements, local_boundaries, local_values = \
+        local_coordinates, local_elements, \
+            local_boundaries, local_values, local_element_to_neighbours, \
+            local_which = \
             mesh.get_local_patch(coordinates=global_coordinates,
                                  elements=global_elements,
                                  boundaries=global_boundaries,
                                  which_for=1,
-                                 global_values=global_values)
+                                 global_values=global_values,
+                                 element_to_neighbours=element_to_neighbours)
         expected_local_elements = np.array([
             [3, 2, 0],
             [0, 1, 3],
@@ -455,15 +335,23 @@ class MeshTest(unittest.TestCase):
             [1, 1],
             [2, 1]
         ])
+        expected_local_element_to_neighbours = np.array([
+            [-1, -1, 1],
+            [-1, -1, 0]
+        ])
         expected_local_boundaries = [
             np.array([0, 1]),
             np.array([1, 3])
         ]
         expected_local_values = np.array([0.1, 0.2, 0.4, 0.5])
+        self.assertEqual(local_which, 1)
         self.assertTrue(np.all(
             local_coordinates == expected_local_coordinates))
         self.assertTrue(np.all(
             local_elements == expected_local_elements))
+        self.assertTrue(np.all(
+            expected_local_element_to_neighbours == local_element_to_neighbours
+            ))
         self.assertTrue(
             len(expected_local_boundaries) == len(local_boundaries))
         for k in range(len(local_boundaries)):
@@ -474,15 +362,18 @@ class MeshTest(unittest.TestCase):
 
         # local patch of element touching dirichlet boundaries
         # -----------------------------------------------
-        local_coordinates, local_elements, local_boundaries, local_values = \
+        local_coordinates, local_elements, \
+            local_boundaries, local_values, local_element_to_neighbours, \
+            local_which = \
             mesh.get_local_patch(coordinates=global_coordinates,
                                  elements=global_elements,
                                  boundaries=global_boundaries,
                                  which_for=0,
-                                 global_values=global_values)
+                                 global_values=global_values,
+                                 element_to_neighbours=element_to_neighbours)
         expected_local_elements = np.array([
-            [3, 2, 0],
             [4, 3, 1],
+            [3, 2, 0],
             [0, 1, 3]
         ])
         expected_local_coordinates = np.array([
@@ -492,16 +383,25 @@ class MeshTest(unittest.TestCase):
             [1, 1],
             [2, 1]
         ])
+        expected_local_element_to_neighbours = np.array([
+            [-1, 2, -1],
+            [-1, -1, 2],
+            [-1, 0, 1]
+        ])
         expected_local_boundaries = [
             np.array([
                 [2, 0],
                 [0, 1]
             ])]
         expected_local_values = np.array([0.0, 0.1, 0.3, 0.4, 0.5])
+        self.assertEqual(local_which, 2)
         self.assertTrue(np.all(
             local_coordinates == expected_local_coordinates))
         self.assertTrue(np.all(
             local_elements == expected_local_elements))
+        self.assertTrue(np.all(
+            expected_local_element_to_neighbours == local_element_to_neighbours
+        ))
         self.assertTrue(
             len(expected_local_boundaries) == len(local_boundaries))
         for k in range(len(local_boundaries)):
@@ -511,6 +411,8 @@ class MeshTest(unittest.TestCase):
         self.assertTrue(np.all(expected_local_values == local_values))
 
         # local patch of element s.t. local patch inherits no boundary
+        # here, we only test that the returned list of boundaries
+        # is indeed an empty list
         # ------------------------------------------------------------
         base_path = Path(
             'tests/data/local_patch_touching_no_boundary')
@@ -524,18 +426,99 @@ class MeshTest(unittest.TestCase):
         boundary = io_helpers.read_boundary_condition(
             path_to_boundary=path_to_boundary)
         global_values = np.loadtxt(path_to_global_values)
+        element_to_neighbours = mesh.get_element_to_neighbours(
+            elements=elements)
 
         expected_local_values = np.array([0.1, 0.3, 0.4, 0.5, 0.6, 0.8])
 
-        local_coordinates, local_elements, local_boundaries, local_values = \
+        local_coordinates, local_elements, \
+            local_boundaries, local_values, _, local_which = \
             mesh.get_local_patch(coordinates=coordinates,
                                  elements=elements,
                                  boundaries=[boundary],
                                  which_for=6,
+                                 element_to_neighbours=element_to_neighbours,
                                  global_values=global_values)
 
         self.assertTrue(np.all(expected_local_values == local_values))
         self.assertFalse(local_boundaries)
+
+        # local patch edge case:
+        # an edge of the actual boundary is not covered by the local patch
+        # but the nodes making up the edge are both part of the local patch
+        # we consider two cases fo the same setup
+        # -----------------------------------------------------------------
+        base_path = Path('tests/data/centered_square_mesh')
+        path_to_coordinates = base_path / Path('coordinates.dat')
+        path_to_elements = base_path / Path('elements.dat')
+        path_to_dirichlet_full = base_path / Path('dirichlet_full.dat')
+        path_to_dirichlet_single = base_path / Path('dirichlet_single.dat')
+
+        global_coordinates, global_elements = io_helpers.read_mesh(
+            path_to_coordinates=path_to_coordinates,
+            path_to_elements=path_to_elements)
+        global_dirichlet_full = io_helpers.read_boundary_condition(
+            path_to_boundary=path_to_dirichlet_full)
+        global_dirichlet_single = io_helpers.read_boundary_condition(
+            path_to_boundary=path_to_dirichlet_single)
+        element_to_neighbours = mesh.get_element_to_neighbours(
+            elements=global_elements)
+
+        # we expect the same local elements in both cases
+        expected_local_elements = np.array([
+            [1, 4, 2],
+            [0, 2, 3],
+            [0, 1, 2]])
+
+        expected_local_boundary_full = np.array([
+            [0, 1],
+            [1, 4],
+            [3, 0]])
+
+        local_coordinates, local_elements, local_boundaries, _, _, _ = \
+            mesh.get_local_patch(
+                coordinates=global_coordinates,
+                elements=global_elements,
+                boundaries=[global_dirichlet_full],
+                which_for=0,
+                element_to_neighbours=element_to_neighbours)
+        # all global coordinates are in the local patch
+        self.assertTrue(np.all(local_coordinates == global_coordinates))
+        self.assertTrue(np.all(local_elements == expected_local_elements))
+        self.assertEqual(len(local_boundaries), 1)
+        self.assertTrue(np.all(
+            local_boundaries[0] == expected_local_boundary_full))
+
+        local_coordinates, local_elements, local_boundaries, _, _, _ = \
+            mesh.get_local_patch(
+                coordinates=global_coordinates,
+                elements=global_elements,
+                boundaries=[global_dirichlet_single],
+                which_for=0,
+                element_to_neighbours=element_to_neighbours)
+        # all global coordinates are in the local patch
+        self.assertTrue(np.all(local_coordinates == global_coordinates))
+        self.assertTrue(np.all(local_elements == expected_local_elements))
+        self.assertEqual(len(local_boundaries), 0)
+
+    def test_get_element_to_neighbours(self):
+        base_path = Path('tests/data/get_neighbours')
+        path_to_elements = base_path / Path('elements_matlab.dat')
+        path_to_expected_output = base_path / Path(
+            'element2neighbours_matlab.dat')
+
+        elements = io_helpers.read_elements(path_to_elements=path_to_elements,
+                                            shift_indices=True)
+
+        expected_element_to_neighbours = np.loadtxt(
+            fname=path_to_expected_output)
+        element_to_neighbours = mesh.get_element_to_neighbours(
+            elements=elements)
+
+        self.assertEqual(expected_element_to_neighbours.size,
+                         element_to_neighbours.size)
+        self.assertTrue(np.all(
+            expected_element_to_neighbours - 1 == element_to_neighbours))
 
 
 if __name__ == '__main__':
