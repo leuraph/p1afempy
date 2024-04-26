@@ -1,6 +1,6 @@
 import numpy as np
 from p1afempy import data_structures
-from p1afempy import utility
+from ismember import ismember, is_row_in
 from scipy.sparse import coo_matrix, find
 from matplotlib import pyplot as plt
 
@@ -212,12 +212,12 @@ def complete_boundaries(elements: data_structures.ElementsType,
     element_indices_j = elements[:, [1, 2, 0]].flatten()
     all_edges_ij = np.column_stack([element_indices_i, element_indices_j])
 
-    is_interior = utility.is_row_in(all_edges_ij, all_edges_ij[:, [1, 0]])
+    is_interior = is_row_in(all_edges_ij, all_edges_ij[:, [1, 0]])
 
     exterior_edges = all_edges_ij[np.logical_not(is_interior)]
 
     for boundary in boundaries:
-        covered = utility.is_row_in(exterior_edges, boundary)
+        covered = is_row_in(exterior_edges, boundary)
         exterior_edges = exterior_edges[np.logical_not(covered)]
 
     if exterior_edges.size > 0:
@@ -235,7 +235,7 @@ def get_local_boundaries(boundaries: list[data_structures.BoundaryType],
 
     local_boundaries = []
     for boundary in boundaries:
-        shared_edges = utility.is_row_in(boundary, local_edges)
+        shared_edges = is_row_in(boundary, local_edges)
         if np.any(shared_edges):
             local_boundaries.append(
                 perform_transform(boundary[shared_edges]))
