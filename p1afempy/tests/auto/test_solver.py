@@ -4,7 +4,7 @@ import p1afempy.io_helpers as io_helpers
 from p1afempy.solvers import solve_laplace, get_mass_matrix_elements
 import p1afempy.refinement as refinement
 from pathlib import Path
-from p1afempy.tests.auto import example_setup
+import example_setup
 
 
 class SolverTest(unittest.TestCase):
