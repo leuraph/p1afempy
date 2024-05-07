@@ -16,7 +16,7 @@ dependencies = [
   "scipy",
   "pathlib",
   "matplotlib",
-  "ismember @ git+https://github.com/erdogant/ismember.git@48c8609ba230d22ad0b416cb7aeb54d63a98df0b"
+  "ismember>=1.0.4"
 ]
 classifiers = [
     "Programming Language :: Python :: 3",
