@@ -1,6 +1,5 @@
 import unittest
 import numpy as np
-import p1afempy.mesh as mesh
 import p1afempy.io_helpers as io_helpers
 from p1afempy.solvers import solve_laplace, get_mass_matrix_elements
 import p1afempy.refinement as refinement
