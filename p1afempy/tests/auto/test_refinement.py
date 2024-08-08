@@ -161,7 +161,7 @@ class RefinementTest(unittest.TestCase):
         self.assertTrue(np.all(
             new_boundaries[2] == refined_bc_2 - 1))
 
-    def test_refineRG(self) -> None:
+    def test_refineRG_without_element_to_neighbours(self) -> None:
         # ------------------------
         # reading the initial mesh
         # ------------------------
@@ -293,7 +293,7 @@ class RefinementTest(unittest.TestCase):
 
         # TODO add case with many more elements exploting possible edge-cases
 
-    def test_refineRG_single(self) -> None:
+    def test_refineRG_with_element_to_neighbours(self) -> None:
         # ------------------------
         # reading the initial mesh
         # ------------------------
