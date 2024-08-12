@@ -268,11 +268,9 @@ def refineRG_with_element_to_neighbours(coordinates: CoordinatesType,
     return new_coordinates, new_elements, new_boundaries, to_embed
 
 
-# NOTE This function is based on the refinement technology found in [1]
-# and hence, in theory, should be capable of red-green refining more than one
-# element at once, where each marked element is red-refined and hanging
-# nodes removed by green-refinement. However, checking/testing/realizing
-# this implementation remains an open TODO.
+# NOTE This functionn is based on the technologies found in [1].
+# However, it must not be used by passinng several marked elements
+# as elements that have two marked egdes are ingored by this implementation.
 #
 # [1] S. Funken, D. Praetorius, and P. Wissgott.
 #     Efficient Implementation of Adaptive P1-FEM in Matlab
