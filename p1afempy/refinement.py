@@ -721,7 +721,7 @@ def refineNVB(coordinates: CoordinatesType,
 def refine_single_edge(
         coordinates: CoordinatesType,
         elements: ElementsType,
-        edge: tuple[int, int]) -> tuple[CoordinatesType, ElementsType]:
+        edge: np.ndarray) -> tuple[CoordinatesType, ElementsType]:
     """
     refines a single non-boundary edge
 
