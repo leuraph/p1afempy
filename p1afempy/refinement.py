@@ -729,4 +729,44 @@ def refine_single_edge(
     -------
     - the new coordinate is located at coordinates[-1]
     """
-    pass
+    i, j = edge[0], edge[1]
+    new_coordinate = 0.5 * (coordinates[i, :] + coordinates[j, :])
+    new_coordinates = np.vstack([coordinates, new_coordinate])
+
+    marked_elements_indices = np.sum(np.isin(elements, edge), axis=1) == 2
+    not_marked_elements_indices = np.logical_not(marked_elements_indices)
+    marked_elements = elements[marked_elements_indices]
+
+    first_element = marked_elements[0]
+    k_1 = first_element[np.logical_not(np.isin(first_element, edge))][0]
+    second_element = marked_elements[1]
+    k_2 = second_element[np.logical_not(np.isin(second_element, edge))][0]
+
+    first_is_left = False
+    for k in range(3):
+        if (first_element[k % 3] == i and first_element[(k+1) % 3] == j):
+            first_is_left = True
+    if first_is_left:
+        k_L = k_1
+        k_R = k_2
+    else:
+        k_L = k_2
+        k_R = k_1
+
+    # generate element numbering for refined mesh
+    n_vertices = coordinates.shape[0]
+    untouched_elements = np.copy(elements[not_marked_elements_indices, :])
+    TL_1 = np.array([n_vertices, k_L, i])
+    TL_2 = np.array([n_vertices, j, k_L])
+    TR_1 = np.array([n_vertices, i, k_R])
+    TR_2 = np.array([n_vertices, k_R, j])
+
+    new_elements = np.vstack([
+        untouched_elements,
+        TL_1,
+        TL_2,
+        TR_1,
+        TR_2,
+    ])
+
+    return new_coordinates, new_elements
