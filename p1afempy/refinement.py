@@ -716,3 +716,17 @@ def refineNVB(coordinates: CoordinatesType,
                                 new_nodes[bisec123, 1]])])
 
     return new_coordinates, new_elements, new_boundaries, embedded_values
+
+
+def refine_single_edge(
+        coordinates: CoordinatesType,
+        elements: ElementsType,
+        edge: tuple[int, int]) -> tuple[CoordinatesType, ElementsType]:
+    """
+    refines a single non-boundary edge
+
+    details
+    -------
+    - the new coordinate is located at coordinates[-1]
+    """
+    pass
