@@ -7,6 +7,7 @@ from p1afempy.data_structures import \
     CoordinatesType, ElementsType, BoundaryType
 from p1afempy import refinement
 from p1afempy.refinement import refine_single_edge
+from p1afempy.mesh import provide_geometric_data
 from ismember import is_row_in
 
 
@@ -104,6 +105,51 @@ class SanityChecks(unittest.TestCase):
                 marked_elements=marked_elements,
                 boundary_conditions=boundaries,
                 to_embed=to_embed)
+
+            # in each step, compare the computed vs. expected eenergy
+            expected_energy = 4.
+
+            computed_energy = evaluate_energy_on_mesh(
+                coordinates=coordinates, elements=elements)
+            self.assertEqual(expected_energy, computed_energy)
+
+            computed_interpolated_energy = evaluate_energy_on_mesh(
+                coordinates=coordinates, elements=elements,
+                test_function_vector=to_embed)
+            self.assertEqual(expected_energy, computed_interpolated_energy)
+
+    def test_refine_nvb_edge_based(self) -> None:
+        coordinates, elements, dirichlet = SanityChecks.get_initial_mesh()
+
+        # initial vector of values to be interpolated on refined meshes
+        to_embed = np.array([test_function(x, y) for (x, y) in coordinates])
+
+        boundaries = [dirichlet]
+        n_refinements = 5
+        for _ in range(n_refinements):
+            element2edges, edge_to_nodes, boundaries_to_edges =\
+                provide_geometric_data(
+                    elements=elements,
+                    boundaries=boundaries)
+
+            # mark random subset of edges for refinement
+            n_unique_edges = edge_to_nodes.shape[0]
+            random_marked_edges_indices =\
+                np.random.randint(0, n_unique_edges, int(n_unique_edges/2))
+            marked_edges = np.zeros(n_unique_edges, dtype=int)
+            marked_edges[random_marked_edges_indices] = 1
+
+            # perform refinement
+            coordinates, elements, boundaries, to_embed =\
+                refinement.refineNVB_edge_based(
+                    coordinates=coordinates,
+                    elements=elements,
+                    boundary_conditions=boundaries,
+                    element2edges=element2edges,
+                    edge_to_nodes=edge_to_nodes,
+                    boundaries_to_edges=boundaries_to_edges,
+                    edge2newNode=marked_edges,
+                    to_embed=to_embed)
 
             # in each step, compare the computed vs. expected eenergy
             expected_energy = 4.
