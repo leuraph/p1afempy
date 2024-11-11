@@ -6,6 +6,8 @@ from p1afempy import io_helpers, solvers, mesh
 from p1afempy.data_structures import \
     CoordinatesType, ElementsType, BoundaryType
 from p1afempy import refinement
+from p1afempy.refinement import refine_single_edge
+from ismember import is_row_in
 
 
 def test_function(x: float, y: float) -> float:
@@ -200,6 +202,49 @@ class SanityChecks(unittest.TestCase):
                 coordinates=coordinates, elements=elements)
 
             self.assertEqual(expected_energy, computed_energy)
+
+    def test_refine_single_edge(self) -> None:
+        coordinates, elements, dirichlet = SanityChecks.get_initial_mesh()
+
+        element_indices_i = elements.flatten()
+        element_indices_j = elements[:, [1, 2, 0]].flatten()
+        edges = np.column_stack([element_indices_i, element_indices_j])
+        unique_edges = edges[element_indices_i < element_indices_j]
+
+        for edge in unique_edges:
+            # skip if edge is on boundary
+            if np.any(is_row_in(edge.reshape((1, 2)), dirichlet)):
+                continue
+
+            # perform refinement
+            new_coordinates, new_elements = \
+                refine_single_edge(
+                    coordinates=coordinates,
+                    elements=elements,
+                    edge=edge)
+
+            # checking for correct orientation of elements,
+            # i.e. counter-clockwise
+            for element in new_elements:
+                z0 = new_coordinates[element[0]]
+                z1 = new_coordinates[element[1]]
+                z2 = new_coordinates[element[2]]
+                DPhi = np.column_stack([z1 - z0, z2 - z0])
+                self.assertGreater(np.linalg.det(DPhi), 0.0)
+
+            # for each refined edge, compare the computed vs. expected eenergy
+            expected_energy = 4.
+            computed_energy = evaluate_energy_on_mesh(
+                coordinates=coordinates, elements=elements)
+
+            expected_new_coordinate = 0.5*(
+                coordinates[edge[0], :] + coordinates[edge[1], :])
+
+            self.assertEqual(expected_energy, computed_energy)
+            self.assertAlmostEqual(
+                expected_new_coordinate[0], new_coordinates[-1, 0])
+            self.assertAlmostEqual(
+                expected_new_coordinate[1], new_coordinates[-1, 1])
 
     def test_refine_rg_with_solution_interpolation(self) -> None:
         random.seed(42)
