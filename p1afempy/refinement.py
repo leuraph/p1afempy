@@ -906,7 +906,9 @@ def refineNVB_edge_based(
 def refine_single_edge(
         coordinates: CoordinatesType,
         elements: ElementsType,
-        edge: np.ndarray) -> tuple[CoordinatesType, ElementsType]:
+        edge: np.ndarray,
+        to_embed: np.ndarray = np.array([])
+        ) -> tuple[CoordinatesType, ElementsType]:
     """
     refines a single non-boundary edge
 
@@ -954,4 +956,8 @@ def refine_single_edge(
         TR_2,
     ])
 
-    return new_coordinates, new_elements
+    if to_embed.size:
+        interpolated_value = 0.5*(to_embed[i] + to_embed[j])
+        to_embed = np.hstack([to_embed, interpolated_value])
+
+    return new_coordinates, new_elements, to_embed
