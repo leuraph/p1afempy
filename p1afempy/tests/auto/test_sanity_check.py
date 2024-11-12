@@ -252,6 +252,8 @@ class SanityChecks(unittest.TestCase):
     def test_refine_single_edge(self) -> None:
         coordinates, elements, dirichlet = SanityChecks.get_initial_mesh()
 
+        to_embed = np.array([test_function(x, y) for (x, y) in coordinates])
+
         element_indices_i = elements.flatten()
         element_indices_j = elements[:, [1, 2, 0]].flatten()
         edges = np.column_stack([element_indices_i, element_indices_j])
@@ -263,11 +265,12 @@ class SanityChecks(unittest.TestCase):
                 continue
 
             # perform refinement
-            new_coordinates, new_elements = \
+            new_coordinates, new_elements, new_to_embed = \
                 refine_single_edge(
                     coordinates=coordinates,
                     elements=elements,
-                    edge=edge)
+                    edge=edge,
+                    to_embed=to_embed)
 
             # checking for correct orientation of elements,
             # i.e. counter-clockwise
@@ -281,7 +284,8 @@ class SanityChecks(unittest.TestCase):
             # for each refined edge, compare the computed vs. expected eenergy
             expected_energy = 4.
             computed_energy = evaluate_energy_on_mesh(
-                coordinates=new_coordinates, elements=new_elements)
+                coordinates=new_coordinates, elements=new_elements,
+                test_function_vector=new_to_embed)
 
             expected_new_coordinate = 0.5*(
                 coordinates[edge[0], :] + coordinates[edge[1], :])
