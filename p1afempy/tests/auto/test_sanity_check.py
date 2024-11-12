@@ -281,7 +281,7 @@ class SanityChecks(unittest.TestCase):
             # for each refined edge, compare the computed vs. expected eenergy
             expected_energy = 4.
             computed_energy = evaluate_energy_on_mesh(
-                coordinates=coordinates, elements=elements)
+                coordinates=new_coordinates, elements=new_elements)
 
             expected_new_coordinate = 0.5*(
                 coordinates[edge[0], :] + coordinates[edge[1], :])
