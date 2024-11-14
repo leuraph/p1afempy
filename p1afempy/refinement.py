@@ -739,8 +739,6 @@ def refineNVB_edge_based(
     ----------
     coordinates: CoordinatesType
     elements: ElementsType
-    marked_edges: np.ndarray
-        indices of the edges to be refined
     boundary_conditions: list[BoundaryType]
         list of boundaries to be refined
     element2edges: np.ndarray
@@ -750,10 +748,14 @@ def refineNVB_edge_based(
     boundaries_to_edges: np.ndarray
         mapping from boundaries to edges
     edge2newNode: np.ndarray
-        edges marked for refinement
+        if edge2newNode[k] = 1, the edge corresponding to
+        edge_to_nodes[k] is markd for refinement.
+        if edge2newNode[k] = 0, the edge corresponding to
+        edge_to_nodes[k] is not markd for refinement.
     to_embed: np.ndarray = np.array([])
         vector of values on coordinates to be interpolated
-        (canonically embedded) onto the refined mesh
+        (canonically embedded) onto the refined mesh, i.e.
+        linearly interpolated
 
     Returns
     -------
@@ -764,7 +766,7 @@ def refineNVB_edge_based(
     new_boundaries: list[BoundaryType]
         the refined boundary conditions
     embedded_values: np.ndarray
-        to_embed interpolated onto the refined mesh
+        `to_embed` interpolated onto the refined mesh
 
     Example
     -------
@@ -776,6 +778,16 @@ def refineNVB_edge_based(
         np.random.randint(0, n_unique_edges, int(n_unique_edges/2))
     >>> marked_edges = np.zeros(n_unique_edges, dtype=int)
     >>> marked_edges[random_marked_edges_indices] = 1
+    >>> new_coordinates, new_elements, new_boundaries, embedded_iterate=\
+        refineNVB_edge_based(
+            coordinates=coordinates,
+            elements=elements,
+            boundary_conditions=boundaries,
+            element2edges=element2edges,
+            edge_to_nodes=edge_to_nodes,
+            boundaries_to_edges=boundaries_to_edges,
+            edge2newNode=marked_edges,
+            to_embed=current_iterate)
     """
     n_elements = elements.shape[0]
 
@@ -908,12 +920,36 @@ def refine_single_edge(
         elements: ElementsType,
         edge: np.ndarray,
         to_embed: np.ndarray = np.array([])
-        ) -> tuple[CoordinatesType, ElementsType]:
+        ) -> tuple[CoordinatesType, ElementsType, np.ndarray]:
     """
     refines a single non-boundary edge
 
+    parameters
+    ----------
+    coordinates: CoordinatesType
+        coordinates of the mesh to be refined
+    elements: ElementsType
+        elements of the mesh to be refined
+    edge: np.ndarray
+        indices of the edge to be refined, i.e.
+        edge = np.array([i, j]), where (i, j)
+        represent the indices of the coordintes
+        that make up the edge to be refined
+    to_embed: np.ndarray = np.array([])
+
+    returns
+    -------
+    new_coordinates: CoordinatesType
+        coordinates of the refined mesh
+    new_elements: ElementsType
+        elements of the refined mesh
+    embedded_values: np.ndarray
+        `to_embed` embedded in the refined mesh, i.e.
+        linearly interpolated
+
     details
     -------
+    - this method must not be called with boundary edges
     - the new coordinate is located at coordinates[-1]
     """
     i, j = edge[0], edge[1]
