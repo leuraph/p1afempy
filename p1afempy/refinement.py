@@ -716,3 +716,294 @@ def refineNVB(coordinates: CoordinatesType,
                                 new_nodes[bisec123, 1]])])
 
     return new_coordinates, new_elements, new_boundaries, embedded_values
+
+
+def refineNVB_edge_based(
+    coordinates: CoordinatesType,
+    elements: ElementsType,
+    boundary_conditions: list[BoundaryType],
+    element2edges: np.ndarray,
+    edge_to_nodes: np.ndarray,
+    boundaries_to_edges: np.ndarray,
+    edge2newNode: np.ndarray,
+    to_embed: np.ndarray = np.array([])
+        ) -> tuple[
+            CoordinatesType,
+            ElementsType,
+            list[BoundaryType],
+            np.ndarray]:
+    """
+    refines the mesh using an edge-based newest vertex bisection (NVB)
+
+    Parameters
+    ----------
+    coordinates: CoordinatesType
+    elements: ElementsType
+    boundary_conditions: list[BoundaryType]
+        list of boundaries to be refined
+    element2edges: np.ndarray
+        mapping from elements to edges
+    edge_to_nodes: np.ndarray
+        mapping from edges to nodes
+    boundaries_to_edges: np.ndarray
+        mapping from boundaries to edges
+    edge2newNode: np.ndarray
+        if edge2newNode[k] = 1, the edge corresponding to
+        edge_to_nodes[k] is markd for refinement.
+        if edge2newNode[k] = 0, the edge corresponding to
+        edge_to_nodes[k] is not markd for refinement.
+    to_embed: np.ndarray = np.array([])
+        vector of values on coordinates to be interpolated
+        (canonically embedded) onto the refined mesh, i.e.
+        linearly interpolated
+
+    Returns
+    -------
+    new_coordinates: CoordinatesType
+        the coordinates of the refined mesh
+    new_elements: ElementsType
+        the elements of the refined mesh
+    new_boundaries: list[BoundaryType]
+        the refined boundary conditions
+    embedded_values: np.ndarray
+        `to_embed` interpolated onto the refined mesh
+
+    Example
+    -------
+    >>> element2edges, edge_to_nodes, boundaries_to_edges =
+        provide_geometric_data(elements=elements,
+        boundaries=boundary_conditions)
+    >>> n_unique_edges = edge_to_nodes.shape[0]
+    >>> random_marked_edges_indices =
+        np.random.randint(0, n_unique_edges, int(n_unique_edges/2))
+    >>> marked_edges = np.zeros(n_unique_edges, dtype=int)
+    >>> marked_edges[random_marked_edges_indices] = 1
+    >>> new_coordinates, new_elements, new_boundaries, embedded_iterate=\
+        refineNVB_edge_based(
+            coordinates=coordinates,
+            elements=elements,
+            boundary_conditions=boundaries,
+            element2edges=element2edges,
+            edge_to_nodes=edge_to_nodes,
+            boundaries_to_edges=boundaries_to_edges,
+            edge2newNode=marked_edges,
+            to_embed=current_iterate)
+    """
+    n_elements = elements.shape[0]
+
+    # closure of edge marking, i.e.
+    # if any edge in T is marked, make sure that the reference
+    # edge in T is marked, as well
+    swap = np.array([1])
+    while swap.size > 0:
+        element2marked_edges = edge2newNode[element2edges]
+        swap = np.nonzero(
+            np.logical_and(
+                # elements, whose reference edge is not marked
+                np.logical_not(element2marked_edges[:, 0]),
+                # elements, having any non-reference edge marked
+                np.logical_or(element2marked_edges[:, 1],
+                              element2marked_edges[:, 2])))[0]
+        edge2newNode[element2edges[swap, 0]] = 1
+
+    new_coordinates, embedded_values = generate_new_nodes(
+        edge2newNode=edge2newNode,
+        edge2nodes=edge_to_nodes,
+        coordinates=coordinates,
+        to_embed=to_embed)
+
+    # refine boundary conditions
+    new_boundaries = []
+    for k, boundary in enumerate(boundary_conditions):
+        if boundary.size:
+            new_nodes_on_boundary = edge2newNode[boundaries_to_edges[k]]
+            marked_edges = np.nonzero(new_nodes_on_boundary)[0]
+            if marked_edges.size:
+                boundary = np.vstack(
+                    [boundary[np.logical_not(new_nodes_on_boundary), :],
+                     np.column_stack([boundary[marked_edges, 0],
+                                      new_nodes_on_boundary[marked_edges]]),
+                     np.column_stack([new_nodes_on_boundary[marked_edges],
+                                      boundary[marked_edges, 1]])])
+        new_boundaries.append(boundary)
+
+    # provide new nodes for refinement of elements
+    new_nodes = edge2newNode[element2edges]
+
+    # Determine type of refinement for each element
+    marked_edges = new_nodes != 0
+
+    ref_marked = marked_edges[:, 0]
+    first_marked = marked_edges[:, 1]
+    second_marked = marked_edges[:, 2]
+
+    none = np.logical_not(ref_marked)
+    not_first = np.logical_not(first_marked)
+    not_second = np.logical_not(second_marked)
+    bisec1 = ref_marked & not_first & not_second
+    bisec12 = ref_marked & first_marked & not_second
+    bisec13 = ref_marked & not_first & second_marked
+    bisec123 = ref_marked & first_marked & second_marked
+
+    # generate element numbering for refined mesh
+    idx = np.ones(n_elements, dtype=int)
+    idx[bisec1] = 2  # bisec(1): newest vertex bisection of 1st edge
+    idx[bisec12] = 3  # bisec(2): newest vertex bisection of 1st and 2nd edge
+    idx[bisec13] = 3  # bisec(2): newest vertex bisection of 1st and 3rd edge
+    idx[bisec123] = 4  # bisec(3): newest vertex bisection of all edges
+    idx = np.hstack([0, np.cumsum(idx)])
+
+    # generate new elements
+    new_elements = np.zeros((idx[-1], 3), dtype=int)
+    idx = idx[:-1]
+    new_elements[idx[none], :] = elements[none, :]
+    new_elements[np.hstack([idx[bisec1],
+                           1+idx[bisec1]]), :] \
+        = np.vstack(
+            [np.column_stack([
+                elements[bisec1, 2],
+                elements[bisec1, 0],
+                new_nodes[bisec1, 0]]),
+             np.column_stack([
+                 elements[bisec1, 1],
+                 elements[bisec1, 2],
+                 new_nodes[bisec1, 0]])])
+    new_elements[np.hstack([idx[bisec12],
+                           1+idx[bisec12],
+                           2+idx[bisec12]]), :] \
+        = np.vstack(
+            [np.column_stack([elements[bisec12, 2],
+                              elements[bisec12, 0],
+                              new_nodes[bisec12, 0]]),
+             np.column_stack([new_nodes[bisec12, 0],
+                              elements[bisec12, 1],
+                              new_nodes[bisec12, 1]]),
+             np.column_stack([elements[bisec12, 2],
+                              new_nodes[bisec12, 0],
+                              new_nodes[bisec12, 1]])])
+    new_elements[np.hstack([idx[bisec13],
+                           1+idx[bisec13],
+                           2+idx[bisec13]]), :] \
+        = np.vstack(
+            [np.column_stack([new_nodes[bisec13, 0],
+                              elements[bisec13, 2],
+                              new_nodes[bisec13, 2]]),
+             np.column_stack([elements[bisec13, 0],
+                              new_nodes[bisec13, 0],
+                              new_nodes[bisec13, 2]]),
+             np.column_stack([elements[bisec13, 1],
+                              elements[bisec13, 2],
+                              new_nodes[bisec13, 0]])])
+    new_elements[np.hstack([idx[bisec123],
+                            1+idx[bisec123],
+                            2+idx[bisec123],
+                            3+idx[bisec123]]), :] \
+        = np.vstack([
+            np.column_stack([new_nodes[bisec123, 0],
+                            elements[bisec123, 2],
+                            new_nodes[bisec123, 2]]),
+            np.column_stack([elements[bisec123, 0],
+                            new_nodes[bisec123, 0],
+                            new_nodes[bisec123, 2]]),
+            np.column_stack([new_nodes[bisec123, 0],
+                            elements[bisec123, 1],
+                            new_nodes[bisec123, 1]]),
+            np.column_stack([elements[bisec123, 2],
+                            new_nodes[bisec123, 0],
+                            new_nodes[bisec123, 1]])])
+
+    return new_coordinates, new_elements, new_boundaries, embedded_values
+
+
+def refine_single_edge(
+        coordinates: CoordinatesType,
+        elements: ElementsType,
+        edge: np.ndarray,
+        to_embed: np.ndarray = np.array([])
+        ) -> tuple[CoordinatesType, ElementsType, np.ndarray]:
+    """
+    refines a single non-boundary edge
+
+    parameters
+    ----------
+    coordinates: CoordinatesType
+        coordinates of the mesh to be refined
+    elements: ElementsType
+        elements of the mesh to be refined
+    edge: np.ndarray
+        indices of the edge to be refined, i.e.
+        edge = np.array([i, j]), where (i, j)
+        represent the indices of the coordintes
+        that make up the edge to be refined
+    to_embed: np.ndarray = np.array([])
+
+    returns
+    -------
+    new_coordinates: CoordinatesType
+        coordinates of the refined mesh
+    new_elements: ElementsType
+        elements of the refined mesh
+    embedded_values: np.ndarray
+        `to_embed` embedded in the refined mesh, i.e.
+        linearly interpolated
+
+    details
+    -------
+    - this method must not be called with boundary edges
+    - the new coordinate is located at coordinates[-1]
+    """
+    i, j = edge[0], edge[1]
+    new_coordinate = 0.5 * (coordinates[i, :] + coordinates[j, :])
+    new_coordinates = np.vstack([coordinates, new_coordinate])
+
+    marked_elements_indices = np.sum(np.isin(elements, edge), axis=1) == 2
+    not_marked_elements_indices = np.logical_not(marked_elements_indices)
+    marked_elements = elements[marked_elements_indices]
+
+    if marked_elements.shape[0] != 2:
+        # if there are less than two elements marked, the edge marked
+        # for refinement is a boundary edge. As this special case remains
+        # unnecessary to consider for now (we only consider homogenous
+        # dirichlet), we exclude this possibility. Otherwise, we would
+        # need to pass the boundary connditions, too, and refine them, too.
+        raise ValueError(
+            'this function must not be called with boundary edges')
+
+    first_element = marked_elements[0]
+    k_1 = first_element[np.logical_not(np.isin(first_element, edge))][0]
+    second_element = marked_elements[1]
+    k_2 = second_element[np.logical_not(np.isin(second_element, edge))][0]
+
+    first_is_left = False
+    for k in range(3):
+        if (first_element[k % 3] == i and first_element[(k+1) % 3] == j):
+            first_is_left = True
+    if first_is_left:
+        k_L = k_1
+        k_R = k_2
+    else:
+        k_L = k_2
+        k_R = k_1
+
+    # generate element numbering for refined mesh
+    n_vertices = coordinates.shape[0]
+    untouched_elements = np.copy(elements[not_marked_elements_indices, :])
+    TL_1 = np.array([n_vertices, k_L, i])
+    TL_2 = np.array([n_vertices, j, k_L])
+    TR_1 = np.array([n_vertices, i, k_R])
+    TR_2 = np.array([n_vertices, k_R, j])
+
+    new_elements = np.vstack([
+        untouched_elements,
+        TL_1,
+        TL_2,
+        TR_1,
+        TR_2,
+    ])
+
+    if to_embed.size:
+        interpolated_value = 0.5*(to_embed[i] + to_embed[j])
+        embedded_values = np.hstack([to_embed, interpolated_value])
+        return new_coordinates, new_elements, embedded_values
+
+    return new_coordinates, new_elements, to_embed

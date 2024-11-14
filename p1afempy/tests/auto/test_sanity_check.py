@@ -6,6 +6,9 @@ from p1afempy import io_helpers, solvers, mesh
 from p1afempy.data_structures import \
     CoordinatesType, ElementsType, BoundaryType
 from p1afempy import refinement
+from p1afempy.refinement import refine_single_edge
+from p1afempy.mesh import provide_geometric_data
+from ismember import is_row_in
 
 
 def test_function(x: float, y: float) -> float:
@@ -115,6 +118,51 @@ class SanityChecks(unittest.TestCase):
                 test_function_vector=to_embed)
             self.assertEqual(expected_energy, computed_interpolated_energy)
 
+    def test_refine_nvb_edge_based(self) -> None:
+        coordinates, elements, dirichlet = SanityChecks.get_initial_mesh()
+
+        # initial vector of values to be interpolated on refined meshes
+        to_embed = np.array([test_function(x, y) for (x, y) in coordinates])
+
+        boundaries = [dirichlet]
+        n_refinements = 5
+        for _ in range(n_refinements):
+            element2edges, edge_to_nodes, boundaries_to_edges =\
+                provide_geometric_data(
+                    elements=elements,
+                    boundaries=boundaries)
+
+            # mark random subset of edges for refinement
+            n_unique_edges = edge_to_nodes.shape[0]
+            random_marked_edges_indices =\
+                np.random.randint(0, n_unique_edges, int(n_unique_edges/2))
+            marked_edges = np.zeros(n_unique_edges, dtype=int)
+            marked_edges[random_marked_edges_indices] = 1
+
+            # perform refinement
+            coordinates, elements, boundaries, to_embed =\
+                refinement.refineNVB_edge_based(
+                    coordinates=coordinates,
+                    elements=elements,
+                    boundary_conditions=boundaries,
+                    element2edges=element2edges,
+                    edge_to_nodes=edge_to_nodes,
+                    boundaries_to_edges=boundaries_to_edges,
+                    edge2newNode=marked_edges,
+                    to_embed=to_embed)
+
+            # in each step, compare the computed vs. expected eenergy
+            expected_energy = 4.
+
+            computed_energy = evaluate_energy_on_mesh(
+                coordinates=coordinates, elements=elements)
+            self.assertEqual(expected_energy, computed_energy)
+
+            computed_interpolated_energy = evaluate_energy_on_mesh(
+                coordinates=coordinates, elements=elements,
+                test_function_vector=to_embed)
+            self.assertEqual(expected_energy, computed_interpolated_energy)
+
     def test_refine_rgb(self) -> None:
         coordinates, elements, dirichlet = SanityChecks.get_initial_mesh()
 
@@ -200,6 +248,53 @@ class SanityChecks(unittest.TestCase):
                 coordinates=coordinates, elements=elements)
 
             self.assertEqual(expected_energy, computed_energy)
+
+    def test_refine_single_edge(self) -> None:
+        coordinates, elements, dirichlet = SanityChecks.get_initial_mesh()
+
+        to_embed = np.array([test_function(x, y) for (x, y) in coordinates])
+
+        element_indices_i = elements.flatten()
+        element_indices_j = elements[:, [1, 2, 0]].flatten()
+        edges = np.column_stack([element_indices_i, element_indices_j])
+        unique_edges = edges[element_indices_i < element_indices_j]
+
+        for edge in unique_edges:
+            # skip if edge is on boundary
+            if np.any(is_row_in(edge.reshape((1, 2)), dirichlet)):
+                continue
+
+            # perform refinement
+            new_coordinates, new_elements, new_to_embed = \
+                refine_single_edge(
+                    coordinates=coordinates,
+                    elements=elements,
+                    edge=edge,
+                    to_embed=to_embed)
+
+            # checking for correct orientation of elements,
+            # i.e. counter-clockwise
+            for element in new_elements:
+                z0 = new_coordinates[element[0]]
+                z1 = new_coordinates[element[1]]
+                z2 = new_coordinates[element[2]]
+                DPhi = np.column_stack([z1 - z0, z2 - z0])
+                self.assertGreater(np.linalg.det(DPhi), 0.0)
+
+            # for each refined edge, compare the computed vs. expected eenergy
+            expected_energy = 4.
+            computed_energy = evaluate_energy_on_mesh(
+                coordinates=new_coordinates, elements=new_elements,
+                test_function_vector=new_to_embed)
+
+            expected_new_coordinate = 0.5*(
+                coordinates[edge[0], :] + coordinates[edge[1], :])
+
+            self.assertEqual(expected_energy, computed_energy)
+            self.assertAlmostEqual(
+                expected_new_coordinate[0], new_coordinates[-1, 0])
+            self.assertAlmostEqual(
+                expected_new_coordinate[1], new_coordinates[-1, 1])
 
     def test_refine_rg_with_solution_interpolation(self) -> None:
         random.seed(42)
