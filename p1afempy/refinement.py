@@ -994,6 +994,7 @@ def refine_single_edge(
 
     if to_embed.size:
         interpolated_value = 0.5*(to_embed[i] + to_embed[j])
-        to_embed = np.hstack([to_embed, interpolated_value])
+        embedded_values = np.hstack([to_embed, interpolated_value])
+        return new_coordinates, new_elements, embedded_values
 
     return new_coordinates, new_elements, to_embed
