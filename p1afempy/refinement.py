@@ -960,6 +960,15 @@ def refine_single_edge(
     not_marked_elements_indices = np.logical_not(marked_elements_indices)
     marked_elements = elements[marked_elements_indices]
 
+    if marked_elements.shape[0] != 2:
+        # if there are less than two elements marked, the edge marked
+        # for refinement is a boundary edge. As this special case remains
+        # unnecessary to consider for now (we only consider homogenous
+        # dirichlet), we exclude this possibility. Otherwise, we would
+        # need to pass the boundary connditions, too, and refine them, too.
+        raise ValueError(
+            'this function must not be called with boundary edges')
+
     first_element = marked_elements[0]
     k_1 = first_element[np.logical_not(np.isin(first_element, edge))][0]
     second_element = marked_elements[1]
