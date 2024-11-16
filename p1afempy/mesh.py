@@ -285,6 +285,71 @@ def get_neighbouring_elements(elements: data_structures.ElementsType,
     return local_elements, local_element_to_neighbours
 
 
+def get_local_patch_edge_based(
+        elements: data_structures.ElementsType,
+        coordinates: data_structures.CoordinatesType,
+        current_iterate: np.ndarray,
+        edge: np.ndarray) -> tuple[
+            data_structures.ElementsType,
+            data_structures.CoordinatesType,
+            np.ndarray,
+            np.ndarray]:
+    """
+    parameters
+    ----------
+    elements: data_structures.ElementsType
+        the global mesh's elements
+    coordinates: data_structures.CoordinatesType
+        the global mesh's coordinates
+    current_iterate: np.ndarray
+        the global curret iterate
+    edge: np.ndarray
+        indices of the edge to be refined, i.e.
+        edge = np.array([i, j]), where (i, j)
+        represent the indices of the coordintes
+        that make up the edge to be refined
+
+    returns
+    -------
+    local_elements: np.ndarray
+        local patch's elements in local indexing
+    local_coordinates: np.ndarray
+        local patch's coordinates
+    local_iterate: np.ndarray
+        current iterate on local patch's nodes
+    local_edge_indices: np.ndarray
+        local patch's edge shared by the two neighbouring
+        elements in local indexing
+    """
+
+    local_elements_indices = np.sum(np.isin(elements, edge), axis=1) == 2
+    local_elements = np.copy(elements[local_elements_indices])
+
+    # local, unique, sorted indices of nodes
+    local_indices = np.unique(local_elements.flatten())
+
+    local_coordinates = np.copy(coordinates[local_indices])
+    local_iterate = np.copy(current_iterate[local_indices])
+
+    # retreiving the transformation (global -> local indices)
+    perform_transform = get_global_to_local_index_mapping(local_indices)
+
+    # local patch's elements in local indices
+    local_elements = perform_transform(local_elements)
+    local_edge_indices = perform_transform(edge)
+
+    if local_elements.shape[0] != 2:
+        # if there are less than two elements extracted, the provided edge
+        # is a boundary edge. As this special case remains
+        # unnecessary to consider for now (we only consider homogenous
+        # dirichlet), we exclude this possibility.
+        raise ValueError(
+            'this function must not be called with boundary edges')
+
+    return local_elements, local_coordinates, local_iterate, \
+        local_edge_indices
+
+
 def get_local_patch(coordinates: data_structures.CoordinatesType,
                     elements: data_structures.ElementsType,
                     boundaries: list[data_structures.BoundaryType],
