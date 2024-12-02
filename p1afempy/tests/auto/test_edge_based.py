@@ -1,5 +1,6 @@
 import unittest
 import p1afempy.mesh as mesh
+from p1afempy.refinement import refine_single_edge
 import numpy as np
 
 
@@ -56,6 +57,79 @@ class MeshTest(unittest.TestCase):
             self.assertRaises(
                 ValueError, mesh.get_local_patch_edge_based,
                 elements, coordinates, solution, boundary_edge)
+
+    def test_refine_single_edge(self) -> None:
+        # initial setup
+        # -------------
+        elements = np.array([
+            [0, 1, 3],
+            [3, 2, 0]
+        ], dtype=int)
+        coordinates = np.array([
+            [0., 0.],
+            [1., 0.],
+            [0., 1.],
+            [1., 1.]
+        ], dtype=float)
+        solution = np.array([1., 5., 7., 11.], dtype=float)
+
+        # refined coords and solution are equal for flipped edges
+        # -------------------------------------------------------
+        expected_refined_solution = np.array(
+            [1., 5., 7., 11., 6.], dtype=float)
+        expected_refined_coordinates = np.array([
+            [0., 0.],
+            [1., 0.],
+            [0., 1.],
+            [1., 1.],
+            [0.5, 0.5]
+        ], dtype=float)
+
+        # refine edge=(0, 3)
+        # ------------------
+        edge = np.array([0, 3], dtype=int)
+        expected_refined_elements = np.array([
+            [4, 2, 0],
+            [4, 3, 2],
+            [4, 0, 1],
+            [4, 1, 3]
+        ], dtype=int)
+
+        refined_coordinates, refined_elements, refined_solution = \
+            refine_single_edge(
+                coordinates=coordinates,
+                elements=elements,
+                edge=edge,
+                to_embed=solution)
+        self.assertTrue(np.all(
+            expected_refined_coordinates == refined_coordinates))
+        self.assertTrue(np.all(
+            expected_refined_elements == refined_elements))
+        self.assertTrue(np.all(
+            expected_refined_solution == refined_solution))
+
+        # refine edge=(0, 3)
+        # ------------------
+        edge = np.array([3, 0], dtype=int)
+        expected_refined_elements = np.array([
+            [4, 1, 3],
+            [4, 0, 1],
+            [4, 3, 2],
+            [4, 2, 0]
+        ], dtype=int)
+
+        refined_coordinates, refined_elements, refined_solution = \
+            refine_single_edge(
+                coordinates=coordinates,
+                elements=elements,
+                edge=edge,
+                to_embed=solution)
+        self.assertTrue(np.all(
+            expected_refined_coordinates == refined_coordinates))
+        self.assertTrue(np.all(
+            expected_refined_elements == refined_elements))
+        self.assertTrue(np.all(
+            expected_refined_solution == refined_solution))
 
 
 def get_state() -> tuple[np.ndarray, np.ndarray, np.ndarray]:
