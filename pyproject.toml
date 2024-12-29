@@ -16,7 +16,8 @@ dependencies = [
   "scipy",
   "pathlib",
   "matplotlib",
-  "ismember>=1.0.4"
+  "ismember>=1.0.4",
+  "triangle-cubature"
 ]
 classifiers = [
     "Programming Language :: Python :: 3",

@@ -4,6 +4,8 @@ from scipy.sparse import coo_matrix, csc_matrix
 from scipy.sparse.linalg import spsolve
 from p1afempy.data_structures import \
     CoordinatesType, ElementsType, BoundaryConditionType, BoundaryType
+from triangle_cubature.cubature_rule import CubatureRuleEnum
+from triangle_cubature.rule_factory import get_rule
 
 
 def get_stiffness_matrix(coordinates: CoordinatesType,
@@ -83,7 +85,8 @@ def get_mass_matrix_elements(
 
 def get_right_hand_side(coordinates: CoordinatesType,
                         elements: ElementsType,
-                        f: BoundaryConditionType):
+                        f: BoundaryConditionType,
+                        cubature_rule: CubatureRuleEnum = None):
     """
     returns the load vector for the P1 FEM with Legendre basis
 
@@ -101,10 +104,19 @@ def get_right_hand_side(coordinates: CoordinatesType,
 
     notes
     -----
+    if `cubature_rule` is `None` (default value),
     the load vector F_i := int f(x)phi_i(x) dx
     is approximated as sum_T |T| * f(sT) * phi_i(sT),
-    where sT denotes the center of mass of triangle T
+    where sT denotes the center of mass of triangle T.
+    otherwise, the integral is approximated using the
+    cubature rule specified.
     """
+    if cubature_rule is not None:
+        return get_right_hand_side_using_quadrature_rule(
+            coordinates=coordinates,
+            elements=elements,
+            f=f,
+            cubature_rule=cubature_rule)
     # vector of element areas 4*|T|
     area4 = 4. * get_area(coordinates=coordinates,
                           elements=elements)
@@ -117,6 +129,67 @@ def get_right_hand_side(coordinates: CoordinatesType,
         elements.flatten(order='F'),
         weights=np.tile(area4*fsT/12., (3, 1)).flatten(),
         minlength=coordinates.shape[0])
+    return b
+
+
+def get_right_hand_side_using_quadrature_rule(
+        coordinates: CoordinatesType,
+        elements: ElementsType,
+        f: BoundaryConditionType,
+        cubature_rule: CubatureRuleEnum):
+    """
+    returns the load vector for the P1 FEM with Legendre basis
+    using the specified cubature rule
+
+    parameters
+    ----------
+    coordinates: CoordinatesType
+    elements: ElementsType
+    f: BoundaryConditionType
+        the function for which to evaluate the load vector
+    cubature_rule: CubatureRuleEnum
+        cubature rule used to approximate integrals
+        such as $\int f(x) phi_i(x) dx$
+
+    returns
+    -------
+    b: np.ndarray
+        the P1 FEM load vector of f on the mesh at hand
+    """
+    areas = get_area(coordinates=coordinates, elements=elements)
+    n_elements = elements.shape[0]
+    n_coordinates = coordinates.shape[0]
+
+    wip = get_rule(rule=cubature_rule).weights_and_integration_points
+    weights, integration_points = wip.weights, wip.integration_points
+
+    z_0 = coordinates[elements[:, 0], :]
+    z_1 = coordinates[elements[:, 1], :]
+    z_2 = coordinates[elements[:, 2], :]
+
+    # initializing empty container
+    L = np.zeros_like(elements, dtype=float)
+    for weight, integration_point in zip(weights, integration_points):
+        eta, xi = integration_point
+
+        phi = np.array([1.-eta-xi, eta, xi])
+
+        transformed_integration_points = (
+            z_0 + eta * (z_1 - z_0) + xi * (z_2 - z_0))
+        f_on_integration_points = f(transformed_integration_points)
+
+        L += (
+            2. *
+            weight *
+            areas.reshape((n_elements, 1)) *
+            phi *
+            f_on_integration_points.reshape((n_elements, 1)))
+
+        b = np.bincount(
+            elements.flatten(),
+            weights=L.flatten(),
+            minlength=n_coordinates)
+
     return b
 
 
