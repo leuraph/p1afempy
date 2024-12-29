@@ -219,7 +219,8 @@ def solve_laplace(coordinates: CoordinatesType,
                   neumann: BoundaryType,
                   f: BoundaryConditionType,
                   g: BoundaryConditionType,
-                  uD: BoundaryConditionType
+                  uD: BoundaryConditionType,
+                  cubature_rule: CubatureRuleEnum = None
                   ) -> tuple[np.ndarray, float]:
     """
     solves the laplace equation, i.e.
@@ -271,7 +272,8 @@ def solve_laplace(coordinates: CoordinatesType,
     x[unique_dirichlet] = uD((coordinates[unique_dirichlet, :]))
 
     b = get_right_hand_side(coordinates=coordinates,
-                            elements=elements, f=f) - A.dot(x)
+                            elements=elements, f=f,
+                            cubature_rule=cubature_rule) - A.dot(x)
     if neumann.size > 0:
         b = apply_neumann(neumann_bc=neumann,
                           coordinates=coordinates,
