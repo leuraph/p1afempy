@@ -42,6 +42,8 @@ Also, this repo includes some functionalities that were not provided in the orig
 - Assembly of Mass Matrix along the same lines as assembly of stiffness matrix.
 - Linear Interpolation of values on coordinates onto new nodes after refinement.
 - Red-Green refinement algorithm, where (yet) only a single element can be marked.
+- Retrieval of right-hand-side (load) vector using custom cubature rules
+  (vectorized implementation inspired by lines 21-28 of Listing 4 in [[3]](#3)).
 
 ## Data structures
 
@@ -324,3 +326,9 @@ Reference Machine:
 | **Memory**       | 16 GB 2400 MHz DDR4             |
 | **Operating System** | MacOS 13.6.3 (22G436)         |
 | **Matlab Version**   | R2023b                          |
+
+<a id="3">[3]</a> 
+Beuter, Stefanie, and Stefan A. Funken.
+Efficient P1-FEM for Any Space Dimension in Matlab.
+Computational Methods in Applied Mathematics 24, no. 2 (1 April 2024):
+283–324. https://doi.org/10.1515/cmam-2022-0239.
