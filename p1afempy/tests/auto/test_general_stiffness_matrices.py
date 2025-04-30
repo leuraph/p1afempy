@@ -2,6 +2,8 @@ import numpy as np
 import unittest
 from p1afempy.data_structures import ElementsType, CoordinatesType
 from p1afempy.refinement import refineNVB
+from p1afempy.solvers import get_stiffness_matrix, get_general_stiffness_matrix
+from triangle_cubature.cubature_rule import CubatureRuleEnum
 import random
 
 
@@ -20,6 +22,45 @@ class GeneralStiffnessMatrixTest(unittest.TestCase):
 
         elements, coordinates = get_small_mesh(
             max_n_vertices=max_n_vertices)
+
+        def a_11(coordinates: CoordinatesType) -> np.ndarray:
+            n_coordinates = coordinates.shape[0]
+            return np.ones(n_coordinates, dtype=float)
+
+        def a_22(coordinates: CoordinatesType) -> np.ndarray:
+            n_coordinates = coordinates.shape[0]
+            return np.ones(n_coordinates, dtype=float)
+
+        def a_12(coordinates: CoordinatesType) -> np.ndarray:
+            n_coordinates = coordinates.shape[0]
+            return np.zeros(n_coordinates, dtype=float)
+
+        def a_21(coordinates: CoordinatesType) -> np.ndarray:
+            n_coordinates = coordinates.shape[0]
+            return np.zeros(n_coordinates, dtype=float)
+
+        general_stiffness_matrix = get_general_stiffness_matrix(
+            coordinates=coordinates,
+            elements=elements,
+            a_11=a_11,
+            a_12=a_12,
+            a_21=a_21,
+            a_22=a_22,
+            cubature_rule=CubatureRuleEnum.DAYTAYLOR)
+
+        stiffness_matrix = get_stiffness_matrix(
+            coordinates=coordinates, elements=elements)
+
+        # ------------------------------------------------------------
+        # sanity check: we can compare sparse matrices in this way
+        # ref: https://stackoverflow.com/a/30685839/15004717
+        sanity_check = (stiffness_matrix != stiffness_matrix).nnz == 0
+        self.assertTrue(sanity_check)
+        # ------------------------------------------------------------
+
+        matrices_agree = (stiffness_matrix != general_stiffness_matrix).nnz == 0
+        # TODO activate by uncommenting
+        # self.assertTrue(matrices_agree)
 
 
 def get_small_mesh(max_n_vertices: int = 100) -> tuple[
