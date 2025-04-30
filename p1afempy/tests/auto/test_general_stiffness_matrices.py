@@ -2,7 +2,9 @@ import numpy as np
 import unittest
 from p1afempy.data_structures import ElementsType, CoordinatesType
 from p1afempy.refinement import refineNVB
-from p1afempy.solvers import get_stiffness_matrix, get_general_stiffness_matrix
+from p1afempy.solvers import \
+    get_stiffness_matrix, get_general_stiffness_matrix, \
+        get_general_stiffness_matrix_inefficient
 from triangle_cubature.cubature_rule import CubatureRuleEnum
 import random
 
@@ -17,7 +19,7 @@ class GeneralStiffnessMatrixTest(unittest.TestCase):
     def tearDownClass(cls):
         pass
 
-    def test_identity(self) -> None:
+    def test_general_stiffness_matrix_with_identity(self) -> None:
         max_n_vertices = 100
 
         elements, coordinates = get_small_mesh(
