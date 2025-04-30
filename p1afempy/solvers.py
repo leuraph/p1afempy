@@ -7,6 +7,7 @@ from p1afempy.data_structures import \
 from triangle_cubature.cubature_rule import CubatureRuleEnum
 from triangle_cubature.rule_factory import get_rule
 from itertools import product
+from triangle_cubature.rule_factory import get_rule
 
 
 def get_stiffness_matrix(coordinates: CoordinatesType,
@@ -98,6 +99,29 @@ def get_general_stiffness_matrix_inefficient(
     row = []
     col = []
 
+    def get_ref_gradient(
+            global_index_of_vertex: int,
+            element: np.ndarray) -> np.ndarray:
+        local_index = np.where(element == global_index_of_vertex)[0]
+        if local_index == 0:
+            return np.array([-1., -1.])
+        if local_index == 1:
+            return np.array([1., 0.])
+        if local_index == 2:
+            return np.array([0., 1.])
+
+    def get_gradient_on_element(
+            global_index_of_vertex: int,
+            element: np.ndarray,
+            DPhi: np.ndarray) -> np.ndarray:
+        ref_gradient = get_ref_gradient(
+            global_index_of_vertex=global_index_of_vertex,
+            element=element)
+        ref_gradient_on_element = np.linalg.solve(
+            DPhi.transpose(),
+            ref_gradient)
+        return ref_gradient_on_element
+
     for i, j in product(range(n_vertices), repeat=2):
         # get the relevant triangles
         i_inside = (elements == i).astype(int)
@@ -111,10 +135,37 @@ def get_general_stiffness_matrix_inefficient(
             continue
 
         for element in relevant_elements:
+            z0 = coordinates[element[0]]
+            z1 = coordinates[element[1]]
+            z2 = coordinates[element[2]]
+
+            DPhi = np.column_stack([z1 - z0, z2 - z0])
+
+            area = np.linalg.det(DPhi) / 2.
+
+            dphi_i = get_gradient_on_element(global_index_of_vertex=i, element=element, DPhi=DPhi)
+            dphi_j = get_gradient_on_element(global_index_of_vertex=j, element=element, DPhi=DPhi)
+
+            A = np.zeros((2, 2))
+
+            wip = get_rule(rule=cubature_rule).weights_and_integration_points
+            weights, integration_points = wip.weights, wip.integration_points
+            for weight, integration_point in zip(weights, integration_points):
+                eta, xi = integration_point
+                transformed_integration_point = z0 + eta*(z1-z0) + xi*(z2-z0)
+                a_11_on_transformed_point = a_11(transformed_integration_point)
+                a_12_on_transformed_point = a_12(transformed_integration_point)
+                a_21_on_transformed_point = a_21(transformed_integration_point)
+                a_22_on_transformed_point = a_22(transformed_integration_point)
+                A[0, 0] += a_11_on_transformed_point[0] * weight
+                A[0, 1] += a_12_on_transformed_point[0] * weight
+                A[1, 0] += a_21_on_transformed_point[0] * weight
+                A[1, 1] += a_22_on_transformed_point[0] * weight
+
             row.append(i)
             col.append(j)
-            # TODO do the calculation and add it to A[i, j]
-            data.append(0)
+
+            data.append(-2. * area * dphi_i.dot(A.dot(dphi_j)))
 
     data = np.array(data)
     row = np.array(row)
