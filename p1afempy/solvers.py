@@ -91,8 +91,15 @@ def get_general_stiffness_matrix(
         a_21: BoundaryConditionType,
         a_22: BoundaryConditionType,
         cubature_rule: CubatureRuleEnum) -> coo_matrix:
-    # TODO implement
-    pass
+    n_vertices = coordinates.shape[0]
+
+    data = np.array([])
+    row = np.array([])
+    col = np.array([])
+
+    general_stiffness_matrix = coo_matrix(
+        (data, (row, col)), shape=(n_vertices, n_vertices))
+    return general_stiffness_matrix
 
 
 def get_right_hand_side(coordinates: CoordinatesType,
