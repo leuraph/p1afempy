@@ -58,9 +58,9 @@ class GeneralStiffnessMatrixTest(unittest.TestCase):
         self.assertTrue(sanity_check)
         # ------------------------------------------------------------
 
-        matrices_agree = (stiffness_matrix != general_stiffness_matrix).nnz == 0
-        # TODO activate by uncommenting
-        # self.assertTrue(matrices_agree)
+        matrices_agree = \
+            (stiffness_matrix != general_stiffness_matrix).nnz == 0
+        self.assertTrue(matrices_agree)
 
 
 def get_small_mesh(max_n_vertices: int = 100) -> tuple[
