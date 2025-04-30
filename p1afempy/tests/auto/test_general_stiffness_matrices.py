@@ -1,6 +1,7 @@
 import numpy as np
 import unittest
 from p1afempy.data_structures import ElementsType, CoordinatesType
+from p1afempy.refinement import refineNVB
 
 
 class GeneralStiffnessMatrixTest(unittest.TestCase):
@@ -30,10 +31,23 @@ def get_small_mesh() -> tuple[ElementsType, CoordinatesType]:
         [0, 2, 3]
     ])
 
+    boundary = np.array([
+        [0, 1],
+        [1, 2],
+        [2, 3],
+        [3, 0]
+    ])
+    boundaries = [boundary]
+
     n_refinement_steps = 3
     for _ in range(n_refinement_steps):
-        pass
-        # TODO refine the mesh
+        n_elements = elements.shape[0]
+        marked = np.arange(n_elements)
+        coordinates, elements, boundaries, _ = refineNVB(
+            coordinates=coordinates,
+            elements=elements,
+            marked_elements=marked,
+            boundary_conditions=boundaries)
 
     return elements, coordinates
 
