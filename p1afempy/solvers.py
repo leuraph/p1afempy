@@ -83,6 +83,25 @@ def get_mass_matrix_elements(
     return indices_i, indices_j, D
 
 
+def get_general_stiffness_matrix_inefficient(
+        coordinates: CoordinatesType,
+        elements: ElementsType,
+        a_11: BoundaryConditionType,
+        a_12: BoundaryConditionType,
+        a_21: BoundaryConditionType,
+        a_22: BoundaryConditionType,
+        cubature_rule: CubatureRuleEnum) -> coo_matrix:
+    n_vertices = coordinates.shape[0]
+
+    data = np.array([])
+    row = np.array([])
+    col = np.array([])
+
+    general_stiffness_matrix = coo_matrix(
+        (data, (row, col)), shape=(n_vertices, n_vertices))
+    return general_stiffness_matrix
+
+
 def get_general_stiffness_matrix(
         coordinates: CoordinatesType,
         elements: ElementsType,
