@@ -83,6 +83,18 @@ def get_mass_matrix_elements(
     return indices_i, indices_j, D
 
 
+def get_general_stiffness_matrix(
+        coordinates: CoordinatesType,
+        elements: ElementsType,
+        a_11: BoundaryConditionType,
+        a_12: BoundaryConditionType,
+        a_21: BoundaryConditionType,
+        a_22: BoundaryConditionType,
+        cubature_rule: CubatureRuleEnum) -> coo_matrix:
+    # TODO implement
+    pass
+
+
 def get_right_hand_side(coordinates: CoordinatesType,
                         elements: ElementsType,
                         f: BoundaryConditionType,
