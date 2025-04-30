@@ -105,8 +105,10 @@ class GeneralStiffnessMatrixTest(unittest.TestCase):
         self.assertTrue(sanity_check)
         # ------------------------------------------------------------
 
-        matrices_agree = \
-            (stiffness_matrix != general_stiffness_matrix).nnz == 0
+        matrices_agree = np.allclose(
+            stiffness_matrix.toarray(),
+            general_stiffness_matrix.toarray()
+        )
         self.assertTrue(matrices_agree)
 
 
