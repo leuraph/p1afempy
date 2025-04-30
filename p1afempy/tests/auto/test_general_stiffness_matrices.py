@@ -2,9 +2,18 @@ import numpy as np
 import unittest
 from p1afempy.data_structures import ElementsType, CoordinatesType
 from p1afempy.refinement import refineNVB
+import random
 
 
 class GeneralStiffnessMatrixTest(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        random.seed(42)
+
+    @classmethod
+    def tearDownClass(cls):
+        pass
 
     def test_identity(self) -> None:
         elements, coordinates = get_small_mesh()
