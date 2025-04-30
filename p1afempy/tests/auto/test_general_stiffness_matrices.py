@@ -27,11 +27,11 @@ class GeneralStiffnessMatrixTest(unittest.TestCase):
 
         def a_11(coordinates: CoordinatesType) -> np.ndarray:
             n_coordinates = coordinates.shape[0]
-            return np.ones(n_coordinates, dtype=float)
+            return -np.ones(n_coordinates, dtype=float)
 
         def a_22(coordinates: CoordinatesType) -> np.ndarray:
             n_coordinates = coordinates.shape[0]
-            return np.ones(n_coordinates, dtype=float)
+            return -np.ones(n_coordinates, dtype=float)
 
         def a_12(coordinates: CoordinatesType) -> np.ndarray:
             n_coordinates = coordinates.shape[0]
@@ -72,11 +72,11 @@ class GeneralStiffnessMatrixTest(unittest.TestCase):
 
         def a_11(coordinates: CoordinatesType) -> np.ndarray:
             n_coordinates = coordinates.shape[0]
-            return np.ones(n_coordinates, dtype=float)
+            return -np.ones(n_coordinates, dtype=float)
 
         def a_22(coordinates: CoordinatesType) -> np.ndarray:
             n_coordinates = coordinates.shape[0]
-            return np.ones(n_coordinates, dtype=float)
+            return -np.ones(n_coordinates, dtype=float)
 
         def a_12(coordinates: CoordinatesType) -> np.ndarray:
             n_coordinates = coordinates.shape[0]
