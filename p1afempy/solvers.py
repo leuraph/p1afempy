@@ -6,6 +6,7 @@ from p1afempy.data_structures import \
     CoordinatesType, ElementsType, BoundaryConditionType, BoundaryType
 from triangle_cubature.cubature_rule import CubatureRuleEnum
 from triangle_cubature.rule_factory import get_rule
+from itertools import product
 
 
 def get_stiffness_matrix(coordinates: CoordinatesType,
@@ -93,9 +94,31 @@ def get_general_stiffness_matrix_inefficient(
         cubature_rule: CubatureRuleEnum) -> coo_matrix:
     n_vertices = coordinates.shape[0]
 
-    data = np.array([])
-    row = np.array([])
-    col = np.array([])
+    data = []
+    row = []
+    col = []
+
+    for i, j in product(range(n_vertices), repeat=2):
+        # get the relevant triangles
+        i_inside = (elements == i).astype(int)
+        j_inside = (elements == j).astype(int)
+        i_or_j_inside = i_inside + j_inside
+
+        relevant_elements_bool = np.sum(i_or_j_inside, axis=1) == 2
+        relevant_elements = elements[relevant_elements_bool]
+
+        if len(relevant_elements) == 0:
+            continue
+
+        for element in relevant_elements:
+            row.append(i)
+            col.append(j)
+            # TODO do the calculation and add it to A[i, j]
+            data.append(0)
+
+    data = np.array(data)
+    row = np.array(row)
+    col = np.array(col)
 
     general_stiffness_matrix = coo_matrix(
         (data, (row, col)), shape=(n_vertices, n_vertices))
