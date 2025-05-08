@@ -44,6 +44,15 @@ Also, this repo includes some functionalities that were not provided in the orig
 - Red-Green refinement algorithm, where (yet) only a single element can be marked.
 - Retrieval of right-hand-side (load) vector using custom cubature rules
   (vectorized implementation inspired by lines 21-28 of Listing 4 in [[3]](#3)).
+- Assembly of a generalized stiffness matrix according to the term
+  $$
+  \nabla (A(x) \nabla u(x)), \quad
+  A(x) =
+  \begin{pmatrix}
+    a_{11}(x) & a_{12}(x) \\
+    a_{21}(x) & a_{22}(x)
+  \end{pmatrix}
+  $$
 
 ## Data structures
 
