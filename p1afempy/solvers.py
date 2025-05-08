@@ -193,12 +193,87 @@ def get_general_stiffness_matrix(
     A(x) = [
         [a_11(x), a_12(x)],
         [a_21(x), a_22(x)]]
+
+    note
+    ----
+    we understand that this code is not readable.
+    here, we trade readability for speed.
     """
     n_vertices = coordinates.shape[0]
+    n_elements = elements.shape[0]
 
-    data = np.array([])
-    row = np.array([])
-    col = np.array([])
+    z0 = coordinates[elements[:, 0]]
+    z1 = coordinates[elements[:, 1]]
+    z2 = coordinates[elements[:, 2]]
+
+    dz1 = z1 - z0
+    dz2 = z2 - z0
+
+    alpha = dz2[:, 1]
+    beta = -dz2[:, 0]
+    gamma = -dz1[:, 1]
+    delta = dz1[:, 0]
+
+    areas = 0.5 * (dz1[:, 0]*dz2[:, 1] - dz1[:, 1]*dz2[:, 0])
+
+    wip = get_rule(rule=cubature_rule).weights_and_integration_points
+    weights, integration_points = wip.weights, wip.integration_points
+
+    a = np.zeros(n_elements)
+    b = np.zeros(n_elements)
+    c = np.zeros(n_elements)
+    d = np.zeros(n_elements)
+
+    for weight, integration_point in zip(weights, integration_points):
+        eta, xi = integration_point
+        transformed_integration_points = z0 + eta*dz1 + xi*dz2
+        a += weight * a_11(transformed_integration_points)
+        b += weight * a_12(transformed_integration_points)
+        c += weight * a_21(transformed_integration_points)
+        d += weight * a_22(transformed_integration_points)
+
+    b11 = (-1./(2.*areas))*(
+        a * alpha * alpha +
+        b * beta * alpha +
+        c * alpha * beta +
+        d * beta * beta)
+    b12 = (-1./(2.*areas))*(
+        a * alpha * gamma +
+        b * delta * alpha +
+        c * gamma * beta +
+        d * beta * delta
+    )
+    b21 = (-1./(2.*areas))*(
+        a * alpha * gamma +
+        b * beta * gamma +
+        c * alpha * delta +
+        d * beta * delta
+    )
+    b22 = (-1./(2.*areas))*(
+        a * gamma * gamma +
+        b * delta * gamma +
+        c * gamma * delta +
+        d * delta * delta
+    )
+
+    A = np.column_stack([
+        b11 + b12 + b21 + b22,
+        -(b11 + b21),
+        -(b12 + b22),
+        -(b11 + b12),
+        b11,
+        b12,
+        -(b21 + b22),
+        b21,
+        b22
+    ])
+
+    I_loc = np.array([0, 0, 0, 1, 1, 1, 2, 2, 2])
+    J_loc = np.array([0, 1, 2, 0, 1, 2, 0, 1, 2])
+
+    data = A.flatten()
+    row = elements[:, I_loc].flatten()
+    col = elements[:, J_loc].flatten()
 
     general_stiffness_matrix = coo_matrix(
         (data, (row, col)), shape=(n_vertices, n_vertices))
