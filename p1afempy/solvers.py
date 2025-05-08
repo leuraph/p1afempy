@@ -6,6 +6,8 @@ from p1afempy.data_structures import \
     CoordinatesType, ElementsType, BoundaryConditionType, BoundaryType
 from triangle_cubature.cubature_rule import CubatureRuleEnum
 from triangle_cubature.rule_factory import get_rule
+from itertools import product
+from triangle_cubature.rule_factory import get_rule
 
 
 def get_stiffness_matrix(coordinates: CoordinatesType,
@@ -81,6 +83,201 @@ def get_mass_matrix_elements(
          area/12., area/6., area/12.,
          area/12., area/12., area/6.]).flatten(order='F')
     return indices_i, indices_j, D
+
+
+def get_general_stiffness_matrix_inefficient(
+        coordinates: CoordinatesType,
+        elements: ElementsType,
+        a_11: BoundaryConditionType,
+        a_12: BoundaryConditionType,
+        a_21: BoundaryConditionType,
+        a_22: BoundaryConditionType,
+        cubature_rule: CubatureRuleEnum) -> coo_matrix:
+    n_vertices = coordinates.shape[0]
+
+    data = []
+    row = []
+    col = []
+
+    def get_ref_gradient(
+            global_index_of_vertex: int,
+            element: np.ndarray) -> np.ndarray:
+        local_index = np.where(element == global_index_of_vertex)[0]
+        if local_index == 0:
+            return np.array([-1., -1.])
+        if local_index == 1:
+            return np.array([1., 0.])
+        if local_index == 2:
+            return np.array([0., 1.])
+
+    def get_gradient_on_element(
+            global_index_of_vertex: int,
+            element: np.ndarray,
+            DPhi: np.ndarray) -> np.ndarray:
+        ref_gradient = get_ref_gradient(
+            global_index_of_vertex=global_index_of_vertex,
+            element=element)
+        ref_gradient_on_element = np.linalg.solve(
+            DPhi.transpose(),
+            ref_gradient)
+        return ref_gradient_on_element
+
+    for i, j in product(range(n_vertices), repeat=2):
+        # get the relevant triangles
+        i_inside = (elements == i).astype(int)
+        j_inside = (elements == j).astype(int)
+        i_or_j_inside = i_inside + j_inside
+
+        relevant_elements_bool = np.sum(i_or_j_inside, axis=1) == 2
+        relevant_elements = elements[relevant_elements_bool]
+
+        if len(relevant_elements) == 0:
+            continue
+
+        for element in relevant_elements:
+            z0 = coordinates[element[0]].reshape(1, 2)
+            z1 = coordinates[element[1]].reshape(1, 2)
+            z2 = coordinates[element[2]].reshape(1, 2)
+
+            DPhi = np.column_stack([(z1 - z0).flatten(), (z2 - z0).flatten()])
+
+            area = np.linalg.det(DPhi) / 2.
+
+            dphi_i = get_gradient_on_element(
+                global_index_of_vertex=i, element=element, DPhi=DPhi)
+            dphi_j = get_gradient_on_element(
+                global_index_of_vertex=j, element=element, DPhi=DPhi)
+
+            A = np.zeros((2, 2))
+
+            wip = get_rule(rule=cubature_rule).weights_and_integration_points
+            weights, integration_points = wip.weights, wip.integration_points
+            for weight, integration_point in zip(weights, integration_points):
+                eta, xi = integration_point
+                transformed_integration_point = z0 + eta*(z1-z0) + xi*(z2-z0)
+                a_11_on_transformed_point = a_11(transformed_integration_point)
+                a_12_on_transformed_point = a_12(transformed_integration_point)
+                a_21_on_transformed_point = a_21(transformed_integration_point)
+                a_22_on_transformed_point = a_22(transformed_integration_point)
+                A[0, 0] += a_11_on_transformed_point[0] * weight
+                A[0, 1] += a_12_on_transformed_point[0] * weight
+                A[1, 0] += a_21_on_transformed_point[0] * weight
+                A[1, 1] += a_22_on_transformed_point[0] * weight
+
+            row.append(i)
+            col.append(j)
+
+            data.append(-2. * area * dphi_i.dot(A.dot(dphi_j)))
+
+    data = np.array(data)
+    row = np.array(row)
+    col = np.array(col)
+
+    general_stiffness_matrix = coo_matrix(
+        (data, (row, col)), shape=(n_vertices, n_vertices))
+    return general_stiffness_matrix
+
+
+def get_general_stiffness_matrix(
+        coordinates: CoordinatesType,
+        elements: ElementsType,
+        a_11: BoundaryConditionType,
+        a_12: BoundaryConditionType,
+        a_21: BoundaryConditionType,
+        a_22: BoundaryConditionType,
+        cubature_rule: CubatureRuleEnum) -> coo_matrix:
+    """
+    returns the stiffness matrix corresponding to the term
+    nabla( A(x) nabla u(x)),
+    where
+    A(x) = [
+        [a_11(x), a_12(x)],
+        [a_21(x), a_22(x)]]
+
+    note
+    ----
+    we understand that this code is not readable.
+    here, we trade readability for speed.
+    """
+    n_vertices = coordinates.shape[0]
+    n_elements = elements.shape[0]
+
+    z0 = coordinates[elements[:, 0]]
+    z1 = coordinates[elements[:, 1]]
+    z2 = coordinates[elements[:, 2]]
+
+    dz1 = z1 - z0
+    dz2 = z2 - z0
+
+    alpha = dz2[:, 1]
+    beta = -dz2[:, 0]
+    gamma = -dz1[:, 1]
+    delta = dz1[:, 0]
+
+    areas = 0.5 * (dz1[:, 0]*dz2[:, 1] - dz1[:, 1]*dz2[:, 0])
+
+    wip = get_rule(rule=cubature_rule).weights_and_integration_points
+    weights, integration_points = wip.weights, wip.integration_points
+
+    a = np.zeros(n_elements)
+    b = np.zeros(n_elements)
+    c = np.zeros(n_elements)
+    d = np.zeros(n_elements)
+
+    for weight, integration_point in zip(weights, integration_points):
+        eta, xi = integration_point
+        transformed_integration_points = z0 + eta*dz1 + xi*dz2
+        a += weight * a_11(transformed_integration_points)
+        b += weight * a_12(transformed_integration_points)
+        c += weight * a_21(transformed_integration_points)
+        d += weight * a_22(transformed_integration_points)
+
+    b11 = (-1./(2.*areas))*(
+        a * alpha * alpha +
+        b * beta * alpha +
+        c * alpha * beta +
+        d * beta * beta)
+    b12 = (-1./(2.*areas))*(
+        a * alpha * gamma +
+        b * delta * alpha +
+        c * gamma * beta +
+        d * beta * delta
+    )
+    b21 = (-1./(2.*areas))*(
+        a * alpha * gamma +
+        b * beta * gamma +
+        c * alpha * delta +
+        d * beta * delta
+    )
+    b22 = (-1./(2.*areas))*(
+        a * gamma * gamma +
+        b * delta * gamma +
+        c * gamma * delta +
+        d * delta * delta
+    )
+
+    A = np.column_stack([
+        b11 + b12 + b21 + b22,
+        -(b11 + b21),
+        -(b12 + b22),
+        -(b11 + b12),
+        b11,
+        b12,
+        -(b21 + b22),
+        b21,
+        b22
+    ])
+
+    I_loc = np.array([0, 0, 0, 1, 1, 1, 2, 2, 2])
+    J_loc = np.array([0, 1, 2, 0, 1, 2, 0, 1, 2])
+
+    data = A.flatten()
+    row = elements[:, I_loc].flatten()
+    col = elements[:, J_loc].flatten()
+
+    general_stiffness_matrix = coo_matrix(
+        (data, (row, col)), shape=(n_vertices, n_vertices))
+    return general_stiffness_matrix
 
 
 def get_right_hand_side(coordinates: CoordinatesType,
