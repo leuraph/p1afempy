@@ -111,6 +111,53 @@ class GeneralStiffnessMatrixTest(unittest.TestCase):
         )
         self.assertTrue(matrices_agree)
 
+    def test_general_stiffness_matrix_inefficient_vs_vectorized(self) -> None:
+        max_n_vertices = 100
+
+        elements, coordinates = get_small_mesh(
+            max_n_vertices=max_n_vertices)
+
+        def a_11(coordinates: CoordinatesType) -> np.ndarray:
+            xs, ys = coordinates[:, 0], coordinates[:, 1]
+            return np.sin(xs) * np.cos(ys)
+
+        def a_22(coordinates: CoordinatesType) -> np.ndarray:
+            xs, ys = coordinates[:, 0], coordinates[:, 1]
+            return np.sin(xs) * np.sin(ys)
+
+        def a_12(coordinates: CoordinatesType) -> np.ndarray:
+            xs, ys = coordinates[:, 0], coordinates[:, 1]
+            return np.cos(xs) * np.cos(ys)
+
+        def a_21(coordinates: CoordinatesType) -> np.ndarray:
+            xs, ys = coordinates[:, 0], coordinates[:, 1]
+            return np.sin(xs) * np.cos(ys) + np.sin(ys) * np.cos(xs)
+
+        general_stiffness_matrix_vect = get_general_stiffness_matrix(
+            coordinates=coordinates,
+            elements=elements,
+            a_11=a_11,
+            a_12=a_12,
+            a_21=a_21,
+            a_22=a_22,
+            cubature_rule=CubatureRuleEnum.DAYTAYLOR)
+
+        general_stiffness_matrix_ineff = \
+            get_general_stiffness_matrix_inefficient(
+                coordinates=coordinates,
+                elements=elements,
+                a_11=a_11,
+                a_12=a_12,
+                a_21=a_21,
+                a_22=a_22,
+                cubature_rule=CubatureRuleEnum.DAYTAYLOR)
+
+        matrices_agree = np.allclose(
+            general_stiffness_matrix_vect.toarray(),
+            general_stiffness_matrix_ineff.toarray()
+        )
+        self.assertTrue(matrices_agree)
+
 
 def get_small_mesh(max_n_vertices: int = 100) -> tuple[
         ElementsType, CoordinatesType]:
