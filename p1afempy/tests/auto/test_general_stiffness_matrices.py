@@ -53,15 +53,9 @@ class GeneralStiffnessMatrixTest(unittest.TestCase):
         stiffness_matrix = get_stiffness_matrix(
             coordinates=coordinates, elements=elements)
 
-        # ------------------------------------------------------------
-        # sanity check: we can compare sparse matrices in this way
-        # ref: https://stackoverflow.com/a/30685839/15004717
-        sanity_check = (stiffness_matrix != stiffness_matrix).nnz == 0
-        self.assertTrue(sanity_check)
-        # ------------------------------------------------------------
-
-        matrices_agree = \
-            (stiffness_matrix != general_stiffness_matrix).nnz == 0
+        matrices_agree = np.allclose(
+            stiffness_matrix.toarray(),
+            general_stiffness_matrix.toarray())
         self.assertTrue(matrices_agree)
 
     def test_inefficient_general_stiffness_matrix_with_identity(self) -> None:
@@ -97,13 +91,6 @@ class GeneralStiffnessMatrixTest(unittest.TestCase):
 
         stiffness_matrix = get_stiffness_matrix(
             coordinates=coordinates, elements=elements)
-
-        # ------------------------------------------------------------
-        # sanity check: we can compare sparse matrices in this way
-        # ref: https://stackoverflow.com/a/30685839/15004717
-        sanity_check = (stiffness_matrix != stiffness_matrix).nnz == 0
-        self.assertTrue(sanity_check)
-        # ------------------------------------------------------------
 
         matrices_agree = np.allclose(
             stiffness_matrix.toarray(),
