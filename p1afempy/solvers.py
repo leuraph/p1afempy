@@ -184,6 +184,14 @@ def get_general_stiffness_matrix(
         a_21: BoundaryConditionType,
         a_22: BoundaryConditionType,
         cubature_rule: CubatureRuleEnum) -> coo_matrix:
+    """
+    returns the stiffness matrix corresponding to the term
+    nabla( A(x) nabla u(x)),
+    where
+    A(x) = [
+        [a_11(x), a_12(x)],
+        [a_21(x), a_22(x)]]
+    """
     n_vertices = coordinates.shape[0]
 
     data = np.array([])
