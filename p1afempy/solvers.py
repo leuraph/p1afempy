@@ -135,16 +135,18 @@ def get_general_stiffness_matrix_inefficient(
             continue
 
         for element in relevant_elements:
-            z0 = coordinates[element[0]]
-            z1 = coordinates[element[1]]
-            z2 = coordinates[element[2]]
+            z0 = coordinates[element[0]].reshape(1, 2)
+            z1 = coordinates[element[1]].reshape(1, 2)
+            z2 = coordinates[element[2]].reshape(1, 2)
 
-            DPhi = np.column_stack([z1 - z0, z2 - z0])
+            DPhi = np.column_stack([(z1 - z0).flatten(), (z2 - z0).flatten()])
 
             area = np.linalg.det(DPhi) / 2.
 
-            dphi_i = get_gradient_on_element(global_index_of_vertex=i, element=element, DPhi=DPhi)
-            dphi_j = get_gradient_on_element(global_index_of_vertex=j, element=element, DPhi=DPhi)
+            dphi_i = get_gradient_on_element(
+                global_index_of_vertex=i, element=element, DPhi=DPhi)
+            dphi_j = get_gradient_on_element(
+                global_index_of_vertex=j, element=element, DPhi=DPhi)
 
             A = np.zeros((2, 2))
 
