@@ -318,6 +318,11 @@ umfpack-libdir = 'path/to/suite-sparse/lib'
 umfpack-includedir = 'path/to/suite-sparse/include'
 ```
 
+## Acknowledgements
+
+This project was funded by the Swiss National Science Foundation (SNSF)
+under grant number 200021_212868.
+
 ## References
 
 <a id="1">[1]</a> 
