@@ -329,6 +329,38 @@ def get_right_hand_side(coordinates: CoordinatesType,
     return b
 
 
+def integrate_nonlinear_fem(
+        f: BoundaryConditionType,
+        u: np.ndarray,
+        coordinates: CoordinatesType,
+        elements: ElementsType,
+        cubature_rule: CubatureRuleEnum) -> float:
+    """
+    numerically approximates the integral
+    int_\Omega f(u(x)) dx,
+    where u lives in the P1 FEM space of the
+    mesh at hand and f:R^N -> R^N is any
+    (non-linear) function
+
+    parameters
+    ----------
+    f: BoundaryConditionType
+        a general function
+    u: np.ndarray
+        P1FEM function represented as array
+        of its values on the `coordinates`
+    coordinates: CoordinatesType
+        coordinates of the mesh at hand
+    elements: ElementsType
+        elements of the mesh at hand
+    cubature_rule: CubatureRuleEnum
+        cubature rule used to numerically
+        approximate the integral
+    """
+    # TODO: implement
+    return 0.
+
+
 def get_right_hand_side_using_quadrature_rule(
         coordinates: CoordinatesType,
         elements: ElementsType,
