@@ -8,6 +8,7 @@ from triangle_cubature.cubature_rule import CubatureRuleEnum
 from triangle_cubature.rule_factory import get_rule
 from itertools import product
 from triangle_cubature.rule_factory import get_rule
+from collections.abc import Callable
 
 
 def get_stiffness_matrix(coordinates: CoordinatesType,
@@ -330,7 +331,7 @@ def get_right_hand_side(coordinates: CoordinatesType,
 
 
 def integrate_nonlinear_fem(
-        f: BoundaryConditionType,
+        f: Callable[[float], float],
         u: np.ndarray,
         coordinates: CoordinatesType,
         elements: ElementsType,
@@ -339,7 +340,7 @@ def integrate_nonlinear_fem(
     numerically approximates the integral
     int_\Omega f(u(x)) dx,
     where u lives in the P1 FEM space of the
-    mesh at hand and f:R^N -> R^N is any
+    mesh at hand and f:R -> R is any
     (non-linear) function
 
     parameters
