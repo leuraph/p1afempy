@@ -3,7 +3,7 @@ import unittest
 import numpy as np
 import p1afempy.io_helpers as io_helpers
 from p1afempy.solvers import solve_laplace, get_mass_matrix_elements, \
-    get_right_hand_side, integrate_nonlinear_fem
+    get_right_hand_side, integrate_composition_nonlinear_with_fem
 import p1afempy.refinement as refinement
 from pathlib import Path
 import example_setup
@@ -220,7 +220,7 @@ class SolverTest(unittest.TestCase):
             return I_numeric
         
         exact_integral = get_exact_integral(a, b, c, c_0, c_1, c_2, c_3=0.)
-        numerical_integral = integrate_nonlinear_fem(
+        numerical_integral = integrate_composition_nonlinear_with_fem(
             f=f, u=u_on_nodes,
             coordinates=coordinates,
             elements=elements,

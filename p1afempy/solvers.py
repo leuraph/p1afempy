@@ -330,7 +330,7 @@ def get_right_hand_side(coordinates: CoordinatesType,
     return b
 
 
-def integrate_nonlinear_fem(
+def integrate_composition_nonlinear_with_fem(
         f: Callable[[float], float],
         u: np.ndarray,
         coordinates: CoordinatesType,
