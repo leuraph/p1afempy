@@ -1,13 +1,15 @@
+from pickle import NONE
 import unittest
 import numpy as np
 import p1afempy.io_helpers as io_helpers
 from p1afempy.solvers import solve_laplace, get_mass_matrix_elements, \
-    get_right_hand_side
+    get_right_hand_side, integrate_nonlinear_fem
 import p1afempy.refinement as refinement
 from pathlib import Path
 import example_setup
 from tests.auto.example_setup import f
 from triangle_cubature.cubature_rule import CubatureRuleEnum
+import sympy as sp
 
 
 class SolverTest(unittest.TestCase):
@@ -122,6 +124,110 @@ class SolverTest(unittest.TestCase):
             cubature_rule=CubatureRuleEnum.MIDPOINT)
 
         self.assertTrue(np.allclose(rhs_vector_midpoint, rhs_vector_P1AFEM))
+    
+    def test_integrate_nonlinear_fem(self):
+        """
+        This is a sanity check to verify
+        the numerical integration of the
+        composition of any non-linear function
+        with a P1FEM function
+        """
+
+        coordinates = np.array([
+            [0., 0.],
+            [1., 0.],
+            [1., 1.],
+            [0., 1.]
+        ])
+        elements = np.array([
+            [0, 1, 2],
+            [0, 2, 3]
+        ])
+        dirichlet = np.array([
+            [0, 1],
+            [1, 2],
+            [2, 3],
+            [3, 0]
+        ])
+        boundaries = [dirichlet]
+
+        # initial refinement
+        n_refinements = 5
+        for _ in range(n_refinements):
+            marked_elements = np.arange(elements.shape[0])
+            coordinates, elements, boundaries, _ = refinement.refineNVB(
+                coordinates=coordinates,
+                elements=elements,
+                marked_elements=marked_elements,
+                boundary_conditions=boundaries)
+        
+        c_0 = 1.0
+        c_1 = 2.3
+        c_2 = 1.6
+
+        def f(u: float):
+            return c_0 + c_1*u + c_2*u**2
+        
+        a = 1.4
+        b = 6.3
+        c = 4.7
+
+        def u(r: np.ndarray) -> np.ndarray:
+            return a + b * r[:, 0] + c * r[:, 1]
+        
+        u_on_nodes = u(coordinates)
+
+        def get_exact_integral(
+                a:float, 
+                b:float,
+                c:float,
+                c_0:float,
+                c_1:float,
+                c_2:float,
+                c_3:float) -> float:
+            """
+            computes the exact value of the integral
+            int_Omega f(u(x)) dx, where
+            Omega = (0, 1)^2
+            f(u) = c_0 + c_1 u + c_2 u^2 + c_3 u^3
+            u(x) = a + bx + cy
+            """
+            # Define symbols
+            a_sym, b_sym, c_sym = sp.symbols('a b c', real=True)
+            c0_sym, c1_sym, c2_sym, c3_sym = sp.symbols('c0 c1 c2 c3', real=True)
+            x_sym, y_sym = sp.symbols('x y', real=True)
+
+            # Define u(x,y)
+            u_sym = a_sym + b_sym*x_sym + c_sym*y_sym
+
+            # Define f(u)
+            f_sym = c0_sym + c1_sym*u_sym + c2_sym*u_sym**2 + c3_sym*u_sym**3
+
+            # Compute exact integral over (0,1)^2
+            I_sym = sp.integrate(sp.integrate(f_sym, (x_sym, 0, 1)), (y_sym, 0, 1))
+
+            # Substitute numerical values for parameters (example values)
+            subs_dict = {
+                a_sym: a,
+                b_sym: b,
+                c_sym: c,
+                c0_sym: c_0,
+                c1_sym: c_1,
+                c2_sym: c_2,
+                c3_sym: c_3}
+            I_numeric = I_sym.subs(subs_dict).evalf()
+
+            return I_numeric
+        
+        exact_integral = get_exact_integral(a, b, c, c_0, c_1, c_2, c_3=0.)
+        numerical_integral = integrate_nonlinear_fem(
+            f=f, u=u_on_nodes,
+            coordinates=coordinates,
+            elements=elements,
+            cubature_rule=CubatureRuleEnum.DAYTAYLOR)
+
+        self.assertAlmostEqual(exact_integral, numerical_integral)
+
 
 
 if __name__ == "__main__":
