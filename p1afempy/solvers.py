@@ -358,8 +358,23 @@ def integrate_nonlinear_fem(
         cubature rule used to numerically
         approximate the integral
     """
-    # TODO: implement
-    return 0.
+    areas = get_area(coordinates=coordinates, elements=elements)
+    n_elements = elements.shape[0]
+
+    wip = get_rule(rule=cubature_rule).weights_and_integration_points
+    weights, integration_points = wip.weights, wip.integration_points
+
+    # initializing empty container
+    L = np.zeros(n_elements, dtype=float)
+    for weight, integration_point in zip(weights, integration_points):
+        eta, xi = integration_point
+
+        u_on_transformed_interation_points \
+            = u[elements[:, 0]]*(1-eta-xi) + u[elements[:, 1]]*eta + u[elements[:, 2]]*xi
+        L += weight * f(u_on_transformed_interation_points) * 2. * areas
+    
+    return np.sum(L)
+
 
 
 def get_right_hand_side_using_quadrature_rule(
