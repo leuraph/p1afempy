@@ -346,7 +346,7 @@ def integrate_composition_nonlinear_with_fem(
     parameters
     ----------
     f: BoundaryConditionType
-        a general function
+        a general function f:R->R
     u: np.ndarray
         P1FEM function represented as array
         of its values on the `coordinates`
