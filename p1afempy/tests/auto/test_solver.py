@@ -147,7 +147,8 @@ class SolverTest(unittest.TestCase):
         ])
         boundaries = [dirichlet]
 
-        cubature_rule = get_rule(rule=CubatureRuleEnum.DAYTAYLOR)
+        rule = CubatureRuleEnum.DAYTAYLOR
+        cubature_rule = get_rule(rule=rule)
 
         # initial refinement
         n_refinements = 2
