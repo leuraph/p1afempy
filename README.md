@@ -44,22 +44,37 @@ Also, this repo includes some functionalities that were not provided in the orig
 - Red-Green refinement algorithm, where (yet) only a single element can be marked.
 - Vectorized assembly / integration (using custom cubature rules, cf. [[4]](#4)) of
   - right-hand-side (load) vector $f \in \mathbb R^N$ with entries
-    $$f_j := \int_\Omega f(x) \phi_j(x) ~\mathrm{d}x,$$
+    $$
+    f_j := \int_\Omega f(x) \phi_j(x) ~\mathrm{d}x,
+    $$
     where $f:\mathbb{R} \to \mathbb{R}$ is any function,
     and $\phi_j \in \mathbb{P}_1 (\mathcal{T}_N)$
     are the standard Lagrange hat functions on the current mesh
     **using custom cubature rules**
     (vectorized implementation inspired by lines 21-28 of Listing 4 in [[3]](#3)),
   - "generalized" stiffness matrix according to the term
-    $$\nabla (A(x) \nabla u(x)), \quad A(x) =\begin{pmatrix}a_{11}(x) & a_{12}(x) \\a_{21}(x) & a_{22}(x)\end{pmatrix},$$
+    $$
+    \nabla (A(x) \nabla u(x)), \quad
+    A(x) =
+    \begin{pmatrix}
+        a_{11}(x) & a_{12}(x) \\
+        a_{21}(x) & a_{22}(x)
+    \end{pmatrix},
+    $$
     i.e.
-    $$A_{ij} := \int_\Omega \nabla \phi_i (x)^\top A(x) \nabla\phi_j(x),$$
+    $$
+    A_{ij} := \int_\Omega \nabla \phi_i (x)^\top A(x) \nabla\phi_j(x),
+    $$
   - non-linear terms of the form
-    $$\int_\Omega f( u(x) ) ~ \mathrm{d} x,$$ 
+    $$
+    \int_\Omega f( u(x) ) ~ \mathrm{d} x,
+    $$ 
     where $u \in \mathbb{P}_1 (\mathcal T_N)$,
     and $f:\mathbb{R} \to \mathbb{R}$ is any function,
   - and non-linear load vectors $\Phi \in \mathbb R^N$ with entries
-    $$\Phi_j := \int_\Omega f(u(x)) \phi_j(x) ~\mathrm{d} x,$$
+    $$
+    \Phi_j := \int_\Omega f(u(x)) \phi_j(x) ~\mathrm{d} x,
+    $$
     where  $u \in \mathbb{P}_1 (\mathcal T_N)$,
     $f:\mathbb{R} \to \mathbb{R}$ is any function,
     and $\phi_j \in \mathbb{P}_1 (\mathcal{T}_N)$
