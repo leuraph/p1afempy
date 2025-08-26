@@ -338,7 +338,7 @@ def integrate_composition_nonlinear_with_fem(
         cubature_rule: CubatureRuleEnum) -> float:
     """
     numerically approximates the integral
-    int_\Omega f(u(x)) dx,
+    int_Omega f(u(x)) dx,
     where u lives in the P1 FEM space of the
     mesh at hand and f:R -> R is any
     (non-linear) function
@@ -383,11 +383,11 @@ def get_load_vector_of_composition_nonlinear_with_fem(
         elements: ElementsType,
         cubature_rule: CubatureRuleEnum) -> float:
     """
-    numerically approximates an array Phi with entries
-    Phi_i := int_\Omega f(u(x))\phi_i(x) dx,
+    numerically approximates an array F with entries
+    F_i := int_Omega f(u(x)) phi_i(x) dx,
     where u lives in the P1 FEM space of the
-    mesh at hand and, f:R -> R is any
-    (non-linear) function, and phi_i(x)
+    mesh at hand, f:R -> R is any
+    (non-linear) function, and phi_i
     are the standard Lagrange hat functions
 
     parameters

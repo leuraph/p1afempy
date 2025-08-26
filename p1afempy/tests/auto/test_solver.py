@@ -132,10 +132,10 @@ class SolverTest(unittest.TestCase):
             self) -> None:
         """
         This serves as a test for the numerical integration of the terms
-        Phi_j := \int_\Omega Phi(u(x)) phi_j(x) dx,
+        F_j := int_Omega f(u(x)) phi_j(x) dx,
         where u is a P1FEM function, given as numpy array.
-        Note that the implementation of the routine returns an array Phi,
-        where Phi[j] = Phi_j.
+        Note that the implementation of the routine returns an array F,
+        where F[j] = F_j.
         """
 
         # generating a reasonable mesh
@@ -179,7 +179,7 @@ class SolverTest(unittest.TestCase):
         # random iterate
         u = np.random.rand(n_vertices)
 
-        def Phi(x: float) -> float:
+        def f(x: float) -> float:
             return 1.7*x**2 + 0.3*x**3
 
         # helper function for calculating triangle areas
@@ -190,10 +190,10 @@ class SolverTest(unittest.TestCase):
             return 0.5*(xA*(yB-yC)+xB*(yC-yA)+xC*(yA-yB))
 
         # non-vectorized assembly of the load vector
-        # Phi_j := int_Omega Phi(u(x)) phi_j(x) dx,
+        # F_j := int_Omega f(u(x)) phi_j(x) dx,
         # where phi_j are the standard lagrange hat function
         # on the current mesh
-        Phi_array = np.zeros(n_vertices)
+        F_array = np.zeros(n_vertices)
         for i in range(n_vertices):
             # identify the elements involved
             # ------------------------------
@@ -219,9 +219,9 @@ class SolverTest(unittest.TestCase):
                     triangle_area = area(z0, z1, z2)
                     u_0, u_1, u_2 = u[element]
                     u_on_transformed_interation_point = u_0*(1-eta-xi) + u_1*eta + u_2*xi
-                    Phi_array[i] += (
+                    F_array[i] += (
                         2.*triangle_area*weight*
-                        Phi(u_on_transformed_interation_point)*
+                        f(u_on_transformed_interation_point)*
                         (1.-eta-xi))
                 # second elements
                 # ---------------
@@ -230,9 +230,9 @@ class SolverTest(unittest.TestCase):
                     triangle_area = area(z0, z1, z2)
                     u_0, u_1, u_2 = u[element]
                     u_on_transformed_interation_point = u_0*(1-eta-xi) + u_1*eta + u_2*xi
-                    Phi_array[i] += (
+                    F_array[i] += (
                         2.*triangle_area*weight*
-                        Phi(u_on_transformed_interation_point)*eta)
+                        f(u_on_transformed_interation_point)*eta)
                 # third elements
                 # --------------
                 for element in elements_where_third:
@@ -240,25 +240,25 @@ class SolverTest(unittest.TestCase):
                     triangle_area = area(z0, z1, z2)
                     u_0, u_1, u_2 = u[element]
                     u_on_transformed_interation_point = u_0*(1-eta-xi) + u_1*eta + u_2*xi
-                    Phi_array[i] += (
+                    F_array[i] += (
                         2.*triangle_area*weight*
-                        Phi(u_on_transformed_interation_point)*xi)
+                        f(u_on_transformed_interation_point)*xi)
             
-        Phi_array_vectorized = get_load_vector_of_composition_nonlinear_with_fem(
-            f=Phi, u=u, coordinates=coordinates, elements=elements,
+        F_array_vectorized = get_load_vector_of_composition_nonlinear_with_fem(
+            f=f, u=u, coordinates=coordinates, elements=elements,
             cubature_rule=rule)
-        self.assertTrue(np.allclose(Phi_array_vectorized, Phi_array))
+        self.assertTrue(np.allclose(F_array_vectorized, F_array))
 
         # Testing the vectorized scheme against another
         # vectorized scheme.
         #
         # Note that we have another implementation
         # that numerically assembles the load vector
-        # F_j := int_Omega f(x) phi_j(x) dx,
-        # where f:Omega -> R is a general function.
-        # We may use the vectorized assembly of F
-        # to test it against the assembly of Phi,
-        # if we provide Phi \circ u as
+        # G_j := int_Omega g(x) phi_j(x) dx,
+        # where g:Omega -> R is a general function.
+        # We may use the vectorized assembly of G
+        # to test it against the assembly of F,
+        # if we provide f \circ u as
         # analytical function, which is easily possible
         # if u is of the form u(x, y) = a + bx + cy
         # over the whole domain
@@ -271,17 +271,17 @@ class SolverTest(unittest.TestCase):
 
         def analytical_integrand(coordinates: CoordinatesType) -> np.ndarray:
             u_analytical_array = u_analytical(coordinates=coordinates)
-            Phi_analyitcal = Phi(u_analytical_array)
-            return Phi_analyitcal
+            F_analyitcal = f(u_analytical_array)
+            return F_analyitcal
 
-        Phi_array_vectorized = get_load_vector_of_composition_nonlinear_with_fem(
-            f=Phi, u=u_analytical_array, coordinates=coordinates, elements=elements,
+        F_array_vectorized = get_load_vector_of_composition_nonlinear_with_fem(
+            f=f, u=u_analytical_array, coordinates=coordinates, elements=elements,
             cubature_rule=rule)
-        Phi_array_different_implementation = get_right_hand_side(
+        F_array_different_implementation = get_right_hand_side(
             coordinates=coordinates, elements=elements,
             f=analytical_integrand, cubature_rule=rule)
 
-        self.assertTrue(np.allclose(Phi_array_vectorized, Phi_array_different_implementation))
+        self.assertTrue(np.allclose(F_array_vectorized, F_array_different_implementation))
     
     def test_integrate_nonlinear_fem(self):
         """
