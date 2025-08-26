@@ -224,11 +224,12 @@ class SolverTest(unittest.TestCase):
                         2.*triangle_area*weight*
                         Phi(u_on_transformed_interation_point)*xi)
             
-            Phi_array_vectorized = get_load_vector_of_composition_nonlinear_with_fem(
-                f=Phi, u=u, coordinates=coordinates, elements=elements,
-                cubature_rule=cubature_rule)
-
-            self.assertTrue(np.allclose(Phi_array_vectorized, Phi_array))
+        Phi_array_vectorized = get_load_vector_of_composition_nonlinear_with_fem(
+            f=Phi, u=u, coordinates=coordinates, elements=elements,
+            cubature_rule=rule)
+        print(Phi_array_vectorized)
+        print(Phi_array)
+        self.assertTrue(np.allclose(Phi_array_vectorized, Phi_array))
     
     def test_integrate_nonlinear_fem(self):
         """
