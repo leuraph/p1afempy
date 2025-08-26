@@ -51,33 +51,24 @@ Also, this repo includes some functionalities that were not provided in the orig
     **using custom cubature rules**
     (vectorized implementation inspired by lines 21-28 of Listing 4 in [[3]](#3)),
   - "generalized" stiffness matrix according to the term
-    $$
-    \nabla (A(x) \nabla u(x)), \quad
+    $$\nabla (A(x) \nabla u(x)), \quad
     A(x) =
     \begin{pmatrix}
         a_{11}(x) & a_{12}(x) \\
         a_{21}(x) & a_{22}(x)
-    \end{pmatrix},
-    $$
+    \end{pmatrix},$$
     i.e.
-    $$
-    A_{ij} := \int_\Omega \nabla \phi_i (x)^\top A(x) \nabla\phi_j(x),
-    $$
+    $$A_{ij} := \int_\Omega \nabla \phi_i (x)^\top A(x) \nabla\phi_j(x),$$
   - non-linear terms of the form
-    $$
-    \int_\Omega f( u(x) ) ~ \mathrm{d} x,
-    $$ 
+    $$\int_\Omega f( u(x) ) ~ \mathrm{d} x,$$ 
     where $u \in \mathbb{P}_1 (\mathcal T_N)$,
     and $f:\mathbb{R} \to \mathbb{R}$ is any function,
   - and non-linear load vectors $\Phi \in \mathbb R^N$ with entries
-    $$
-    \Phi_j := \int_\Omega f(u(x)) \phi_j(x) ~\mathrm{d} x,
-    $$
+    $$\Phi_j := \int_\Omega f(u(x)) \phi_j(x) ~\mathrm{d} x,$$
     where  $u \in \mathbb{P}_1 (\mathcal T_N)$,
     $f:\mathbb{R} \to \mathbb{R}$ is any function,
     and $\phi_j \in \mathbb{P}_1 (\mathcal{T}_N)$
     are the standard Lagrange hat functions on the current mesh.
-    $$
 ## Data structures
 
 Regarding the underlying data structures used, we follow the original code as closely as possible, i.e.
