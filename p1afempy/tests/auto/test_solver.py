@@ -158,9 +158,6 @@ class SolverTest(unittest.TestCase):
         ])
         boundaries = [dirichlet]
 
-        rule = CubatureRuleEnum.DAYTAYLOR
-        cubature_rule = get_rule(rule=rule)
-
         # initial refinement
         n_refinements = 4
         for _ in range(n_refinements):
@@ -171,6 +168,9 @@ class SolverTest(unittest.TestCase):
                 marked_elements=marked_elements,
                 boundary_conditions=boundaries)
         n_vertices = coordinates.shape[0]
+
+        rule = CubatureRuleEnum.DAYTAYLOR
+        cubature_rule = get_rule(rule=rule)
 
         u = np.random.rand(n_vertices)
 
