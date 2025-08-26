@@ -51,12 +51,7 @@ Also, this repo includes some functionalities that were not provided in the orig
     **using custom cubature rules**
     (vectorized implementation inspired by lines 21-28 of Listing 4 in [[3]](#3)),
   - "generalized" stiffness matrix according to the term
-    $$\nabla (A(x) \nabla u(x)), \quad
-    A(x) =
-    \begin{pmatrix}
-        a_{11}(x) & a_{12}(x) \\
-        a_{21}(x) & a_{22}(x)
-    \end{pmatrix},$$
+    $$\nabla (A(x) \nabla u(x)), \quad A(x) =\begin{pmatrix}a_{11}(x) & a_{12}(x) \\a_{21}(x) & a_{22}(x)\end{pmatrix},$$
     i.e.
     $$A_{ij} := \int_\Omega \nabla \phi_i (x)^\top A(x) \nabla\phi_j(x),$$
   - non-linear terms of the form
