@@ -1,13 +1,18 @@
+from pickle import NONE
 import unittest
 import numpy as np
+from p1afempy.data_structures import CoordinatesType
 import p1afempy.io_helpers as io_helpers
 from p1afempy.solvers import solve_laplace, get_mass_matrix_elements, \
-    get_right_hand_side
+    get_right_hand_side, integrate_composition_nonlinear_with_fem, \
+    get_load_vector_of_composition_nonlinear_with_fem
 import p1afempy.refinement as refinement
 from pathlib import Path
 import example_setup
 from tests.auto.example_setup import f
 from triangle_cubature.cubature_rule import CubatureRuleEnum
+import sympy as sp
+from triangle_cubature.rule_factory import get_rule
 
 
 class SolverTest(unittest.TestCase):
@@ -122,6 +127,265 @@ class SolverTest(unittest.TestCase):
             cubature_rule=CubatureRuleEnum.MIDPOINT)
 
         self.assertTrue(np.allclose(rhs_vector_midpoint, rhs_vector_P1AFEM))
+
+    def test_get_load_vector_of_composition_nonlinear_with_fem(
+            self) -> None:
+        """
+        This serves as a test for the numerical integration of the terms
+        F_j := int_Omega f(u(x)) phi_j(x) dx,
+        where u is a P1FEM function, given as numpy array.
+        Note that the implementation of the routine returns an array F,
+        where F[j] = F_j.
+        """
+
+        # generating a reasonable mesh
+        # ----------------------------
+        coordinates = np.array([
+            [0., 0.],
+            [1., 0.],
+            [1., 1.],
+            [0., 1.]
+        ])
+        elements = np.array([
+            [0, 1, 2],
+            [0, 2, 3]
+        ])
+        dirichlet = np.array([
+            [0, 1],
+            [1, 2],
+            [2, 3],
+            [3, 0]
+        ])
+        boundaries = [dirichlet]
+
+        # initial refinement
+        n_refinements = 4
+        for _ in range(n_refinements):
+            marked_elements = np.arange(elements.shape[0])
+            coordinates, elements, boundaries, _ = refinement.refineNVB(
+                coordinates=coordinates,
+                elements=elements,
+                marked_elements=marked_elements,
+                boundary_conditions=boundaries)
+        n_vertices = coordinates.shape[0]
+
+        rule = CubatureRuleEnum.DAYTAYLOR
+        cubature_rule = get_rule(rule=rule)
+
+        # Testing the vectorized integration scheme
+        # against a non-vectorized version
+        # -----------------------------------------
+
+        # random iterate
+        u = np.random.rand(n_vertices)
+
+        def f(x: float) -> float:
+            return 1.7*x**2 + 0.3*x**3
+
+        # helper function for calculating triangle areas
+        def area(z0, z1, z2) -> float:
+            xA, yA = z0
+            xB, yB = z1
+            xC, yC = z2
+            return 0.5*(xA*(yB-yC)+xB*(yC-yA)+xC*(yA-yB))
+
+        # non-vectorized assembly of the load vector
+        # F_j := int_Omega f(u(x)) phi_j(x) dx,
+        # where phi_j are the standard lagrange hat function
+        # on the current mesh
+        F_array = np.zeros(n_vertices)
+        for i in range(n_vertices):
+            # identify the elements involved
+            # ------------------------------
+            relevant = np.isin(elements, i)
+
+            is_first = relevant[:, 0]
+            is_second = relevant[:, 1]
+            is_third = relevant[:, 2]
+
+            elements_where_first = elements[is_first]
+            elements_where_second = elements[is_second]
+            elements_where_third = elements[is_third]
+
+            # perform the numerical integration on all the elements involved
+            waip = cubature_rule.weights_and_integration_points
+            for weight, integration_point in zip(waip.weights, waip.integration_points):
+                eta, xi = integration_point
+
+                # first elements
+                # --------------
+                for element in elements_where_first:
+                    z0, z1, z2 =coordinates[element, :]
+                    triangle_area = area(z0, z1, z2)
+                    u_0, u_1, u_2 = u[element]
+                    u_on_transformed_interation_point = u_0*(1-eta-xi) + u_1*eta + u_2*xi
+                    F_array[i] += (
+                        2.*triangle_area*weight*
+                        f(u_on_transformed_interation_point)*
+                        (1.-eta-xi))
+                # second elements
+                # ---------------
+                for element in elements_where_second:
+                    z0, z1, z2 =coordinates[element, :]
+                    triangle_area = area(z0, z1, z2)
+                    u_0, u_1, u_2 = u[element]
+                    u_on_transformed_interation_point = u_0*(1-eta-xi) + u_1*eta + u_2*xi
+                    F_array[i] += (
+                        2.*triangle_area*weight*
+                        f(u_on_transformed_interation_point)*eta)
+                # third elements
+                # --------------
+                for element in elements_where_third:
+                    z0, z1, z2 =coordinates[element, :]
+                    triangle_area = area(z0, z1, z2)
+                    u_0, u_1, u_2 = u[element]
+                    u_on_transformed_interation_point = u_0*(1-eta-xi) + u_1*eta + u_2*xi
+                    F_array[i] += (
+                        2.*triangle_area*weight*
+                        f(u_on_transformed_interation_point)*xi)
+            
+        F_array_vectorized = get_load_vector_of_composition_nonlinear_with_fem(
+            f=f, u=u, coordinates=coordinates, elements=elements,
+            cubature_rule=rule)
+        self.assertTrue(np.allclose(F_array_vectorized, F_array))
+
+        # Testing the vectorized scheme against another
+        # vectorized scheme.
+        #
+        # Note that we have another implementation
+        # that numerically assembles the load vector
+        # G_j := int_Omega g(x) phi_j(x) dx,
+        # where g:Omega -> R is a general function.
+        # We may use the vectorized assembly of G
+        # to test it against the assembly of F,
+        # if we provide f \circ u as
+        # analytical function, which is easily possible
+        # if u is of the form u(x, y) = a + bx + cy
+        # over the whole domain
+        # ---------------------------------------------
+        def u_analytical(coordinates: CoordinatesType) -> np.ndarray:
+            xs, ys = coordinates[:, 0], coordinates[:, 1]
+            return 0.78 + 3.45 * xs + 98.6 * ys
+    
+        u_analytical_array = u_analytical(coordinates=coordinates)
+
+        def analytical_integrand(coordinates: CoordinatesType) -> np.ndarray:
+            u_analytical_array = u_analytical(coordinates=coordinates)
+            F_analyitcal = f(u_analytical_array)
+            return F_analyitcal
+
+        F_array_vectorized = get_load_vector_of_composition_nonlinear_with_fem(
+            f=f, u=u_analytical_array, coordinates=coordinates, elements=elements,
+            cubature_rule=rule)
+        F_array_different_implementation = get_right_hand_side(
+            coordinates=coordinates, elements=elements,
+            f=analytical_integrand, cubature_rule=rule)
+
+        self.assertTrue(np.allclose(F_array_vectorized, F_array_different_implementation))
+    
+    def test_integrate_nonlinear_fem(self):
+        """
+        This is a sanity check to verify
+        the numerical integration of the
+        composition of any non-linear function
+        with a P1FEM function
+        """
+
+        coordinates = np.array([
+            [0., 0.],
+            [1., 0.],
+            [1., 1.],
+            [0., 1.]
+        ])
+        elements = np.array([
+            [0, 1, 2],
+            [0, 2, 3]
+        ])
+        dirichlet = np.array([
+            [0, 1],
+            [1, 2],
+            [2, 3],
+            [3, 0]
+        ])
+        boundaries = [dirichlet]
+
+        # initial refinement
+        n_refinements = 5
+        for _ in range(n_refinements):
+            marked_elements = np.arange(elements.shape[0])
+            coordinates, elements, boundaries, _ = refinement.refineNVB(
+                coordinates=coordinates,
+                elements=elements,
+                marked_elements=marked_elements,
+                boundary_conditions=boundaries)
+        
+        c_0 = 1.0
+        c_1 = 2.3
+        c_2 = 1.6
+
+        def f(u: float):
+            return c_0 + c_1*u + c_2*u**2
+        
+        a = 1.4
+        b = 6.3
+        c = 4.7
+
+        def u(r: np.ndarray) -> np.ndarray:
+            return a + b * r[:, 0] + c * r[:, 1]
+        
+        u_on_nodes = u(coordinates)
+
+        def get_exact_integral(
+                a:float, 
+                b:float,
+                c:float,
+                c_0:float,
+                c_1:float,
+                c_2:float,
+                c_3:float) -> float:
+            """
+            computes the exact value of the integral
+            int_Omega f(u(x)) dx, where
+            Omega = (0, 1)^2
+            f(u) = c_0 + c_1 u + c_2 u^2 + c_3 u^3
+            u(x) = a + bx + cy
+            """
+            # Define symbols
+            a_sym, b_sym, c_sym = sp.symbols('a b c', real=True)
+            c0_sym, c1_sym, c2_sym, c3_sym = sp.symbols('c0 c1 c2 c3', real=True)
+            x_sym, y_sym = sp.symbols('x y', real=True)
+
+            # Define u(x,y)
+            u_sym = a_sym + b_sym*x_sym + c_sym*y_sym
+
+            # Define f(u)
+            f_sym = c0_sym + c1_sym*u_sym + c2_sym*u_sym**2 + c3_sym*u_sym**3
+
+            # Compute exact integral over (0,1)^2
+            I_sym = sp.integrate(sp.integrate(f_sym, (x_sym, 0, 1)), (y_sym, 0, 1))
+
+            # Substitute numerical values for parameters (example values)
+            subs_dict = {
+                a_sym: a,
+                b_sym: b,
+                c_sym: c,
+                c0_sym: c_0,
+                c1_sym: c_1,
+                c2_sym: c_2,
+                c3_sym: c_3}
+            I_numeric = I_sym.subs(subs_dict).evalf()
+
+            return I_numeric
+        
+        exact_integral = get_exact_integral(a, b, c, c_0, c_1, c_2, c_3=0.)
+        numerical_integral = integrate_composition_nonlinear_with_fem(
+            f=f, u=u_on_nodes,
+            coordinates=coordinates,
+            elements=elements,
+            cubature_rule=CubatureRuleEnum.DAYTAYLOR)
+
+        self.assertAlmostEqual(exact_integral, numerical_integral)
+
 
 
 if __name__ == "__main__":

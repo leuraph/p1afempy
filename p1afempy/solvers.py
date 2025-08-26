@@ -8,6 +8,7 @@ from triangle_cubature.cubature_rule import CubatureRuleEnum
 from triangle_cubature.rule_factory import get_rule
 from itertools import product
 from triangle_cubature.rule_factory import get_rule
+from collections.abc import Callable
 
 
 def get_stiffness_matrix(coordinates: CoordinatesType,
@@ -327,6 +328,117 @@ def get_right_hand_side(coordinates: CoordinatesType,
         weights=np.tile(area4*fsT/12., (3, 1)).flatten(),
         minlength=coordinates.shape[0])
     return b
+
+
+def integrate_composition_nonlinear_with_fem(
+        f: Callable[[float], float],
+        u: np.ndarray,
+        coordinates: CoordinatesType,
+        elements: ElementsType,
+        cubature_rule: CubatureRuleEnum) -> float:
+    """
+    numerically approximates the integral
+    int_Omega f(u(x)) dx,
+    where u lives in the P1 FEM space of the
+    mesh at hand and f:R -> R is any
+    (non-linear) function
+
+    parameters
+    ----------
+    f: BoundaryConditionType
+        a general function f:R->R
+    u: np.ndarray
+        P1FEM function represented as array
+        of its values on the `coordinates`
+    coordinates: CoordinatesType
+        coordinates of the mesh at hand
+    elements: ElementsType
+        elements of the mesh at hand
+    cubature_rule: CubatureRuleEnum
+        cubature rule used to numerically
+        approximate the integral
+    """
+    areas = get_area(coordinates=coordinates, elements=elements)
+    n_elements = elements.shape[0]
+
+    wip = get_rule(rule=cubature_rule).weights_and_integration_points
+    weights, integration_points = wip.weights, wip.integration_points
+
+    # initializing empty container
+    L = np.zeros(n_elements, dtype=float)
+    for weight, integration_point in zip(weights, integration_points):
+        eta, xi = integration_point
+
+        u_on_transformed_interation_points \
+            = u[elements[:, 0]]*(1-eta-xi) + u[elements[:, 1]]*eta + u[elements[:, 2]]*xi
+        L += weight * f(u_on_transformed_interation_points) * 2. * areas
+    
+    return np.sum(L)
+
+
+def get_load_vector_of_composition_nonlinear_with_fem(
+        f: Callable[[float], float],
+        u: np.ndarray,
+        coordinates: CoordinatesType,
+        elements: ElementsType,
+        cubature_rule: CubatureRuleEnum) -> float:
+    """
+    numerically approximates an array F with entries
+    F_i := int_Omega f(u(x)) phi_i(x) dx,
+    where u lives in the P1 FEM space of the
+    mesh at hand, f:R -> R is any
+    (non-linear) function, and phi_i
+    are the standard Lagrange hat functions
+
+    parameters
+    ----------
+    f: BoundaryConditionType
+        a general function f:R->R
+    u: np.ndarray
+        P1FEM function represented as array
+        of its values on the `coordinates`
+    coordinates: CoordinatesType
+        coordinates of the mesh at hand
+    elements: ElementsType
+        elements of the mesh at hand
+    cubature_rule: CubatureRuleEnum
+        cubature rule used to numerically
+        approximate the integral
+    """
+    areas = get_area(coordinates=coordinates, elements=elements)
+    n_elements = elements.shape[0]
+    n_coordinates = coordinates.shape[0]
+
+    wip = get_rule(rule=cubature_rule).weights_and_integration_points
+    weights, integration_points = wip.weights, wip.integration_points
+
+    u_0 = u[elements[:, 0]]
+    u_1 = u[elements[:, 1]]
+    u_2 = u[elements[:, 2]]
+
+    # initializing empty container
+    L = np.zeros_like(elements, dtype=float)
+    for weight, integration_point in zip(weights, integration_points):
+        eta, xi = integration_point
+
+        phi = np.array([1.-eta-xi, eta, xi])
+
+        u_at_transformed_integration_points = u_0*(1.-eta-xi) + u_1*eta + u_2*xi
+        f_on_integration_points = f(u_at_transformed_integration_points)
+
+        L += (
+            2. *
+            weight *
+            areas.reshape((n_elements, 1)) *
+            phi *
+            f_on_integration_points.reshape((n_elements, 1)))
+
+        Phi = np.bincount(
+            elements.flatten(),
+            weights=L.flatten(),
+            minlength=n_coordinates)
+
+    return Phi
 
 
 def get_right_hand_side_using_quadrature_rule(
