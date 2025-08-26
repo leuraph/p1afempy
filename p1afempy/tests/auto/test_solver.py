@@ -3,13 +3,15 @@ import unittest
 import numpy as np
 import p1afempy.io_helpers as io_helpers
 from p1afempy.solvers import solve_laplace, get_mass_matrix_elements, \
-    get_right_hand_side, integrate_composition_nonlinear_with_fem
+    get_right_hand_side, integrate_composition_nonlinear_with_fem, \
+    get_load_vector_of_composition_nonlinear_with_fem
 import p1afempy.refinement as refinement
 from pathlib import Path
 import example_setup
 from tests.auto.example_setup import f
 from triangle_cubature.cubature_rule import CubatureRuleEnum
 import sympy as sp
+from triangle_cubature.rule_factory import get_rule
 
 
 class SolverTest(unittest.TestCase):
@@ -124,6 +126,108 @@ class SolverTest(unittest.TestCase):
             cubature_rule=CubatureRuleEnum.MIDPOINT)
 
         self.assertTrue(np.allclose(rhs_vector_midpoint, rhs_vector_P1AFEM))
+
+    def test_get_load_vector_of_composition_nonlinear_with_fem(
+            self) -> None:
+        coordinates = np.array([
+            [0., 0.],
+            [1., 0.],
+            [1., 1.],
+            [0., 1.]
+        ])
+        elements = np.array([
+            [0, 1, 2],
+            [0, 2, 3]
+        ])
+        dirichlet = np.array([
+            [0, 1],
+            [1, 2],
+            [2, 3],
+            [3, 0]
+        ])
+        boundaries = [dirichlet]
+
+        cubature_rule = get_rule(rule=CubatureRuleEnum.DAYTAYLOR)
+
+        # initial refinement
+        n_refinements = 2
+        for _ in range(n_refinements):
+            marked_elements = np.arange(elements.shape[0])
+            coordinates, elements, boundaries, _ = refinement.refineNVB(
+                coordinates=coordinates,
+                elements=elements,
+                marked_elements=marked_elements,
+                boundary_conditions=boundaries)
+        n_vertices = coordinates.shape[0]
+
+        #TODO change to something meaningful
+        u = np.ones(n_vertices, dtype=float)
+
+        def Phi(x: float) -> float:
+            return x**0.5
+
+        def area(z0, z1, z2) -> float:
+            xA, yA = z0
+            xB, yB = z1
+            xC, yC = z2
+            return 0.5*(xA*(yB-yC)+xB*(yC-yA)+xC*(yA-yB))
+
+        Phi_array = np.zeros(n_vertices)
+        for i in range(n_vertices):
+            # identify the elements involved
+            # ------------------------------
+            relevant = np.isin(elements, i)
+
+            is_first = relevant[:, 0]
+            is_second = relevant[:, 1]
+            is_third = relevant[:, 2]
+
+            elements_where_first = elements[is_first]
+            elements_where_second = elements[is_second]
+            elements_where_third = elements[is_third]
+
+            # perform the numerical integration on all the elements involved
+            waip = cubature_rule.weights_and_integration_points
+            for weight, integration_point in zip(waip.weights, waip.integration_points):
+                eta, xi = integration_point
+
+                # first elements
+                # --------------
+                for element in elements_where_first:
+                    z0, z1, z2 =coordinates[element, :]
+                    triangle_area = area(z0, z1, z2)
+                    u_0, u_1, u_2 = u[element]
+                    u_on_transformed_interation_point = u_0*(1-eta-xi) + u_1*eta + u_2*xi
+                    Phi_array[i] += (
+                        2.*triangle_area*weight*
+                        Phi(u_on_transformed_interation_point)*
+                        (1.-eta-xi))
+                # second elements
+                # ---------------
+                for element in elements_where_second:
+                    z0, z1, z2 =coordinates[element, :]
+                    triangle_area = area(z0, z1, z2)
+                    u_0, u_1, u_2 = u[element]
+                    u_on_transformed_interation_point = u_0*(1-eta-xi) + u_1*eta + u_2*xi
+                    Phi_array[i] += (
+                        2.*triangle_area*weight*
+                        Phi(u_on_transformed_interation_point)*eta)
+                # third elements
+                # --------------
+                for element in elements_where_third:
+                    z0, z1, z2 =coordinates[element, :]
+                    triangle_area = area(z0, z1, z2)
+                    u_0, u_1, u_2 = u[element]
+                    u_on_transformed_interation_point = u_0*(1-eta-xi) + u_1*eta + u_2*xi
+                    Phi_array[i] += (
+                        2.*triangle_area*weight*
+                        Phi(u_on_transformed_interation_point)*xi)
+            
+            Phi_array_vectorized = get_load_vector_of_composition_nonlinear_with_fem(
+                f=Phi, u=u, coordinates=coordinates, elements=elements,
+                cubature_rule=cubature_rule)
+
+            self.assertTrue(np.allclose(Phi_array_vectorized, Phi_array))
     
     def test_integrate_nonlinear_fem(self):
         """
