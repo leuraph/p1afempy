@@ -129,6 +129,16 @@ class SolverTest(unittest.TestCase):
 
     def test_get_load_vector_of_composition_nonlinear_with_fem(
             self) -> None:
+        """
+        This serves as a test for the numerical integration of the terms
+        Phi_j := \int_\Omega Phi(u(x)) phi_j(x) dx,
+        where u is a P1FEM function, given as numpy array.
+        Note that the implementation of the routine returns an array Phi,
+        where Phi[j] = Phi_j.
+        """
+
+        # generating a reasonable mesh
+        # ----------------------------
         coordinates = np.array([
             [0., 0.],
             [1., 0.],
