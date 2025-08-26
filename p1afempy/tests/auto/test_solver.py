@@ -151,7 +151,7 @@ class SolverTest(unittest.TestCase):
         cubature_rule = get_rule(rule=rule)
 
         # initial refinement
-        n_refinements = 2
+        n_refinements = 4
         for _ in range(n_refinements):
             marked_elements = np.arange(elements.shape[0])
             coordinates, elements, boundaries, _ = refinement.refineNVB(
