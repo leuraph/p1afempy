@@ -55,12 +55,14 @@ Also, this repo includes some functionalities that were not provided in the orig
   - "generalized" stiffness matrix according to the term
     
     $$
+    \begin{equation*}
     \nabla (A(x) \nabla u(x)), \quad
     A(x) =
     \begin{pmatrix}
         a_{11}(x) & a_{12}(x) \\
         a_{21}(x) & a_{22}(x)
     \end{pmatrix},
+    \end{equation*}
     $$
     
     i.e.
