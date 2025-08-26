@@ -1,6 +1,7 @@
 from pickle import NONE
 import unittest
 import numpy as np
+from p1afempy.data_structures import CoordinatesType
 import p1afempy.io_helpers as io_helpers
 from p1afempy.solvers import solve_laplace, get_mass_matrix_elements, \
     get_right_hand_side, integrate_composition_nonlinear_with_fem, \
@@ -237,6 +238,26 @@ class SolverTest(unittest.TestCase):
             f=Phi, u=u, coordinates=coordinates, elements=elements,
             cubature_rule=rule)
         self.assertTrue(np.allclose(Phi_array_vectorized, Phi_array))
+
+        def u_analytical(coordinates: CoordinatesType) -> np.ndarray:
+            xs, ys = coordinates[:, 0], coordinates[:, 1]
+            return 0.78 + 3.45 * xs + 98.6 * ys
+    
+        u_analytical_array = u_analytical(coordinates=coordinates)
+
+        def analytical_integrand(coordinates: CoordinatesType) -> np.ndarray:
+            u_analytical_array = u_analytical(coordinates=coordinates)
+            Phi_analyitcal = Phi(u_analytical_array)
+            return Phi_analyitcal
+
+        Phi_array_vectorized = get_load_vector_of_composition_nonlinear_with_fem(
+            f=Phi, u=u_analytical_array, coordinates=coordinates, elements=elements,
+            cubature_rule=rule)
+        Phi_array_different_implementation = get_right_hand_side(
+            coordinates=coordinates, elements=elements,
+            f=analytical_integrand, cubature_rule=rule)
+
+        self.assertTrue(np.allclose(Phi_array_vectorized, Phi_array_different_implementation))
     
     def test_integrate_nonlinear_fem(self):
         """
