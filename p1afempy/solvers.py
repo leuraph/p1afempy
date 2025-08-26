@@ -441,7 +441,6 @@ def get_load_vector_of_composition_nonlinear_with_fem(
     return Phi
 
 
-
 def get_right_hand_side_using_quadrature_rule(
         coordinates: CoordinatesType,
         elements: ElementsType,
