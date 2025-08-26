@@ -433,12 +433,12 @@ def get_load_vector_of_composition_nonlinear_with_fem(
             phi *
             f_on_integration_points.reshape((n_elements, 1)))
 
-        b = np.bincount(
+        Phi = np.bincount(
             elements.flatten(),
             weights=L.flatten(),
             minlength=n_coordinates)
 
-    return b
+    return Phi
 
 
 
