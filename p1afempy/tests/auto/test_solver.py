@@ -172,17 +172,27 @@ class SolverTest(unittest.TestCase):
         rule = CubatureRuleEnum.DAYTAYLOR
         cubature_rule = get_rule(rule=rule)
 
+        # Testing the vectorized integration scheme
+        # against a non-vectorized version
+        # -----------------------------------------
+
+        # random iterate
         u = np.random.rand(n_vertices)
 
         def Phi(x: float) -> float:
             return 1.7*x**2 + 0.3*x**3
 
+        # helper function for calculating triangle areas
         def area(z0, z1, z2) -> float:
             xA, yA = z0
             xB, yB = z1
             xC, yC = z2
             return 0.5*(xA*(yB-yC)+xB*(yC-yA)+xC*(yA-yB))
 
+        # non-vectorized assembly of the load vector
+        # Phi_j := int_Omega Phi(u(x)) phi_j(x) dx,
+        # where phi_j are the standard lagrange hat function
+        # on the current mesh
         Phi_array = np.zeros(n_vertices)
         for i in range(n_vertices):
             # identify the elements involved
@@ -239,6 +249,20 @@ class SolverTest(unittest.TestCase):
             cubature_rule=rule)
         self.assertTrue(np.allclose(Phi_array_vectorized, Phi_array))
 
+        # Testing the vectorized scheme against another
+        # vectorized scheme.
+        #
+        # Note that we have another implementation
+        # that numerically assembles the load vector
+        # F_j := int_Omega f(x) phi_j(x) dx,
+        # where f:Omega -> R is a general function.
+        # We may use the vectorized assembly of F
+        # to test it against the assembly of Phi,
+        # if we provide Phi \circ u as
+        # analytical function, which is easily possible
+        # if u is of the form u(x, y) = a + bx + cy
+        # over the whole domain
+        # ---------------------------------------------
         def u_analytical(coordinates: CoordinatesType) -> np.ndarray:
             xs, ys = coordinates[:, 0], coordinates[:, 1]
             return 0.78 + 3.45 * xs + 98.6 * ys
