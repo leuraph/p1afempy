@@ -161,11 +161,10 @@ class SolverTest(unittest.TestCase):
                 boundary_conditions=boundaries)
         n_vertices = coordinates.shape[0]
 
-        #TODO change to something meaningful
-        u = np.ones(n_vertices, dtype=float)
+        u = np.random.rand(n_vertices)
 
         def Phi(x: float) -> float:
-            return x**0.5
+            return 1.7*x**2 + 0.3*x**3
 
         def area(z0, z1, z2) -> float:
             xA, yA = z0
