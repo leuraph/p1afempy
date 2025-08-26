@@ -44,9 +44,9 @@ Also, this repo includes some functionalities that were not provided in the orig
 - Red-Green refinement algorithm, where (yet) only a single element can be marked.
 - Vectorized assembly / integration (using custom cubature rules, cf. [[4]](#4)) of
   - right-hand-side (load) vector $f \in \mathbb R^N$ with entries
-    $$
+    ```math
     f_j := \int_\Omega f(x) \phi_j(x) ~\mathrm{d}x,
-    $$
+    ```
     where $f:\mathbb{R} \to \mathbb{R}$ is any function,
     and $\phi_j \in \mathbb{P}_1 (\mathcal{T}_N)$
     are the standard Lagrange hat functions on the current mesh
