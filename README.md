@@ -43,9 +43,9 @@ Also, this repo includes some functionalities that were not provided in the orig
 - Linear Interpolation of values on coordinates onto new nodes after refinement.
 - Red-Green refinement algorithm, where (yet) only a single element can be marked.
 - Vectorized assembly / integration (using custom cubature rules, cf. [[4]](#4)) of
-  - right-hand-side (load) vector $f \in \mathbb R^N$ with entries
+  - right-hand-side (load) vector $F \in \mathbb R^N$ with entries
     $$
-    f_j := \int_\Omega f(x) \phi_j(x) ~\mathrm{d}x,
+    F_j := \int_\Omega f(x) \phi_j(x) ~\mathrm{d}x,
     $$
     where $f:\mathbb{R} \to \mathbb{R}$ is any function,
     and $\phi_j \in \mathbb{P}_1 (\mathcal{T}_N)$
@@ -68,12 +68,12 @@ Also, this repo includes some functionalities that were not provided in the orig
   - non-linear terms of the form
     $$
     \int_\Omega f( u(x) ) ~ \mathrm{d} x,
-    $$ 
+    $$
     where $u \in \mathbb{P}_1 (\mathcal T_N)$,
     and $f:\mathbb{R} \to \mathbb{R}$ is any function,
-  - and non-linear load vectors $\Phi \in \mathbb R^N$ with entries
+  - and non-linear load vectors $F \in \mathbb R^N$ with entries
     $$
-    \Phi_j := \int_\Omega f(u(x)) \phi_j(x) ~\mathrm{d} x,
+    F_j := \int_\Omega f(u(x)) \phi_j(x) ~\mathrm{d} x,
     $$
     where  $u \in \mathbb{P}_1 (\mathcal T_N)$,
     $f:\mathbb{R} \to \mathbb{R}$ is any function,
