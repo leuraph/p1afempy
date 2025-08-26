@@ -405,8 +405,40 @@ def get_load_vector_of_composition_nonlinear_with_fem(
         cubature rule used to numerically
         approximate the integral
     """
-    # TODO implement
-    return np.zeros_like(u)
+    areas = get_area(coordinates=coordinates, elements=elements)
+    n_elements = elements.shape[0]
+    n_coordinates = coordinates.shape[0]
+
+    wip = get_rule(rule=cubature_rule).weights_and_integration_points
+    weights, integration_points = wip.weights, wip.integration_points
+
+    u_0 = u[elements[:, 0]]
+    u_1 = u[elements[:, 1]]
+    u_2 = u[elements[:, 2]]
+
+    # initializing empty container
+    L = np.zeros_like(elements, dtype=float)
+    for weight, integration_point in zip(weights, integration_points):
+        eta, xi = integration_point
+
+        phi = np.array([1.-eta-xi, eta, xi])
+
+        u_at_transformed_integration_points = u_0*(1.-eta-xi) + u_1*eta + u_2*xi
+        f_on_integration_points = f(u_at_transformed_integration_points)
+
+        L += (
+            2. *
+            weight *
+            areas.reshape((n_elements, 1)) *
+            phi *
+            f_on_integration_points.reshape((n_elements, 1)))
+
+        b = np.bincount(
+            elements.flatten(),
+            weights=L.flatten(),
+            minlength=n_coordinates)
+
+    return b
 
 
 
