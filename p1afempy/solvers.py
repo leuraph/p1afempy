@@ -376,6 +376,39 @@ def integrate_composition_nonlinear_with_fem(
     return np.sum(L)
 
 
+def get_load_vector_of_composition_nonlinear_with_fem(
+        f: Callable[[float], float],
+        u: np.ndarray,
+        coordinates: CoordinatesType,
+        elements: ElementsType,
+        cubature_rule: CubatureRuleEnum) -> float:
+    """
+    numerically approximates an array Phi with entries
+    Phi_i := int_\Omega f(u(x))\phi_i(x) dx,
+    where u lives in the P1 FEM space of the
+    mesh at hand and, f:R -> R is any
+    (non-linear) function, and phi_i(x)
+    are the standard Lagrange hat functions
+
+    parameters
+    ----------
+    f: BoundaryConditionType
+        a general function f:R->R
+    u: np.ndarray
+        P1FEM function represented as array
+        of its values on the `coordinates`
+    coordinates: CoordinatesType
+        coordinates of the mesh at hand
+    elements: ElementsType
+        elements of the mesh at hand
+    cubature_rule: CubatureRuleEnum
+        cubature rule used to numerically
+        approximate the integral
+    """
+    # TODO implement
+    return np.zeros_like(u)
+
+
 
 def get_right_hand_side_using_quadrature_rule(
         coordinates: CoordinatesType,
