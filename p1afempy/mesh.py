@@ -1,8 +1,10 @@
 import numpy as np
+from pathlib import Path
 from p1afempy import data_structures
-from ismember import ismember, is_row_in
+from ismember import is_row_in
 from scipy.sparse import coo_matrix, find
 from matplotlib import pyplot as plt
+import matplotlib.tri as mtri
 
 
 def get_area(coordinates: data_structures.CoordinatesType,
@@ -51,26 +53,35 @@ def get_directional_vectors(coordinates: data_structures.CoordinatesType,
 
 def show_mesh(coordinates: data_structures.CoordinatesType,
               elements: data_structures.ElementsType,
-              boundaries: list[data_structures.BoundaryType] = None) -> None:
-    """displays the mesh at hand"""
-    for element in elements:
-        r0, r1, r2 = coordinates[element, :]
-        plt.plot(
-            [r0[0], r1[0], r2[0], r0[0]],
-            [r0[1], r1[1], r2[1], r0[1]],
-            'black', linewidth=0.5)
-    if boundaries is None:
-        plt.show()
-        return
-    for boundary in boundaries:
-        for edge in boundary:
-            r_0 = coordinates[edge[0], :]
-            r_1 = coordinates[edge[1], :]
-            plt.plot(
-                [r_0[0], r_1[0]],
-                [r_0[1], r_1[1]],
-                'blue', linewidth=1.0)
+              boundaries: list[data_structures.BoundaryType] = None,
+              path_to_save: Path = None,
+              linewidth: float = 0.1) -> None:
+    """displays (and saves a figure of) the mesh at hand"""
+
+    x, y = coordinates[:, 0], coordinates[:, 1]
+    triang = mtri.Triangulation(x, y, elements)
+
+    plt.triplot(triang, color="black", linewidth=linewidth)
+    plt.gca().set_aspect("equal")
+    plt.axis("off")
+
+    # plot boundary, if given
+    if boundaries is not None:    
+        for boundary in boundaries:
+            for edge in boundary:
+                r_0 = coordinates[edge[0], :]
+                r_1 = coordinates[edge[1], :]
+                plt.plot(
+                    [r_0[0], r_1[0]],
+                    [r_0[1], r_1[1]],
+                    'blue', linewidth=1.0)
+    
+    # save figure, if path is passed
+    if path_to_save is not None:
+        plt.savefig(path_to_save, bbox_inches="tight")
+
     plt.show()
+    plt.close()
 
 
 def provide_geometric_data(elements: data_structures.ElementsType,
