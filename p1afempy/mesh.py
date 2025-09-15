@@ -1,8 +1,10 @@
 import numpy as np
+from pathlib import Path
 from p1afempy import data_structures
-from ismember import ismember, is_row_in
+from ismember import is_row_in
 from scipy.sparse import coo_matrix, find
 from matplotlib import pyplot as plt
+import matplotlib.tri as mtri
 
 
 def get_area(coordinates: data_structures.CoordinatesType,
@@ -50,15 +52,36 @@ def get_directional_vectors(coordinates: data_structures.CoordinatesType,
 
 
 def show_mesh(coordinates: data_structures.CoordinatesType,
-              elements: data_structures.ElementsType) -> None:
-    """displays the mesh at hand"""
-    for element in elements:
-        r0, r1, r2 = coordinates[element, :]
-        plt.plot(
-            [r0[0], r1[0], r2[0], r0[0]],
-            [r0[1], r1[1], r2[1], r0[1]],
-            'black', linewidth=0.5)
+              elements: data_structures.ElementsType,
+              boundaries: list[data_structures.BoundaryType] = None,
+              path_to_save: Path = None,
+              linewidth: float = 0.1) -> None:
+    """displays (and saves a figure of) the mesh at hand"""
+
+    x, y = coordinates[:, 0], coordinates[:, 1]
+    triang = mtri.Triangulation(x, y, elements)
+
+    plt.triplot(triang, color="black", linewidth=linewidth)
+    plt.gca().set_aspect("equal")
+    plt.axis("off")
+
+    # plot boundary, if given
+    if boundaries is not None:    
+        for boundary in boundaries:
+            for edge in boundary:
+                r_0 = coordinates[edge[0], :]
+                r_1 = coordinates[edge[1], :]
+                plt.plot(
+                    [r_0[0], r_1[0]],
+                    [r_0[1], r_1[1]],
+                    'blue', linewidth=1.0)
+    
+    # save figure, if path is passed
+    if path_to_save is not None:
+        plt.savefig(path_to_save, bbox_inches="tight")
+
     plt.show()
+    plt.close()
 
 
 def provide_geometric_data(elements: data_structures.ElementsType,
@@ -503,3 +526,135 @@ def get_element_to_neighbours(
     element2neighbours = np.zeros(3 * n_elements, dtype=int)
     element2neighbours[idxIJ-1] = neighbourIJ - 1
     return element2neighbours.reshape((n_elements, 3), order='F') - 1
+
+
+def get_rectangular_mesh(
+        lower_left: np.ndarray,
+        upper_right: np.ndarray,
+        n_elements_x: int,
+        n_elements_y: int) -> tuple[
+            data_structures.CoordinatesType,
+            data_structures.ElementsType,
+            list[data_structures.BoundaryType]]:
+    """
+    returns a rectangular mesh
+    
+    parameters
+    ----------
+    lower_left: np.ndarray
+        (x,y) coordinates of lower left corner
+    upper_right: np.ndarray
+        (x,y) coordinates of upper right corner
+    n_elements_x: int
+        number of elements in x-direction
+    n_elements_y: int
+        number of elements in y-direction
+    
+    returns
+    -------
+    coordinates: CoordinatesType
+    elements: ElementsType
+    boundaries: list[BoundaryType]
+    """
+
+    x_min, x_max = lower_left[0], upper_right[0]
+    y_min, y_max = lower_left[1], upper_right[1]
+
+    dx = (x_max - x_min)/n_elements_x
+    dy = (y_max - y_min)/n_elements_y
+
+    n_coordinates_x = n_elements_x + 1
+    n_coordinates_y = n_elements_y + 1
+
+    coordinates = []
+    for k_y in range(n_coordinates_y):
+        for k_x in range(n_coordinates_x):
+            y_coordinate = k_y * dy
+            x_coordinate = k_x * dx
+            coordinates.append([x_coordinate, y_coordinate])
+    coordinates = np.array(coordinates)
+
+    elements = []
+    # stepping through all local rectangles
+    # via generation of the local index of
+    # its lower left corner
+    for k_x in range(n_elements_x):
+        for k_y in range(n_elements_y):
+            j_lower_left_corner = k_y * n_coordinates_x + k_x
+            j_lower_right_corner = j_lower_left_corner + 1
+            j_upper_left_corner = j_lower_left_corner + n_coordinates_x
+            j_upper_right_corner = j_upper_left_corner + 1
+
+            lower_element = [
+                j_upper_right_corner,
+                j_lower_left_corner,
+                j_lower_right_corner
+            ]
+            upper_element = [
+                j_lower_left_corner,
+                j_upper_right_corner,
+                j_upper_left_corner
+            ]
+
+            elements.append(lower_element)
+            elements.append(upper_element)
+    elements = np.array(elements)
+
+    boundary = []
+    #lower boundary
+    # -------------
+    for k in range(n_elements_x):
+        edge = [k, k+1]
+        boundary.append(edge)
+    # -------------
+    
+    #right boundary
+    # -------------
+    for k in range(n_coordinates_y-1):
+        edge = [
+            (k+1) * n_coordinates_x -1,
+            (k+2) * n_coordinates_x -1
+        ]
+        boundary.append(edge)
+    # -------------
+    
+    #upper boundary
+    # -------------
+    for k in range(n_elements_x):
+        edge = [
+            n_coordinates_x * n_coordinates_y - 1 - k,
+            n_coordinates_x * n_coordinates_y - 1 - (k+1)
+        ]
+        boundary.append(edge)
+    # -------------
+
+    #left boundary
+    # ------------
+    for k in range(n_coordinates_y-1):
+        edge = [
+            (k+1) * n_coordinates_x,
+            k * n_coordinates_x
+        ]
+        boundary.append(edge)
+    # ------------
+    boundary = np.array(boundary)
+    boundaries = [boundary]
+
+    return coordinates, elements, boundaries
+
+
+def get_unit_square_mesh(
+        n_elements_x: int,
+        n_elements_y: int) -> tuple[
+            data_structures.CoordinatesType,
+            data_structures.ElementsType,
+            list[data_structures.BoundaryType]]:
+    """returns a mesh of the unit square (0, 1)x(0, 1)"""
+    lower_left = np.array([0., 0.])
+    upper_right = np.array([1., 1.])
+    
+    return get_rectangular_mesh(
+        lower_left=lower_left,
+        upper_right=upper_right,
+        n_elements_x=n_elements_x,
+        n_elements_y=n_elements_y)
