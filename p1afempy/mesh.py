@@ -549,5 +549,72 @@ def get_rectangular_mesh(
             y_coordinate = k_y * dy
             x_coordinate = k_x * dx
             coordinates.append([x_coordinate, y_coordinate])
-
     coordinates = np.array(coordinates)
+
+    elements = []
+    # stepping through all local rectangles
+    # via generation of the local index of
+    # its lower left corner
+    for k_x in range(n_elements_x):
+        for k_y in range(n_elements_y):
+            j_lower_left_corner = k_y * n_coordinates_x + k_x
+            j_lower_right_corner = j_lower_left_corner + 1
+            j_upper_left_corner = j_lower_left_corner + n_coordinates_x
+            j_upper_right_corner = j_upper_left_corner + 1
+
+            lower_element = [
+                j_upper_right_corner,
+                j_lower_left_corner,
+                j_lower_right_corner
+            ]
+            upper_element = [
+                j_lower_left_corner,
+                j_upper_right_corner,
+                j_upper_left_corner
+            ]
+
+            elements.append(lower_element)
+            elements.append(upper_element)
+    elements = np.array(elements)
+
+    boundary = []
+    #lower boundary
+    # -------------
+    for k in range(n_elements_x):
+        edge = [k, k+1]
+        boundary.append(edge)
+    # -------------
+    
+    #right boundary
+    # -------------
+    for k in range(n_coordinates_y-1):
+        edge = [
+            (k+1) * n_coordinates_x -1,
+            (k+2) * n_coordinates_x -1
+        ]
+        boundary.append(edge)
+    # -------------
+    
+    #upper boundary
+    # -------------
+    for k in range(n_elements_x):
+        edge = [
+            n_coordinates_x * n_coordinates_y - 1 - k,
+            n_coordinates_x * n_coordinates_y - 1 - (k+1)
+        ]
+        boundary.append(edge)
+    # -------------
+
+    #left boundary
+    # ------------
+    for k in range(n_coordinates_y-1):
+        edge = [
+            (k+1) * n_coordinates_x,
+            k * n_coordinates_x
+        ]
+        boundary.append(edge)
+    # ------------
+    boundary = np.array(boundary)
+    boundaries = [boundary]
+
+    return coordinates, elements, boundaries
