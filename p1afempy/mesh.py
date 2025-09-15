@@ -503,3 +503,35 @@ def get_element_to_neighbours(
     element2neighbours = np.zeros(3 * n_elements, dtype=int)
     element2neighbours[idxIJ-1] = neighbourIJ - 1
     return element2neighbours.reshape((n_elements, 3), order='F') - 1
+
+
+def get_rectangular_mesh(
+        lower_left: np.ndarray,
+        upper_right: np.ndarray,
+        n_elements_x: int,
+        n_elements_y: int) -> tuple[
+            data_structures.CoordinatesType,
+            data_structures.ElementsType,
+            list[data_structures.BoundaryType]]:
+    """
+    returns a rectangular mesh
+    
+    parameters
+    ----------
+    lower_left: np.ndarray
+        (x,y) coordinates of lower left corner
+    upper_right: np.ndarray
+        (x,y) coordinates of upper right corner
+    n_elements_x: int
+        number of elements in x-direction
+    n_elements_y: int
+        number of elements in y-direction
+    
+    returns
+    -------
+    coordinates: CoordinatesType
+    elements: ElementsType
+    boundaries: list[BoundaryType]
+    """
+    pass
+    # TODO implement
