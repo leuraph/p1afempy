@@ -50,7 +50,8 @@ def get_directional_vectors(coordinates: data_structures.CoordinatesType,
 
 
 def show_mesh(coordinates: data_structures.CoordinatesType,
-              elements: data_structures.ElementsType) -> None:
+              elements: data_structures.ElementsType,
+              boundaries: list[data_structures.BoundaryType] = None) -> None:
     """displays the mesh at hand"""
     for element in elements:
         r0, r1, r2 = coordinates[element, :]
@@ -58,6 +59,17 @@ def show_mesh(coordinates: data_structures.CoordinatesType,
             [r0[0], r1[0], r2[0], r0[0]],
             [r0[1], r1[1], r2[1], r0[1]],
             'black', linewidth=0.5)
+    if boundaries is None:
+        plt.show()
+        return
+    for boundary in boundaries:
+        for edge in boundary:
+            r_0 = coordinates[edge[0], :]
+            r_1 = coordinates[edge[1], :]
+            plt.plot(
+                [r_0[0], r_1[0]],
+                [r_0[1], r_1[1]],
+                'blue', linewidth=1.0)
     plt.show()
 
 
