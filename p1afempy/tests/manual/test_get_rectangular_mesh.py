@@ -7,8 +7,8 @@ def main():
 
     lower_left = np.array([0., 0.])
     upper_right = np.array([1., 1.])
-    n_elements_x = 3
-    n_elements_y = 3
+    n_elements_x = 5
+    n_elements_y = 10
 
     coordinates, elements, boundaries\
         = get_rectangular_mesh(
@@ -17,7 +17,10 @@ def main():
             n_elements_x=n_elements_x,
             n_elements_y=n_elements_y)
 
-    show_mesh(coordinates=coordinates, elements=elements)
+    show_mesh(
+        coordinates=coordinates,
+        elements=elements,
+        boundaries=boundaries)
 
 
 if __name__ == '__main__':
