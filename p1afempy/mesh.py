@@ -641,3 +641,20 @@ def get_rectangular_mesh(
     boundaries = [boundary]
 
     return coordinates, elements, boundaries
+
+
+def get_unit_square_mesh(
+        n_elements_x: int,
+        n_elements_y: int) -> tuple[
+            data_structures.CoordinatesType,
+            data_structures.ElementsType,
+            list[data_structures.BoundaryType]]:
+    """returns a mesh of the unit square (0, 1)x(0, 1)"""
+    lower_left = np.array([0., 0.])
+    upper_right = np.array([1., 1.])
+    
+    return get_rectangular_mesh(
+        lower_left=lower_left,
+        upper_right=upper_right,
+        n_elements_x=n_elements_x,
+        n_elements_y=n_elements_y)
