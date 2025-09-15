@@ -533,5 +533,21 @@ def get_rectangular_mesh(
     elements: ElementsType
     boundaries: list[BoundaryType]
     """
-    pass
-    # TODO implement
+
+    x_min, x_max = lower_left[0], upper_right[0]
+    y_min, y_max = lower_left[1], upper_right[1]
+
+    dx = (x_max - x_min)/n_elements_x
+    dy = (y_max - y_min)/n_elements_y
+
+    n_coordinates_x = n_elements_x + 1
+    n_coordinates_y = n_elements_y + 1
+
+    coordinates = []
+    for k_y in range(n_coordinates_y):
+        for k_x in range(n_coordinates_x):
+            y_coordinate = k_y * dy
+            x_coordinate = k_x * dx
+            coordinates.append([x_coordinate, y_coordinate])
+
+    coordinates = np.array(coordinates)
