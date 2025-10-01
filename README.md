@@ -65,6 +65,12 @@ Also, this repo includes some functionalities that were not provided in the orig
     $$
     A_{ij} := \int_\Omega \nabla \phi_i (x)^\top A(x) \nabla\phi_j(x),
     $$
+  - vectorized assembly of weighted mass matrices $M$, where
+    $$
+    M_{ij} := \int_\Omega \phi(u(x)) \phi_i(x) \phi_j(x)~\mathrm d x,
+    $$
+    where $u \in \mathbb{P}_1 (\mathcal T_N)$,
+    and $f:\mathbb{R} \to \mathbb{R}$ is any function,
   - non-linear terms of the form
     $$
     \int_\Omega f( u(x) ) ~ \mathrm{d} x,
