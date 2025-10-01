@@ -67,7 +67,7 @@ Also, this repo includes some functionalities that were not provided in the orig
     $$
   - vectorized assembly of weighted mass matrices $M$, where
     $$
-    M_{ij} := \int_\Omega \phi(u(x)) \phi_i(x) \phi_j(x)~\mathrm d x,
+    M_{ij} := \int_\Omega f(u(x)) \phi_i(x) \phi_j(x)~\mathrm d x,
     $$
     where $u \in \mathbb{P}_1 (\mathcal T_N)$,
     and $f:\mathbb{R} \to \mathbb{R}$ is any function,
