@@ -46,6 +46,36 @@ def get_stiffness_matrix(coordinates: CoordinatesType,
                        (indices_i, indices_j)))
 
 
+def get_weighted_mass_matrix(
+        coordinates: CoordinatesType,
+        elements: ElementsType,
+        current_iterate: np.ndarray,
+        phi: BoundaryConditionType,
+        cubature_rule: CubatureRuleEnum) -> coo_matrix:
+    """
+    returns a weighted mass matrix in the sense of
+    M_ij := int phi(current_iterate) phi_i phi_j,
+    where current iterate is a P1FEM function
+    given by its values on the nodes
+    and phi_j are the standard Lagrange basis functions
+
+    parameters
+    ----------
+    coordinates: CoordinatesType
+    elements: ElementsType
+    current_iterate: np.ndarray
+    phi: BoundaryConditionType
+    cubature_rule: CubatureRuleEnum
+
+    returns
+    -------
+    weighted_mass_matrix: coo_matrix
+        the weighted mass matrix as described above
+    """
+    # TODO implement
+    return None
+
+
 def get_mass_matrix(coordinates: CoordinatesType,
                     elements: ElementsType) -> coo_matrix:
     """
