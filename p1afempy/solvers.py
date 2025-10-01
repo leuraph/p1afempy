@@ -46,6 +46,101 @@ def get_stiffness_matrix(coordinates: CoordinatesType,
                        (indices_i, indices_j)))
 
 
+def get_weighted_mass_matrix(
+        coordinates: CoordinatesType,
+        elements: ElementsType,
+        current_iterate: np.ndarray,
+        phi: BoundaryConditionType,
+        cubature_rule: CubatureRuleEnum) -> coo_matrix:
+    """
+    returns a weighted mass matrix in the sense of
+    M_ij := int phi(current_iterate) phi_i phi_j,
+    where current iterate is a P1FEM function
+    given by its values on the nodes
+    and phi_j are the standard Lagrange basis functions
+
+    parameters
+    ----------
+    coordinates: CoordinatesType
+    elements: ElementsType
+    current_iterate: np.ndarray
+    phi: BoundaryConditionType
+    cubature_rule: CubatureRuleEnum
+
+    returns
+    -------
+    weighted_mass_matrix: coo_matrix
+        the weighted mass matrix as described above
+    """
+    n_vertices = coordinates.shape[0]
+    n_elements = elements.shape[0]
+
+    z0 = coordinates[elements[:, 0]]
+    z1 = coordinates[elements[:, 1]]
+    z2 = coordinates[elements[:, 2]]
+
+    dz1 = z1 - z0
+    dz2 = z2 - z0
+
+    areas = 0.5 * (dz1[:, 0]*dz2[:, 1] - dz1[:, 1]*dz2[:, 0])
+
+    wip = get_rule(rule=cubature_rule).weights_and_integration_points
+    weights, integration_points = wip.weights, wip.integration_points
+
+    # preparing empty array
+    a_11 = np.zeros(n_elements)
+    a_12 = np.zeros(n_elements)
+    a_13 = np.zeros(n_elements)
+    a_21 = np.zeros(n_elements)
+    a_22 = np.zeros(n_elements)
+    a_23 = np.zeros(n_elements)
+    a_31 = np.zeros(n_elements)
+    a_32 = np.zeros(n_elements)
+    a_33 = np.zeros(n_elements)
+
+    u_1 = current_iterate[elements[:, 0]]
+    u_2 = current_iterate[elements[:, 1]]
+    u_3 = current_iterate[elements[:, 2]]
+
+    for weight, integration_point in zip(weights, integration_points):
+        eta, xi = integration_point
+
+        phi_1_hat = 1 - eta - xi
+        phi_2_hat = eta
+        phi_3_hat = xi
+
+        u_on_integration_points = (
+            u_1 * phi_1_hat
+            + u_2 * phi_2_hat
+            + u_3 * phi_3_hat
+        )
+
+        phi_of_u_on_integration_points = phi(u_on_integration_points)
+
+        a_11 += 2*areas*weight*phi_of_u_on_integration_points*phi_1_hat*phi_1_hat
+        a_12 += 2*areas*weight*phi_of_u_on_integration_points*phi_1_hat*phi_2_hat
+        a_13 += 2*areas*weight*phi_of_u_on_integration_points*phi_1_hat*phi_3_hat
+        a_21 += 2*areas*weight*phi_of_u_on_integration_points*phi_2_hat*phi_1_hat
+        a_22 += 2*areas*weight*phi_of_u_on_integration_points*phi_2_hat*phi_2_hat
+        a_23 += 2*areas*weight*phi_of_u_on_integration_points*phi_2_hat*phi_3_hat
+        a_31 += 2*areas*weight*phi_of_u_on_integration_points*phi_3_hat*phi_1_hat
+        a_32 += 2*areas*weight*phi_of_u_on_integration_points*phi_3_hat*phi_2_hat
+        a_33 += 2*areas*weight*phi_of_u_on_integration_points*phi_3_hat*phi_3_hat
+
+    I_loc = np.array([0, 0, 0, 1, 1, 1, 2, 2, 2])
+    J_loc = np.array([0, 1, 2, 0, 1, 2, 0, 1, 2])
+
+    A = np.column_stack(
+        [a_11, a_12, a_13, a_21, a_22, a_23, a_31, a_32, a_33])
+    data = A.flatten()
+    row = elements[:, I_loc].flatten()
+    col = elements[:, J_loc].flatten()
+
+    weighted_mass_matrix = coo_matrix(
+        (data, (row, col)), shape=(n_vertices, n_vertices))
+    return weighted_mass_matrix
+
+
 def get_mass_matrix(coordinates: CoordinatesType,
                     elements: ElementsType) -> coo_matrix:
     """
