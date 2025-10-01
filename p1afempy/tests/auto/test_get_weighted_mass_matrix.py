@@ -1,6 +1,5 @@
 import numpy as np
 import unittest
-from p1afempy.data_structures import ElementsType, CoordinatesType
 from p1afempy.refinement import refineNVB
 from triangle_cubature.cubature_rule import CubatureRuleEnum
 import random
@@ -20,9 +19,12 @@ class WeightedMassMatrixTest(unittest.TestCase):
 
     def test_weighted_mass_matrix(self) -> None:
 
-        a_0 = 10.34
-        a_1 = 23.67
-        a_2 = 23.45
+        coefficients = [
+            34.3,
+            12.4,
+            1.4,
+            0.45,
+            0.332]
 
         Uh_star = 12.
 
@@ -53,7 +55,11 @@ class WeightedMassMatrixTest(unittest.TestCase):
 
         def phi(x):
             # polynomial
-            return a_0 + a_1 * x + a_2 * x**2
+            n_entries = x.shape[0]
+            result = np.zeros(n_entries)
+            for (k, a) in enumerate(coefficients):
+                result += a * x**k
+            return result
 
         def get_exact_result(coefficients: list[float], u_star: float):
             # see hand-written notes from 30.09.2025 for a derivation
@@ -84,7 +90,7 @@ class WeightedMassMatrixTest(unittest.TestCase):
                 weighted_mass_matrix.dot(current_iterate))
             
             exact_result = get_exact_result(
-                coefficients=[a_0, a_1, a_2],
+                coefficients=coefficients,
                 u_star=Uh_star)
             print(exact_result)
 
