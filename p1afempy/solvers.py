@@ -727,6 +727,54 @@ def evaluate_on_coordinates(
     then, this routine returns a vector `u_tilde`
     of length N, given by u_tilde_j := u(z_j).
     """
-    #TODO implement
-    n_coordinates = r.shape[0]
-    return np.zeros(n_coordinates)
+
+    determinants = 2.*get_area(
+        coordinates=coordinates,
+        elements=elements)
+    
+    x1 = coordinates[elements[:, 0], 0]
+    x2 = coordinates[elements[:, 1], 0]
+    x3 = coordinates[elements[:, 2], 0]
+    y1 = coordinates[elements[:, 0], 1]
+    y2 = coordinates[elements[:, 1], 1]
+    y3 = coordinates[elements[:, 2], 1]
+
+    u_tilde = np.zeros(r.shape[0])
+    for k, z in enumerate(r):
+        x, y = z
+
+        lambdas_1 = (
+            (y2 - y3)*(x - x3)
+            +
+            (x3 - x2)*(y - y3)
+        )/determinants
+
+        lambdas_2 = (
+            (y3 - y1)*(x - x3)
+            +
+            (x1 - x3)*(y - y3)
+        )/determinants
+
+        lambdas_3 = 1. - lambdas_1 - lambdas_2
+
+        lambdas = np.column_stack([
+            lambdas_1, lambdas_2, lambdas_3
+        ])
+
+        indicators = np.sum(lambdas >= 0., axis=1)
+
+        index_of_element = np.argmax(indicators)
+
+        l1, l2, l3 = lambdas[index_of_element, :]
+
+        u_1, u_2, u_3 = u[elements[index_of_element, :]]
+
+        u_tilde[k] = (
+            l1 * u_1
+            +
+            l2 * u_2
+            +
+            l3 * u_3
+        )
+
+    return u_tilde
