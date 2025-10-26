@@ -694,3 +694,39 @@ def solve_laplace(coordinates: CoordinatesType,
     energy = x.dot(A.dot(x))
 
     return x, energy
+
+
+def evaluate_on_coordinates(
+        u: np.ndarray,
+        elements: ElementsType,
+        coordinates: CoordinatesType,
+        r: CoordinatesType
+) -> np.ndarray:
+    """
+    evaluates the P1FEM function `u`
+    living on the mesh given by
+    `coordinates` and `elements`
+    on the coordinates given by `r`
+
+    parameters
+    ----------
+    u: np.ndarray
+        a P1 FEM vector living on the mesh
+        given by `coordinates_H` and `elements_H`
+    elements: ElementsType
+        the elements of the mesh we wish to transfer from
+    coordinates: CoordinatesType
+        the coordinates of the mesh we wish to transfer from
+    r: CoordinatesType
+        the coordinates on which we wish
+        to evaluate u_H in P1(T_H)
+    
+    notes
+    -----
+    let N denote the number of coordinates in `r`.
+    then, this routine returns a vector `u_tilde`
+    of length N, given by u_tilde_j := u(z_j).
+    """
+    #TODO implement
+    n_coordinates = r.shape[0]
+    return np.zeros(n_coordinates)
