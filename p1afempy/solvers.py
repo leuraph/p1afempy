@@ -725,9 +725,15 @@ def evaluate_on_coordinates(
     
     notes
     -----
-    let N denote the number of coordinates in `r`.
-    then, this routine returns a vector `u_tilde`
-    of length N, given by u_tilde_j := u(z_j).
+    - let N denote the number of coordinates in `r`.
+      then, this routine returns a vector `u_tilde`
+      of length N, given by u_tilde_j := u(z_j).
+    - it is implicitly assumed that all the points
+      in `r` lie in the domain Omega
+    - the idea of this implementation is that
+      we calculate barycentric coordinates lambda_j
+      and note that, if r_i lies in or on the triangle T,
+      we have lambda_j >= 0.
     """
 
     determinants = 2.*get_area(
