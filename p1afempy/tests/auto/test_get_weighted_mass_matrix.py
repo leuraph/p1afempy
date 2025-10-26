@@ -92,7 +92,6 @@ class WeightedMassMatrixTest(unittest.TestCase):
             exact_result = get_exact_result(
                 coefficients=coefficients,
                 u_star=Uh_star)
-            print(exact_result)
 
             self.assertAlmostEqual(numerical_result, exact_result)
 

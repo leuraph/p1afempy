@@ -9,6 +9,7 @@ from triangle_cubature.rule_factory import get_rule
 from itertools import product
 from triangle_cubature.rule_factory import get_rule
 from collections.abc import Callable
+from tqdm import tqdm
 
 
 def get_stiffness_matrix(coordinates: CoordinatesType,
@@ -694,3 +695,94 @@ def solve_laplace(coordinates: CoordinatesType,
     energy = x.dot(A.dot(x))
 
     return x, energy
+
+
+def evaluate_on_coordinates(
+        u: np.ndarray,
+        elements: ElementsType,
+        coordinates: CoordinatesType,
+        r: CoordinatesType,
+        display_progress_bar: bool = False
+) -> np.ndarray:
+    """
+    evaluates the P1FEM function `u`
+    living on the mesh given by
+    `coordinates` and `elements`
+    on the coordinates given by `r`
+
+    parameters
+    ----------
+    u: np.ndarray
+        a P1 FEM vector living on the mesh
+        given by `coordinates_H` and `elements_H`
+    elements: ElementsType
+        the elements of the mesh we wish to transfer from
+    coordinates: CoordinatesType
+        the coordinates of the mesh we wish to transfer from
+    r: CoordinatesType
+        the coordinates on which we wish
+        to evaluate u_H in P1(T_H)
+    
+    notes
+    -----
+    - let N denote the number of coordinates in `r`.
+      then, this routine returns a vector `u_tilde`
+      of length N, given by u_tilde_j := u(z_j).
+    - it is implicitly assumed that all the points
+      in `r` lie in the domain Omega
+    - the idea of this implementation is that
+      we calculate barycentric coordinates lambda_j
+      and note that, if r_i lies in or on the triangle T,
+      we have lambda_j >= 0.
+    """
+
+    determinants = 2.*get_area(
+        coordinates=coordinates,
+        elements=elements)
+    
+    x1 = coordinates[elements[:, 0], 0]
+    x2 = coordinates[elements[:, 1], 0]
+    x3 = coordinates[elements[:, 2], 0]
+    y1 = coordinates[elements[:, 0], 1]
+    y2 = coordinates[elements[:, 1], 1]
+    y3 = coordinates[elements[:, 2], 1]
+
+    u_tilde = np.zeros(r.shape[0])
+    for k in tqdm(range(r.shape[0]), disable=not display_progress_bar):
+        x, y = r[k]
+
+        lambdas_1 = (
+            (y2 - y3)*(x - x3)
+            +
+            (x3 - x2)*(y - y3)
+        )/determinants
+
+        lambdas_2 = (
+            (y3 - y1)*(x - x3)
+            +
+            (x1 - x3)*(y - y3)
+        )/determinants
+
+        lambdas_3 = 1. - lambdas_1 - lambdas_2
+
+        lambdas = np.column_stack([
+            lambdas_1, lambdas_2, lambdas_3
+        ])
+
+        indicators = np.sum(lambdas >= 0., axis=1)
+
+        index_of_element = np.argmax(indicators)
+
+        l1, l2, l3 = lambdas[index_of_element, :]
+
+        u_1, u_2, u_3 = u[elements[index_of_element, :]]
+
+        u_tilde[k] = (
+            l1 * u_1
+            +
+            l2 * u_2
+            +
+            l3 * u_3
+        )
+
+    return u_tilde
