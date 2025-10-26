@@ -57,7 +57,8 @@ class GeneralStiffnessMatrixTest(unittest.TestCase):
                 u=u,
                 elements=old_elements,
                 coordinates=old_coordinates,
-                r=new_coordinates)
+                r=new_coordinates,
+                display_progress_bar=False)
             
             current_a_norm_squared = u.dot(stiffness_matrix.dot(u))
 

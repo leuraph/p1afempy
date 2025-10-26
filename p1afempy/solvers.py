@@ -9,6 +9,7 @@ from triangle_cubature.rule_factory import get_rule
 from itertools import product
 from triangle_cubature.rule_factory import get_rule
 from collections.abc import Callable
+from tqdm import tqdm
 
 
 def get_stiffness_matrix(coordinates: CoordinatesType,
@@ -700,7 +701,8 @@ def evaluate_on_coordinates(
         u: np.ndarray,
         elements: ElementsType,
         coordinates: CoordinatesType,
-        r: CoordinatesType
+        r: CoordinatesType,
+        display_progress_bar: bool = False
 ) -> np.ndarray:
     """
     evaluates the P1FEM function `u`
@@ -740,8 +742,8 @@ def evaluate_on_coordinates(
     y3 = coordinates[elements[:, 2], 1]
 
     u_tilde = np.zeros(r.shape[0])
-    for k, z in enumerate(r):
-        x, y = z
+    for k in tqdm(range(r.shape[0]), disable=not display_progress_bar):
+        x, y = r[k]
 
         lambdas_1 = (
             (y2 - y3)*(x - x3)
