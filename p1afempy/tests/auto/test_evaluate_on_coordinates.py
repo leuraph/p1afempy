@@ -17,7 +17,7 @@ class GeneralStiffnessMatrixTest(unittest.TestCase):
     def tearDownClass(cls):
         pass
 
-    def test_evaluate_on_mesh(self) -> None:
+    def test_evaluate_on_coordinates(self) -> None:
         n_initial_refinements = 3
         n_test_refinements = 5
 
