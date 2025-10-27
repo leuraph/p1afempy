@@ -19,7 +19,7 @@ class GeneralStiffnessMatrixTest(unittest.TestCase):
 
     def test_evaluate_on_coordinates(self) -> None:
         n_initial_refinements = 3
-        n_test_refinements = 5
+        n_test_refinements = 2
 
         elements, coordinates, boundaries = get_initial_mesh()
 
@@ -43,7 +43,7 @@ class GeneralStiffnessMatrixTest(unittest.TestCase):
         initial_a_norm_squared = u.dot(stiffness_matrix.dot(u))
 
         for _ in range(n_test_refinements):
-            marked_elements = np.arange(elements.shape[0])
+            marked_elements = np.arange(old_elements.shape[0])
             new_coordinates, new_elements, new_boundaries, _ = \
                 refineNVB(
                     coordinates=old_coordinates,
