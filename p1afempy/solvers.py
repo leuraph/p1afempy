@@ -751,16 +751,19 @@ def evaluate_on_coordinates(
     for k in tqdm(range(r.shape[0]), disable=not display_progress_bar):
         x, y = r[k]
 
+        dx = x - x3
+        dy = y - y3
+
         lambdas_1 = (
-            (y2 - y3)*(x - x3)
+            (y2 - y3)*(dx)
             +
-            (x3 - x2)*(y - y3)
+            (x3 - x2)*(dy)
         )/determinants
 
         lambdas_2 = (
-            (y3 - y1)*(x - x3)
+            (y3 - y1)*(dx)
             +
-            (x1 - x3)*(y - y3)
+            (x1 - x3)*(dy)
         )/determinants
 
         lambdas_3 = 1. - lambdas_1 - lambdas_2
