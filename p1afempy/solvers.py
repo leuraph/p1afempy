@@ -537,6 +537,22 @@ def get_load_vector_of_composition_nonlinear_with_fem(
     return Phi
 
 
+def get_weighted_stiffness_matrix(
+        coordinates: CoordinatesType,
+        elements: ElementsType,
+        mu: BoundaryConditionType) -> coo_matrix:
+    """
+    This method returns the weighted mass matrix of the form
+    int_Omega mu(|nabla u_N(x)|^2) <nabla phi_i(x), nabla phi_j(x)> dx.
+
+    Note
+    ----
+    - passing a quadrature rule is obsolete as, for P1FEM,
+      the integrand is constant across elements for u_n in the P1 space.
+    """
+    return None
+
+
 def get_right_hand_side_using_quadrature_rule(
         coordinates: CoordinatesType,
         elements: ElementsType,
