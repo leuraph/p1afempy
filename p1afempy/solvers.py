@@ -548,7 +548,7 @@ def get_weighted_stiffness_matrix(
     Note
     ----
     - passing a quadrature rule is obsolete as, for P1FEM,
-      the integrand is constant across elements for u_n in the P1 space.
+      the integrand is constant across elements for u_N in the P1 space.
     """
     return None
 
