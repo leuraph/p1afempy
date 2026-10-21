@@ -540,17 +540,137 @@ def get_load_vector_of_composition_nonlinear_with_fem(
 def get_weighted_stiffness_matrix(
         coordinates: CoordinatesType,
         elements: ElementsType,
+        u: np.ndarray,
         mu: BoundaryConditionType) -> coo_matrix:
     """
     This method returns the weighted mass matrix of the form
     int_Omega mu(|nabla u_N(x)|^2) <nabla phi_i(x), nabla phi_j(x)> dx.
+
+    Parameters
+    ----------
+    coordinates: CoordinatesType
+        The coordinates of the mesh at hand
+    elements: ElementsType
+        The elements of the mesh at hand
+    u: np.ndarray
+        Coefficient vector of an arbitrary P1FEM function
+        in the standard Lagrange basis.
+    mu: BoundaryConditionType
+        The weight function in the integrand.
 
     Note
     ----
     - passing a quadrature rule is obsolete as, for P1FEM,
       the integrand is constant across elements for u_N in the P1 space.
     """
-    return None
+    n_vertices = coordinates.shape[0]
+    n_elements = elements.shape[0]
+
+    z0 = coordinates[elements[:, 0]]
+    z1 = coordinates[elements[:, 1]]
+    z2 = coordinates[elements[:, 2]]
+
+    dz1 = z1 - z0
+    dz2 = z2 - z0
+
+    alpha = dz1[:, 0]
+    beta = dz2[:, 0]
+    gamma = dz1[:, 1]
+    delta = dz2[:, 1]
+
+    # Areas correspond to half the determinant of the
+    # coordinate transformation Phi_T : \hat{T} -> T
+    areas = 0.5 * (alpha * delta - beta * gamma)
+
+    u_0 = u[elements[:, 0]]
+    u_1 = u[elements[:, 1]]
+    u_2 = u[elements[:, 2]]
+
+    # The following represents the argument
+    # passed to the nonlinearity mu, i.e., the expression
+    # |\nabla u_N|^2
+    # in a vectorized fashion, i.e., every entry represents
+    # the argument evaluated on an element
+    mu_arg = (1./(4*areas*areas)) * (
+        u_0*(
+            u_0*(
+                -alpha*(-alpha + beta)
+                + beta*(-alpha + beta)
+                - delta*(-delta + gamma)
+                + gamma*(-delta + gamma)
+            )
+            + u_1*(
+                alpha*beta - beta**2 - delta**2 + delta*gamma
+            )
+            + u_2*(
+                -alpha**2 + alpha*beta + delta*gamma - gamma**2
+            )) 
+        +
+        u_1*(
+            u_0*(
+                -beta*(-alpha + beta) + delta*(-delta + gamma)
+            ) 
+            + 
+            u_1*(
+                beta**2 + delta**2
+                ) 
+            +
+            u_2*(
+                -alpha*beta - delta*gamma
+            ))
+        + u_2*(
+            u_0*(
+                alpha*(-alpha + beta) - gamma*(-delta + gamma)
+            ) 
+            + u_1*(
+                -alpha*beta - delta*gamma
+            ) 
+            + u_2*(
+                alpha**2 + gamma**2
+            )))
+    
+
+    mu_eval = mu(mu_arg)
+
+    # Sympy generated code based on symbolic computations
+    L_tilde_00 = -alpha*(-alpha + beta) + beta*(-alpha + beta) - delta*(-delta + gamma) + gamma*(-delta + gamma)
+    L_tilde_01 = -beta*(-alpha + beta) + delta*(-delta + gamma)
+    L_tilde_02 = alpha*(-alpha + beta) - gamma*(-delta + gamma)
+    L_tilde_10 = alpha*beta - beta**2 - delta**2 + delta*gamma
+    L_tilde_11 = beta**2 + delta**2
+    L_tilde_12 = -alpha*beta - delta*gamma
+    L_tilde_20 = -alpha**2 + alpha*beta + delta*gamma - gamma**2
+    L_tilde_21 = -alpha*beta - delta*gamma
+    L_tilde_22 = alpha**2 + gamma**2
+
+    scaling = (1.)/(4. * areas) * mu_eval
+
+    L_00 = scaling * L_tilde_00
+    L_01 = scaling * L_tilde_01
+    L_02 = scaling * L_tilde_02
+    L_10 = scaling * L_tilde_10
+    L_11 = scaling * L_tilde_11
+    L_12 = scaling * L_tilde_12
+    L_20 = scaling * L_tilde_20
+    L_21 = scaling * L_tilde_21
+    L_22 = scaling * L_tilde_22
+
+    A = np.column_stack([
+        L_00, L_01, L_02,
+        L_10, L_11, L_12,
+        L_20, L_21, L_22
+    ])
+
+    I_loc = np.array([0, 0, 0, 1, 1, 1, 2, 2, 2])
+    J_loc = np.array([0, 1, 2, 0, 1, 2, 0, 1, 2])
+
+    data = A.flatten()
+    row = elements[:, I_loc].flatten()
+    col = elements[:, J_loc].flatten()
+
+    weighted_stiffness_matrx = coo_matrix(
+        (data, (row, col)), shape=(n_vertices, n_vertices))
+    return weighted_stiffness_matrx
 
 
 def get_right_hand_side_using_quadrature_rule(

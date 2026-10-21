@@ -3,11 +3,11 @@ import unittest
 from p1afempy.refinement import refineNVB
 from triangle_cubature.cubature_rule import CubatureRuleEnum
 import random
-from p1afempy.solvers import get_weighted_mass_matrix
+from p1afempy.solvers import get_stiffness_matrix, get_weighted_stiffness_matrix
 from scipy.sparse import csr_matrix
 
 
-class WeightedMassMatrixTest(unittest.TestCase):
+class WeightedStiffnessMatrixTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -17,16 +17,15 @@ class WeightedMassMatrixTest(unittest.TestCase):
     def tearDownClass(cls):
         pass
 
-    def test_weighted_mass_matrix(self) -> None:
+    def test_weighted_stiffness_matrix(self) -> None:
 
-        coefficients = [
-            34.3,
-            12.4,
-            1.4,
-            0.45,
-            0.332]
+        a, b = 5.34, 90.32
 
-        Uh_star = 12.
+        def mu(t):
+            return 1. + np.exp(-t)
+        
+        def u_analytical(x, y):
+            return a*x + b*y
 
         # square mesh with side length 2
         # centered at the origin
@@ -51,22 +50,7 @@ class WeightedMassMatrixTest(unittest.TestCase):
         ])
         boundary_conditions = [dirichlet]
 
-        current_iterate = np.array([0., 0., 0., 0., Uh_star])
-
-        def phi(x):
-            # polynomial
-            n_entries = x.shape[0]
-            result = np.zeros(n_entries)
-            for (k, a) in enumerate(coefficients):
-                result += a * x**k
-            return result
-
-        def get_exact_result(coefficients: list[float], u_star: float):
-            # see hand-written notes from 30.09.2025 for a derivation
-            result = 0.
-            for (k, a) in enumerate(coefficients):
-                result += (a * u_star**k)/((k + 3.)*(k + 4.))
-            return 8. * u_star**2 * result
+        current_iterate = np.array([u_analytical(x, y) for x, y in coordinates])
 
         n_mesh_refinements = 5
         for _ in range(n_mesh_refinements):
@@ -79,21 +63,22 @@ class WeightedMassMatrixTest(unittest.TestCase):
                     boundary_conditions=boundary_conditions,
                     to_embed=current_iterate)
 
-            weighted_mass_matrix = csr_matrix(get_weighted_mass_matrix(
+            weighted_stiffness_matrix = csr_matrix(get_weighted_stiffness_matrix(
                 coordinates=coordinates,
                 elements=elements,
-                current_iterate=current_iterate,
-                phi=phi,
-                cubature_rule=CubatureRuleEnum.DAYTAYLOR))
+                u=current_iterate,
+                mu=mu
+            ))
 
-            numerical_result = current_iterate.dot(
-                weighted_mass_matrix.dot(current_iterate))
-            
-            exact_result = get_exact_result(
-                coefficients=coefficients,
-                u_star=Uh_star)
+            stiffness_matrix = csr_matrix(get_stiffness_matrix(
+                coordinates=coordinates,
+                elements=elements
+            ))
 
-            self.assertAlmostEqual(numerical_result, exact_result)
+            A = weighted_stiffness_matrix
+            B = mu(a**2 + b**2)*stiffness_matrix
+
+            np.testing.assert_allclose(A.toarray(), B.toarray(), rtol=1e-12, atol=1e-14)
 
 
 if __name__ == '__main__':
