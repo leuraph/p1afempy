@@ -85,6 +85,19 @@ Also, this repo includes some functionalities that were not provided in the orig
     $f:\mathbb{R} \to \mathbb{R}$ is any function,
     and $\phi_j \in \mathbb{P}_1 (\mathcal{T}_N)$
     are the standard Lagrange hat functions on the current mesh.
+- vectorized assembly of a "weighted mass matrix", i.e.,
+  $$
+  A_{ij}
+  =
+  \int_{\Omega} \mu\Big( |\nabla u_N(x)|^2 \Big)~
+  \nabla\phi_i(x) \cdot \nabla\phi_j(x)~\mathrm{d}x
+  \\
+  =
+  \sum_T |T| \mu\Big( \big|\nabla u_N|_T\big|^2 \Big)~
+  \nabla\phi_i|_T \cdot \nabla\phi_j|_T,
+  $$
+  where $u_N \in \mathbb P_1(\mathcal T_N)$ and $\mu:\mathbb R \to \mathbb R$
+  is any function. See `solvers.get_weighted_stiffness_matrix`
 ## Data structures
 
 Regarding the underlying data structures used, we follow the original code as closely as possible, i.e.
